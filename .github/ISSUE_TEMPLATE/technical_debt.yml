@@ -1,0 +1,66 @@
+name: Technical debt
+description: Track maintainability, reliability, or architecture debt.
+title: "[Tech Debt]: "
+labels:
+  - technical-debt
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to document debt that slows delivery, increases risk, or raises maintenance cost.
+
+  - type: input
+    id: debt-summary
+    attributes:
+      label: Debt summary
+      description: Concise description of the debt item.
+      placeholder: Duplicate logic in...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this debt exists and where it appears.
+    validations:
+      required: true
+
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk if not addressed
+      description: Reliability, performance, security, or delivery impact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Proposed remediation
+      description: Suggested approach and acceptance criteria.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Estimated effort
+      options:
+        - small
+        - medium
+        - large
+        - extra-large
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true

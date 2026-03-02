@@ -1,0 +1,76 @@
+name: Feature request
+description: Propose an enhancement or new capability.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your idea. Clear problem framing helps maintainers evaluate priority and scope.
+
+  - type: input
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: As a..., I need..., so that...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior and expected outcome.
+      placeholder: We could add...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you evaluated.
+      placeholder: We considered..., but...
+    validations:
+      required: false
+
+  - type: textarea
+    id: value
+    attributes:
+      label: Value and impact
+      description: Who benefits and how?
+      placeholder: Improves..., reduces..., enables...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: urgency
+    attributes:
+      label: Urgency
+      description: How time-sensitive is this request?
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and dependencies
+      description: Mention likely affected areas, constraints, or dependencies.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues and did not find a duplicate request.
+          required: true
+        - label: This request describes a problem and proposed outcome, not just an implementation detail.
+          required: true

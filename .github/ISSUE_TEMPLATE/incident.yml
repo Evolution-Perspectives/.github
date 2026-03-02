@@ -1,0 +1,81 @@
+name: Incident report
+description: Report an active or recently resolved service incident.
+title: "[Incident]: "
+labels:
+  - incident
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for outages, degradations, data issues, or security-related operational incidents.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Incident summary
+      description: One-line description of the incident.
+      placeholder: Elevated error rates in...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Current status
+      options:
+        - investigating
+        - identified
+        - monitoring
+        - resolved
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - sev4
+        - sev3
+        - sev2
+        - sev1
+    validations:
+      required: true
+
+  - type: textarea
+    id: timeline
+    attributes:
+      label: Timeline
+      description: Key timestamps (detected, mitigated, resolved) in UTC.
+      placeholder: |
+        - 2026-03-01 13:10 UTC detected
+        - 2026-03-01 13:35 UTC mitigation applied
+        - 2026-03-01 14:05 UTC resolved
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact assessment
+      description: Users/systems affected and scope of impact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actions
+    attributes:
+      label: Mitigation and next actions
+      description: What has been done and what remains.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: communications
+    attributes:
+      label: Communications
+      options:
+        - label: Internal stakeholders have been notified.
+          required: false
+        - label: External communication is required or completed (if applicable).
+          required: false
