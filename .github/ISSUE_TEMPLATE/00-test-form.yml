@@ -1,0 +1,48 @@
+name: Test form
+description: Use this to test GitHub Issue Form behavior.
+title: "[Test]: "
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for testing only.
+
+  - type: input
+    id: test-summary
+    attributes:
+      label: Summary
+      description: Enter a short test summary.
+      placeholder: Testing issue forms
+    validations:
+      required: true
+
+  - type: dropdown
+    id: test-priority
+    attributes:
+      label: Priority
+      description: Select any option for testing.
+      options:
+        - low
+        - medium
+        - high
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: test-confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: I confirm this is only a test issue.
+          required: true
+
+  - type: textarea
+    id: test-notes
+    attributes:
+      label: Notes
+      description: Add any observations about form behavior.
+      placeholder: The form worked as expected...
+    validations:
+      required: false
