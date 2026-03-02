@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Signalement de vulnérabilité de sécurité
-    url: https://github.com/orgs/your-org/security
-    about: Veuillez signaler les vulnérabilités de sécurité via la politique de sécurité.
-  - name: Guide de contribution
-    url: https://github.com/orgs/your-org
-    about: Lisez les attentes de contribution avant d'ouvrir une issue.
