@@ -1,5 +1,5 @@
-name: Technical debt
-description: Track maintainability, reliability, or architecture debt.
+name: Dette technique
+description: Suivez la dette de maintenabilité, fiabilité ou architecture.
 title: "[Tech Debt]: "
 labels:
   - technical-debt
@@ -7,60 +7,60 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template to document debt that slows delivery, increases risk, or raises maintenance cost.
+        Utilisez ce modèle pour documenter la dette qui ralentit la livraison, augmente le risque ou alourdit les coûts de maintenance.
 
   - type: input
     id: debt-summary
     attributes:
-      label: Debt summary
-      description: Concise description of the debt item.
-      placeholder: Duplicate logic in...
+      label: Résumé de la dette
+      description: Description concise de l'élément de dette.
+      placeholder: Logique dupliquée dans...
     validations:
       required: true
 
   - type: textarea
     id: context
     attributes:
-      label: Context
-      description: Why this debt exists and where it appears.
+      label: Contexte
+      description: Pourquoi cette dette existe et où elle apparaît.
     validations:
       required: true
 
   - type: textarea
     id: risk
     attributes:
-      label: Risk if not addressed
-      description: Reliability, performance, security, or delivery impact.
+      label: Risque si non traité
+      description: Impact sur la fiabilité, la performance, la sécurité ou la livraison.
     validations:
       required: true
 
   - type: textarea
     id: remediation
     attributes:
-      label: Proposed remediation
-      description: Suggested approach and acceptance criteria.
+      label: Remédiation proposée
+      description: Approche suggérée et critères d'acceptation.
     validations:
       required: true
 
   - type: dropdown
     id: effort
     attributes:
-      label: Estimated effort
+      label: Effort estimé
       options:
-        - small
-        - medium
-        - large
-        - extra-large
+        - faible
+        - moyen
+        - important
+        - très important
     validations:
       required: false
 
   - type: dropdown
     id: priority
     attributes:
-      label: Priority
+      label: Priorité
       options:
-        - low
-        - medium
-        - high
+        - faible
+        - moyenne
+        - élevée
     validations:
       required: true

@@ -1,5 +1,5 @@
-name: Feature request
-description: Propose an enhancement or new capability.
+name: Demande de fonctionnalité
+description: Proposez une amélioration ou une nouvelle capacité.
 title: "[Feature]: "
 labels:
   - enhancement
@@ -7,70 +7,70 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for sharing your idea. Clear problem framing helps maintainers evaluate priority and scope.
+        Merci de partager votre idée. Une formulation claire du problème aide les mainteneurs à évaluer la priorité et le périmètre.
 
   - type: input
     id: problem
     attributes:
-      label: Problem statement
-      description: What problem are you trying to solve?
-      placeholder: As a..., I need..., so that...
+      label: Problème à résoudre
+      description: Quel problème essayez-vous de résoudre ?
+      placeholder: En tant que..., j'ai besoin de..., afin de...
     validations:
       required: true
 
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed solution
-      description: Describe the behavior and expected outcome.
-      placeholder: We could add...
+      label: Solution proposée
+      description: Décrivez le comportement et le résultat attendus.
+      placeholder: Nous pourrions ajouter...
     validations:
       required: true
 
   - type: textarea
     id: alternatives
     attributes:
-      label: Alternatives considered
-      description: Any other approaches you evaluated.
-      placeholder: We considered..., but...
+      label: Alternatives envisagées
+      description: Quelles autres approches avez-vous évaluées ?
+      placeholder: Nous avons envisagé..., mais...
     validations:
       required: false
 
   - type: textarea
     id: value
     attributes:
-      label: Value and impact
-      description: Who benefits and how?
-      placeholder: Improves..., reduces..., enables...
+      label: Valeur et impact
+      description: Qui en bénéficie et comment ?
+      placeholder: Améliore..., réduit..., permet...
     validations:
       required: true
 
   - type: dropdown
     id: urgency
     attributes:
-      label: Urgency
-      description: How time-sensitive is this request?
+      label: Urgence
+      description: Dans quelle mesure cette demande est-elle urgente ?
       options:
-        - low
-        - medium
-        - high
+        - faible
+        - moyenne
+        - élevée
     validations:
       required: true
 
   - type: textarea
     id: scope
     attributes:
-      label: Scope and dependencies
-      description: Mention likely affected areas, constraints, or dependencies.
+      label: Périmètre et dépendances
+      description: Mentionnez les zones potentiellement impactées, contraintes ou dépendances.
     validations:
       required: false
 
   - type: checkboxes
     id: checks
     attributes:
-      label: Pre-submission checks
+      label: Vérifications avant soumission
       options:
-        - label: I searched existing issues and did not find a duplicate request.
+        - label: J'ai recherché dans les issues existantes et je n'ai pas trouvé de demande en doublon.
           required: true
-        - label: This request describes a problem and proposed outcome, not just an implementation detail.
+        - label: Cette demande décrit un problème et un résultat attendu, pas seulement un détail d'implémentation.
           required: true

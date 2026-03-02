@@ -1,5 +1,5 @@
-name: Bug report
-description: Report a reproducible problem or regression.
+name: Signalement de bug
+description: Signalez un problème reproductible ou une régression.
 title: "[Bug]: "
 labels:
   - bug
@@ -7,44 +7,44 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for filing a bug report. Please provide enough detail for maintainers to reproduce and triage quickly.
+        Merci pour votre signalement. Veuillez fournir suffisamment de détails pour permettre une reproduction et un triage rapides.
 
   - type: input
     id: summary
     attributes:
-      label: Summary
-      description: Short description of the issue.
-      placeholder: Unexpected behavior when...
+      label: Résumé
+      description: Brève description du problème.
+      placeholder: Comportement inattendu lorsque...
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: Expected behavior
-      description: What did you expect to happen?
-      placeholder: It should...
+      label: Comportement attendu
+      description: Que devait-il se passer ?
+      placeholder: Cela devrait...
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: Actual behavior
-      description: What actually happened?
-      placeholder: Instead, it...
+      label: Comportement observé
+      description: Que s'est-il réellement passé ?
+      placeholder: À la place, cela...
     validations:
       required: true
 
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
-      description: Provide a minimal, ordered, reproducible sequence.
+      label: Étapes de reproduction
+      description: Fournissez une séquence minimale, ordonnée et reproductible.
       placeholder: |
-        1. Go to...
-        2. Run...
-        3. Observe...
+        1. Aller à...
+        2. Exécuter...
+        3. Observer...
     validations:
       required: true
 
@@ -52,47 +52,47 @@ body:
     id: impact
     attributes:
       label: Impact
-      description: Describe user/business/operational impact.
-      placeholder: Affects..., blocks..., severity...
+      description: Décrivez l'impact utilisateur, métier ou opérationnel.
+      placeholder: Affecte..., bloque..., criticité...
     validations:
       required: true
 
   - type: dropdown
     id: severity
     attributes:
-      label: Severity
-      description: Select the current severity level.
+      label: Criticité
+      description: Sélectionnez le niveau de criticité actuel.
       options:
-        - low
-        - medium
-        - high
-        - critical
+        - faible
+        - moyenne
+        - élevée
+        - critique
     validations:
       required: true
 
   - type: textarea
     id: environment
     attributes:
-      label: Environment
-      description: Any relevant context (OS, browser, version, configuration, etc.).
-      placeholder: Windows 11, Chrome 131, app version...
+      label: Environnement
+      description: Tout contexte pertinent (OS, navigateur, version, configuration, etc.).
+      placeholder: Windows 11, Chrome 131, version de l'application...
     validations:
       required: false
 
   - type: textarea
     id: attachments
     attributes:
-      label: Logs, screenshots, or links
-      description: Share sanitized diagnostics, screenshots, or references.
+      label: Logs, captures d'écran ou liens
+      description: Partagez des diagnostics anonymisés, captures d'écran ou références.
     validations:
       required: false
 
   - type: checkboxes
     id: checks
     attributes:
-      label: Pre-submission checks
+      label: Vérifications avant soumission
       options:
-        - label: I searched existing issues and did not find a duplicate.
+        - label: J'ai recherché dans les issues existantes et je n'ai pas trouvé de doublon.
           required: true
-        - label: I can reproduce this on the latest available version.
+        - label: Je peux reproduire le problème sur la dernière version disponible.
           required: true

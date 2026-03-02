@@ -1,5 +1,5 @@
-name: Incident report
-description: Report an active or recently resolved service incident.
+name: Rapport d'incident
+description: Signalez un incident de service en cours ou récemment résolu.
 title: "[Incident]: "
 labels:
   - incident
@@ -7,33 +7,33 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this template for outages, degradations, data issues, or security-related operational incidents.
+        Utilisez ce modèle pour les pannes, dégradations, problèmes de données ou incidents opérationnels liés à la sécurité.
 
   - type: input
     id: summary
     attributes:
-      label: Incident summary
-      description: One-line description of the incident.
-      placeholder: Elevated error rates in...
+      label: Résumé de l'incident
+      description: Description de l'incident en une ligne.
+      placeholder: Hausse du taux d'erreurs sur...
     validations:
       required: true
 
   - type: dropdown
     id: status
     attributes:
-      label: Current status
+      label: Statut actuel
       options:
-        - investigating
-        - identified
-        - monitoring
-        - resolved
+        - en investigation
+        - identifié
+        - sous surveillance
+        - résolu
     validations:
       required: true
 
   - type: dropdown
     id: severity
     attributes:
-      label: Severity
+      label: Criticité
       options:
         - sev4
         - sev3
@@ -45,28 +45,28 @@ body:
   - type: textarea
     id: timeline
     attributes:
-      label: Timeline
-      description: Key timestamps (detected, mitigated, resolved) in UTC.
+      label: Chronologie
+      description: Horodatages clés (détection, mitigation, résolution) en UTC.
       placeholder: |
-        - 2026-03-01 13:10 UTC detected
-        - 2026-03-01 13:35 UTC mitigation applied
-        - 2026-03-01 14:05 UTC resolved
+        - 2026-03-01 13:10 UTC détecté
+        - 2026-03-01 13:35 UTC mitigation appliquée
+        - 2026-03-01 14:05 UTC résolu
     validations:
       required: true
 
   - type: textarea
     id: impact
     attributes:
-      label: Impact assessment
-      description: Users/systems affected and scope of impact.
+      label: Évaluation de l'impact
+      description: Utilisateurs/systèmes affectés et étendue de l'impact.
     validations:
       required: true
 
   - type: textarea
     id: actions
     attributes:
-      label: Mitigation and next actions
-      description: What has been done and what remains.
+      label: Mitigation et prochaines actions
+      description: Ce qui a été fait et ce qui reste à faire.
     validations:
       required: true
 
@@ -75,7 +75,7 @@ body:
     attributes:
       label: Communications
       options:
-        - label: Internal stakeholders have been notified.
+        - label: Les parties prenantes internes ont été notifiées.
           required: false
-        - label: External communication is required or completed (if applicable).
+        - label: Une communication externe est requise ou terminée (si applicable).
           required: false

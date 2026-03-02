@@ -1,5 +1,5 @@
-name: Test form
-description: Use this to test GitHub Issue Form behavior.
+name: Formulaire de test
+description: Utilisez ce formulaire pour tester le comportement des Issue Forms GitHub.
 title: "[Test]: "
 labels:
   - question
@@ -7,26 +7,26 @@ body:
   - type: markdown
     attributes:
       value: |
-        This form is for testing only.
+        Ce formulaire est réservé aux tests.
 
   - type: input
     id: test-summary
     attributes:
-      label: Summary
-      description: Enter a short test summary.
-      placeholder: Testing issue forms
+      label: Résumé
+      description: Saisissez un court résumé du test.
+      placeholder: Test des formulaires d'issue
     validations:
       required: true
 
   - type: dropdown
     id: test-priority
     attributes:
-      label: Priority
-      description: Select any option for testing.
+      label: Priorité
+      description: Sélectionnez n'importe quelle option pour le test.
       options:
-        - low
-        - medium
-        - high
+        - faible
+        - moyenne
+        - élevée
     validations:
       required: true
 
@@ -35,14 +35,14 @@ body:
     attributes:
       label: Confirmation
       options:
-        - label: I confirm this is only a test issue.
+        - label: Je confirme qu'il s'agit uniquement d'une issue de test.
           required: true
 
   - type: textarea
     id: test-notes
     attributes:
       label: Notes
-      description: Add any observations about form behavior.
-      placeholder: The form worked as expected...
+      description: Ajoutez vos observations sur le comportement du formulaire.
+      placeholder: Le formulaire a fonctionné comme prévu...
     validations:
       required: false
