@@ -7,7 +7,7 @@ on:
 
 jobs:
   cleanup-blocking-relationships:
-    uses: Evolution-Perspectives/.github/.github/workflows/remove-blocking-on-close-reusable.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/remove-blocking-on-close-action.yml@main
     with:
       issue_node_id: ${{ github.event.issue.node_id }}
       source_repository: ${{ github.repository }}
