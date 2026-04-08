@@ -1,0 +1,175 @@
+name: Remove Blocking Relationships (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      issue_node_id:
+        description: Node ID of the issue that was just closed.
+        required: true
+        type: string
+      source_repository:
+        description: Repository where the close event originated.
+        required: false
+        type: string
+        default: unknown
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      automation_pat:
+        description: PAT with repo scope (and project if project automation is also used).
+        required: true
+
+jobs:
+  cleanup:
+    name: Cleanup outgoing blocking edges
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Remove outgoing blocking relationships
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          script: |
+            const issueNodeId = '${{ inputs.issue_node_id }}';
+            const sourceRepository = '${{ inputs.source_repository }}';
+            const debug = '${{ inputs.debug }}' === 'true';
+
+            if (!issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
+              core.setFailed('Missing required issue_node_id input.');
+              return;
+            }
+
+            const query = `
+              query($id: ID!, $after: String) {
+                node(id: $id) {
+                  ... on Issue {
+                    id
+                    number
+                    title
+                    repository {
+                      nameWithOwner
+                    }
+                    blocking(first: 100, after: $after) {
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                      nodes {
+                        id
+                        number
+                        title
+                        state
+                        repository {
+                          nameWithOwner
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const mutation = `
+              mutation($issueId: ID!, $blockingIssueId: ID!) {
+                removeBlockedBy(input: {
+                  issueId: $issueId,
+                  blockingIssueId: $blockingIssueId
+                }) {
+                  clientMutationId
+                }
+              }
+            `;
+
+            let closedIssue = null;
+            const blockedIssues = [];
+            let after = null;
+
+            while (true) {
+              const res = await github.graphql(query, { id: issueNodeId, after });
+              const issue = res?.node;
+
+              if (!issue) {
+                core.setFailed(`No issue found for node ID ${issueNodeId}.`);
+                return;
+              }
+
+              closedIssue = issue;
+              const pageNodes = issue.blocking?.nodes || [];
+              blockedIssues.push(...pageNodes);
+
+              const pageInfo = issue.blocking?.pageInfo;
+              if (!pageInfo?.hasNextPage) {
+                break;
+              }
+              after = pageInfo.endCursor;
+            }
+
+            const closedIssueRef = `${closedIssue.repository.nameWithOwner}#${closedIssue.number}`;
+            core.info(`Closed issue: ${closedIssueRef}`);
+            core.info(`Source repository input: ${sourceRepository}`);
+            core.info(`Discovered outgoing blocking edges: ${blockedIssues.length}`);
+
+            if (blockedIssues.length === 0) {
+              await core.summary
+                .addHeading('Issue dependency cleanup')
+                .addRaw(`Closed issue: ${closedIssueRef}`)
+                .addEOL()
+                .addRaw('Discovered edges: 0')
+                .addEOL()
+                .addRaw('Removed edges: 0')
+                .addEOL()
+                .addRaw('Failed edges: 0')
+                .addEOL()
+                .write();
+              return;
+            }
+
+            let removed = 0;
+            let failed = 0;
+            const failedEdges = [];
+
+            for (const target of blockedIssues) {
+              const targetRef = `${target.repository.nameWithOwner}#${target.number}`;
+
+              try {
+                await github.graphql(mutation, {
+                  issueId: target.id,
+                  blockingIssueId: closedIssue.id,
+                });
+                removed += 1;
+                if (debug) {
+                  core.info(`Removed edge: ${closedIssueRef} -> ${targetRef}`);
+                }
+              } catch (error) {
+                failed += 1;
+                const message = error?.message || String(error);
+                failedEdges.push({ targetRef, message });
+                core.warning(`Failed to remove edge ${closedIssueRef} -> ${targetRef}: ${message}`);
+              }
+            }
+
+            await core.summary
+              .addHeading('Issue dependency cleanup')
+              .addRaw(`Closed issue: ${closedIssueRef}`)
+              .addEOL()
+              .addRaw(`Discovered edges: ${blockedIssues.length}`)
+              .addEOL()
+              .addRaw(`Removed edges: ${removed}`)
+              .addEOL()
+              .addRaw(`Failed edges: ${failed}`)
+              .addEOL();
+
+            if (failedEdges.length > 0) {
+              core.summary.addEOL().addHeading('Failed edge removals', 2);
+              for (const entry of failedEdges) {
+                core.summary
+                  .addRaw(`- ${entry.targetRef}: ${entry.message}`)
+                  .addEOL();
+              }
+            }
+
+            await core.summary.write();
