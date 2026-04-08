@@ -1,0 +1,177 @@
+{
+  "project": {
+    "id": "PVT_kwDOCIcusc4BOGrD",
+    "title": "Projets Digitaux",
+    "number": 2,
+    "org": "Evolution-Perspectives"
+  },
+  "issueTypes": {
+    "Tâche": { "id": "IT_kwDOCIcusc4BNM3f", "color": "YELLOW", "description": "Tâche opérationnelle à exécuter" },
+    "Bug": { "id": "IT_kwDOCIcusc4BNM3j", "color": "RED", "description": "Comportement non prévu/incorrect ou défaut à corriger." },
+    "Fonctionnalité": { "id": "IT_kwDOCIcusc4BNM3l", "color": "BLUE", "description": "Nouvelle fonctionnalité ou évolution produit." },
+    "Développement/Production": { "id": "IT_kwDOCIcusc4B4kdT", "color": "PURPLE", "description": "Exécution opérationnelle : réalisation des actions planifiées et passage en production selon le contexte" },
+    "Métier": { "id": "IT_kwDOCIcusc4B4kd4", "color": "GRAY", "description": "Tâche effectuée par le coeur de métier" },
+    "Test/Validation": { "id": "IT_kwDOCIcusc4B4kkh", "color": "GREEN", "description": "Vérification qualité, tests de fonctionnalité, validation fonctionnelle/technique" },
+    "Support": { "id": "IT_kwDOCIcusc4B4knB", "color": "PINK", "description": "Assistance utilisateur, aide ponctuelle sur un fonctionnement ou correction rapide non structurante." },
+    "Externe": { "id": "IT_kwDOCIcusc4B4knI", "color": "GRAY", "description": "Sujet dépendant d'un client/prestataire/partenaire externe." },
+    "Recherche/Veille technique": { "id": "IT_kwDOCIcusc4B4kr-", "color": "GRAY", "description": "Analyse technique en amont en vue de la production, étude de l'existant, évaluation des impacts" },
+    "Specs/Cahier des charges": { "id": "IT_kwDOCIcusc4B4lwK", "color": "GRAY", "description": "Rédaction/affinage des besoins et cadrage fonctionnel." },
+    "Management/Direction": { "id": "IT_kwDOCIcusc4B5VS2", "color": "GRAY", "description": null },
+    "Projet": { "id": "IT_kwDOCIcusc4B64Nz", "color": "BLUE", "description": "Ensemble d'issues correspondant à une iteration, un projet, un objectif clair, avec un début et une fin" }
+  },
+  "fields": {
+    "Status": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg852S8",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "Backlog": "f75ad846",
+        "Ready": "e18bf179",
+        "In progress": "47fc9ee4",
+        "In review": "aba860b9",
+        "Done": "98236657",
+        "Canceled": "69f90333"
+      }
+    },
+    "Prio": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg852o8",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "🔥Urgent": "79628723",
+        "⚡Important": "0a877460",
+        "🌿 Planifié": "da944a9c",
+        "💧 Secondaire": "7a3bdd06",
+        "🪼  Optionnel": "ed0703a2"
+      }
+    },
+    "Entity": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg857gY",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "Way2Be": "b21b2d6c",
+        "Sites Web": "7da81e3b",
+        "IT": "f06324df",
+        "Automatisations": "04a97a2d"
+      }
+    },
+    "Projet": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg9L3-o",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "W2B - Mentorat": "b3462d4d",
+        "W2B - Mutuelles": "8fffb7fd",
+        "SW - Thème Hubspot": "124a1107",
+        "SW - Dashboard": "a42e26cc",
+        "SEO - Market": "c3234699",
+        "Auto - Pedago": "52eef7ad",
+        "IT - Support": "1bbaf803",
+        "IT - MS 365": "76945a33",
+        "IT - Onboarding": "61646f46",
+        "IT - Offboarding": "d512bf2d",
+        "SW - Page formation": "a9b387cf",
+        "SW - Correctifs SEO/Legal": "b84ff1f5"
+      }
+    },
+    "Feature": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg86GDw",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "W2B - Visio": "72bdad8d",
+        "W2B - Authentification": "f79367b9",
+        "SW - ICF": "2876654e",
+        "SW - Theme Source": "c9d46b5e",
+        "SW - Module": "065ea5bc",
+        "SW - Template": "910e6d4b",
+        "SW - Page": "1de81464",
+        "AT - Remontées Certifs": "5851e188",
+        "AT - Dates désactivations Apolearn": "d3afe854",
+        "AT - Syncho Hubspot Dendreo": "0e47c47a"
+      }
+    },
+    "Domaine": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg86DNA",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "Dev": "9a2e0903",
+        "IT": "664e8370",
+        "Design": "d4bb1333",
+        "Market": "0ca9c6fb",
+        "Sales": "ca3ea087",
+        "Com": "a61237c9",
+        "Pedago": "16e1f485",
+        "RH/Admin": "63d292d3",
+        "Direction": "c3a82a17",
+        "Video": "55399b65"
+      }
+    },
+    "Size": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "XS": "911790be",
+        "S": "b277fb01",
+        "M": "86db8eb3",
+        "L": "853c8207",
+        "XL": "2d0801e2"
+      }
+    },
+    "Fiabilite": {
+      "id": "PVTSSF_lADOCIcusc4BOGrDzg86YYg",
+      "dataType": "SINGLE_SELECT",
+      "options": {
+        "🍀Très confiant ±10%": "b63baf56",
+        "✨Confiant ±20%": "7165508f",
+        "🛠️Mitigé ±35%": "4d1cca16",
+        "⛔Incertain ±50%": "7a4b0b8e",
+        "🛰️Exploratoire ±100%": "a847a5e1"
+      }
+    },
+    "Estimate": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852pE",
+      "dataType": "NUMBER"
+    },
+    "Start date": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg9L4lg",
+      "dataType": "DATE"
+    },
+    "End date": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg86WOk",
+      "dataType": "DATE"
+    },
+    "Title": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852S0",
+      "dataType": "TITLE"
+    },
+    "Assignees": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852S4",
+      "dataType": "ASSIGNEES"
+    },
+    "Labels": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TA",
+      "dataType": "LABELS"
+    },
+    "Milestone": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TI",
+      "dataType": "MILESTONE"
+    },
+    "Repository": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TM",
+      "dataType": "REPOSITORY"
+    },
+    "Reviewers": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TU",
+      "dataType": "REVIEWERS"
+    },
+    "Parent issue": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TY",
+      "dataType": "PARENT_ISSUE"
+    },
+    "Linked pull requests": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852TE",
+      "dataType": "LINKED_PULL_REQUESTS"
+    },
+    "Sub-issues progress": {
+      "id": "PVTF_lADOCIcusc4BOGrDzg852Tc",
+      "dataType": "SUB_ISSUES_PROGRESS"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+name: Remove Blocking Relationships On Issue Close
+
+on:
+  issues:
+    types:
+      - closed
+
+jobs:
+  cleanup-blocking-relationships:
+    uses: Evolution-Perspectives/.github/.github/workflows/remove-blocking-on-close-reusable.yml@main
+    with:
+      issue_node_id: ${{ github.event.issue.node_id }}
+      source_repository: ${{ github.repository }}
+      debug: false
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
