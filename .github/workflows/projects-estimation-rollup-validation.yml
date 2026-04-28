@@ -1,0 +1,30 @@
+name: Projects Estimation Rollup Validation
+
+on:
+  pull_request:
+    paths:
+      - .github/scripts/projects-rollup.js
+      - .github/scripts/projects-rollup.test.js
+      - .github/scripts/validate-rollup-references.ps1
+      - .github/workflows/projects-estimation-rollup-action.yml
+      - .github/workflows/projects-estimation-rollup.yml
+      - .github/workflow-templates/projects-estimation-rollup.yml
+      - .github/workflow-templates/projects-estimation-rollup.properties.json
+      - openspec/changes/project-estimation-rollup-automation/**
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run rollup logic tests
+        run: node --test .github/scripts/projects-rollup.test.js
+
+      - name: Validate workflow/template reference integrity
+        shell: pwsh
+        run: .github/scripts/validate-rollup-references.ps1

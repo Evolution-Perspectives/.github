@@ -1,0 +1,10 @@
+schema: spec-driven
+created: 2026-04-28
+context: |
+  Pilot validation in this repository may create temporary issues.
+  All temporary test issues must be deleted after tests complete.
+rules:
+  tasks:
+    - Keep explicit cleanup steps for temporary test issues and verify no leftovers.
+  design:
+    - Record cleanup approach and fallback behavior if hard delete is unavailable.

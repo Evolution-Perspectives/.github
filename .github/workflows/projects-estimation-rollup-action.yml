@@ -1,0 +1,155 @@
+name: Projects Estimation Rollup (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Projects v2 node ID.
+        required: true
+        type: string
+      estimate_field_id:
+        description: Project field ID used for estimate hours.
+        required: true
+        type: string
+      remaining_hours_field_id:
+        description: Optional project field ID for remaining hours.
+        required: false
+        type: string
+        default: ""
+      forecast_date_field_id:
+        description: Optional project field ID for forecast date output.
+        required: false
+        type: string
+        default: ""
+      forecast_state_field_id:
+        description: Optional single-select field ID used to mark incomplete forecast state.
+        required: false
+        type: string
+        default: ""
+      incomplete_forecast_state_option_id:
+        description: Optional single-select option ID that marks incomplete forecast.
+        required: false
+        type: string
+        default: ""
+      strict_mode:
+        description: If true, missing descendant estimates suppress forecast publication.
+        required: false
+        type: string
+        default: "true"
+      capacity_hours_per_day:
+        description: Working capacity per day used for forecast calculation.
+        required: false
+        type: number
+        default: 6
+      non_working_weekdays:
+        description: CSV weekdays treated as non-working (0=Sunday ... 6=Saturday).
+        required: false
+        type: string
+        default: "0,6"
+      non_working_dates:
+        description: CSV non-working dates in YYYY-MM-DD format.
+        required: false
+        type: string
+        default: ""
+      root_item_id:
+        description: Optional explicit root item or issue node ID to scope recompute.
+        required: false
+        type: string
+        default: ""
+      event_item_node_id:
+        description: Optional changed issue node ID for branch recompute routing.
+        required: false
+        type: string
+        default: ""
+      event_action:
+        description: Event classifier for observability.
+        required: false
+        type: string
+        default: reconcile
+      max_items:
+        description: Maximum issue-backed project items to scan per run.
+        required: false
+        type: number
+        default: 500
+      fail_fast:
+        description: If true, stop on first root failure.
+        required: false
+        type: string
+        default: "false"
+      dry_run:
+        description: If true, compute and summarize without writing field updates.
+        required: false
+        type: string
+        default: "false"
+      debug:
+        description: Enable additional diagnostic logs.
+        required: false
+        type: string
+        default: "false"
+    secrets:
+      automation_pat:
+        description: Organization automation token with project and issue read/write scope.
+        required: true
+
+jobs:
+  recompute-estimates:
+    name: Recompute project rollups
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    concurrency:
+      group: projects-rollup-${{ inputs.project_id }}-${{ inputs.root_item_id != '' && inputs.root_item_id || 'all' }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate and apply estimation rollups
+        uses: actions/github-script@v8
+        env:
+          PROJECT_ID: ${{ inputs.project_id }}
+          ESTIMATE_FIELD_ID: ${{ inputs.estimate_field_id }}
+          REMAINING_HOURS_FIELD_ID: ${{ inputs.remaining_hours_field_id }}
+          FORECAST_DATE_FIELD_ID: ${{ inputs.forecast_date_field_id }}
+          FORECAST_STATE_FIELD_ID: ${{ inputs.forecast_state_field_id }}
+          INCOMPLETE_FORECAST_STATE_OPTION_ID: ${{ inputs.incomplete_forecast_state_option_id }}
+          STRICT_MODE: ${{ inputs.strict_mode }}
+          CAPACITY_HOURS_PER_DAY: ${{ inputs.capacity_hours_per_day }}
+          NON_WORKING_WEEKDAYS: ${{ inputs.non_working_weekdays }}
+          NON_WORKING_DATES: ${{ inputs.non_working_dates }}
+          ROOT_ITEM_ID: ${{ inputs.root_item_id }}
+          EVENT_ITEM_NODE_ID: ${{ inputs.event_item_node_id }}
+          EVENT_ACTION: ${{ inputs.event_action }}
+          MAX_ITEMS: ${{ inputs.max_items }}
+          FAIL_FAST: ${{ inputs.fail_fast }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          DEBUG: ${{ inputs.debug }}
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          retries: 2
+          script: |
+            const engine = require('./.github/scripts/projects-rollup.js');
+            await engine.run({
+              github,
+              core,
+              context,
+              inputs: {
+                projectId: process.env.PROJECT_ID,
+                estimateFieldId: process.env.ESTIMATE_FIELD_ID,
+                remainingHoursFieldId: process.env.REMAINING_HOURS_FIELD_ID,
+                forecastDateFieldId: process.env.FORECAST_DATE_FIELD_ID,
+                forecastStateFieldId: process.env.FORECAST_STATE_FIELD_ID,
+                incompleteForecastStateOptionId: process.env.INCOMPLETE_FORECAST_STATE_OPTION_ID,
+                strictMode: process.env.STRICT_MODE,
+                capacityHoursPerDay: process.env.CAPACITY_HOURS_PER_DAY,
+                nonWorkingWeekdays: process.env.NON_WORKING_WEEKDAYS,
+                nonWorkingDates: process.env.NON_WORKING_DATES,
+                rootItemId: process.env.ROOT_ITEM_ID,
+                eventItemNodeId: process.env.EVENT_ITEM_NODE_ID,
+                eventAction: process.env.EVENT_ACTION,
+                maxItems: process.env.MAX_ITEMS,
+                failFast: process.env.FAIL_FAST,
+                dryRun: process.env.DRY_RUN,
+                debug: process.env.DEBUG,
+              },
+            });

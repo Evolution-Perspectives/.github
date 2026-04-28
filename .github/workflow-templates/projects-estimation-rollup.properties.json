@@ -1,0 +1,9 @@
+{
+  "name": "Projects Estimation Rollup",
+  "description": "Automatically rolls up parent estimates from child issues, updates forecast dates, and runs nightly reconciliation for drift repair.",
+  "iconName": "octicon project",
+  "categories": [
+    "Automation",
+    "Project management"
+  ]
+}
