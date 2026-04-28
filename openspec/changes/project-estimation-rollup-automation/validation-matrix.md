@@ -44,10 +44,16 @@ Covered scenarios:
 
 ### Workflow Execution Note
 
-- Attempting `gh workflow run "Projects Estimation Rollup Validation" --ref main` currently fails with `could not find any workflows named Projects Estimation Rollup Validation` until workflow changes are available on the remote branch.
-- Local repository validation is complete and clean; remote Actions-run evidence should be captured again after pushing workflow files.
+- Remote workflow execution succeeded after pushing workflow files to `main`.
+- Workflow: `Projects Estimation Rollup Validation`
+- Run ID: `25047577545`
+- Trigger: `workflow_dispatch`
+- Conclusion: `success`
+- Created at: `2026-04-28T10:26:11Z`
+- Updated at: `2026-04-28T10:26:26Z`
+- Run URL: https://github.com/Evolution-Perspectives/.github/actions/runs/25047577545
 
 ### Readiness Decision
 
-- Status: Conditional go
-- Decision: Ready for organization rollout after one post-push remote Actions validation run confirms the same pass state.
+- Status: Go
+- Decision: Validation requirements are satisfied for this repository pilot and change is ready for archive/rollout progression.
