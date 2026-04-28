@@ -1,0 +1,58 @@
+name: Projects Estimation Rollup
+
+on:
+  repository_dispatch:
+    types:
+      - projects-v2-item-updated
+      - projects-v2-hierarchy-updated
+      - projects-v2-rollup-reconcile
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Override project ID for manual run.
+        required: false
+        type: string
+      root_item_id:
+        description: Optional explicit root item or issue node ID.
+        required: false
+        type: string
+      event_item_node_id:
+        description: Optional changed issue node ID.
+        required: false
+        type: string
+      dry_run:
+        description: Compute only, no writes.
+        required: false
+        default: true
+        type: boolean
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  apply-rollup:
+    uses: ./.github/workflows/projects-estimation-rollup-action.yml
+    with:
+      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] }}
+      estimate_field_id: ${{ github.event.client_payload.estimate_field_id || vars['EP_ESTIMATE_FIELD_ID'] }}
+      remaining_hours_field_id: ${{ github.event.client_payload.remaining_hours_field_id || vars['EP_REMAINING_HOURS_FIELD_ID'] }}
+      forecast_date_field_id: ${{ github.event.client_payload.forecast_date_field_id || vars['EP_FORECAST_DATE_FIELD_ID'] }}
+      forecast_state_field_id: ${{ github.event.client_payload.forecast_state_field_id || vars['EP_FORECAST_STATE_FIELD_ID'] }}
+      incomplete_forecast_state_option_id: ${{ github.event.client_payload.incomplete_forecast_state_option_id || vars['EP_INCOMPLETE_FORECAST_OPTION_ID'] }}
+      strict_mode: ${{ github.event.client_payload.strict_mode || vars['EP_STRICT_MODE'] || 'true' }}
+      capacity_hours_per_day: ${{ github.event.client_payload.capacity_hours_per_day || vars['EP_CAPACITY_HOURS_PER_DAY'] || 6 }}
+      non_working_weekdays: ${{ github.event.client_payload.non_working_weekdays || vars['EP_NON_WORKING_WEEKDAYS'] || '0,6' }}
+      non_working_dates: ${{ github.event.client_payload.non_working_dates || vars['EP_NON_WORKING_DATES'] || '' }}
+      root_item_id: ${{ github.event_name == 'workflow_dispatch' && inputs.root_item_id || github.event.client_payload.root_item_id || '' }}
+      event_item_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.event_item_node_id || github.event.client_payload.item_node_id || '' }}
+      event_action: ${{ github.event_name == 'schedule' && 'reconcile' || github.event.client_payload.event_action || github.event.action || 'reconcile' }}
+      max_items: ${{ github.event.client_payload.max_items || vars['EP_MAX_PROJECT_ITEMS'] || 500 }}
+      fail_fast: ${{ github.event.client_payload.fail_fast || vars['EP_FAIL_FAST'] || 'false' }}
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event.client_payload.dry_run || 'false' }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || github.event.client_payload.debug || vars['EP_ROLLUP_DEBUG'] || 'false' }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

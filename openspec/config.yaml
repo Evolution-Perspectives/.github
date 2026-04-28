@@ -1,5 +1,16 @@
 schema: spec-driven
 
+context: |
+  Validation policy: temporary GitHub issues, pull requests, and test artifacts created during pilot or rollout validation must be cleaned up after testing.
+  Preferred cleanup path is hard delete when available; fallback is explicit close/archive with reason and documented evidence.
+
+rules:
+  design:
+    - Include a test-data cleanup plan for temporary validation artifacts.
+  tasks:
+    - Add explicit cleanup tasks for temporary issues/PRs created during testing.
+    - Capture evidence that cleanup completed (created item IDs and post-cleanup verification).
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.
