@@ -37,8 +37,8 @@ jobs:
   apply-rollup:
     uses: ./.github/workflows/projects-estimation-rollup-action.yml
     with:
-      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] }}
-      estimate_field_id: ${{ github.event.client_payload.estimate_field_id || vars['EP_ESTIMATE_FIELD_ID'] }}
+      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] || 'PVT_kwDOCIcusc4BOGrD' }}
+      estimate_field_id: ${{ github.event.client_payload.estimate_field_id || vars['EP_ESTIMATE_FIELD_ID'] || 'PVTF_lADOCIcusc4BOGrDzhRQc9k' }}
       remaining_hours_field_id: ${{ github.event.client_payload.remaining_hours_field_id || vars['EP_REMAINING_HOURS_FIELD_ID'] }}
       forecast_date_field_id: ${{ github.event.client_payload.forecast_date_field_id || vars['EP_FORECAST_DATE_FIELD_ID'] }}
       forecast_state_field_id: ${{ github.event.client_payload.forecast_state_field_id || vars['EP_FORECAST_STATE_FIELD_ID'] }}
