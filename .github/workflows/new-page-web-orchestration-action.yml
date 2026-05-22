@@ -226,6 +226,65 @@ jobs:
               }
             `;
 
+            const updateIssueTypeMutation = `
+              mutation($id: ID!, $issueTypeId: ID!) {
+                updateIssue(input: { id: $id, issueTypeId: $issueTypeId }) {
+                  issue {
+                    id
+                  }
+                }
+              }
+            `;
+
+            const repositoryIssueTypesQuery = `
+              query($owner: String!, $repo: String!) {
+                repository(owner: $owner, name: $repo) {
+                  issueTypes(first: 100) {
+                    nodes {
+                      id
+                      name
+                      isEnabled
+                    }
+                  }
+                }
+              }
+            `;
+
+            const normalizeIssueTypeKey = (value) =>
+              (value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '');
+
+            function resolveIssueTypeId(issueTypes, desiredName) {
+              if (!desiredName) return '';
+              const aliasMap = new Map([
+                ['directionmanagement', 'managementdirection'],
+                ['managementdirection', 'managementdirection'],
+                ['developpementproduction', 'developpementproduction'],
+              ]);
+              const desiredRawKey = normalizeIssueTypeKey(desiredName);
+              const desiredKey = aliasMap.get(desiredRawKey) || desiredRawKey;
+
+              for (const issueType of issueTypes || []) {
+                const typeRawKey = normalizeIssueTypeKey(issueType?.name || '');
+                const typeKey = aliasMap.get(typeRawKey) || typeRawKey;
+                if (typeKey === desiredKey) {
+                  return issueType.id;
+                }
+              }
+              return '';
+            }
+
+            async function ensureIssueType(issueId, issueTypeId) {
+              if (!issueId || !issueTypeId) return;
+              await github.graphql(updateIssueTypeMutation, {
+                id: issueId,
+                issueTypeId,
+              });
+            }
+
             let parent = null;
             if (issueNodeIdInput) {
               const res = await github.graphql(resolveByNodeQuery, { id: issueNodeIdInput });
@@ -265,6 +324,12 @@ jobs:
             const nomPage = extractSingleValue(body, 'Nom de la page');
             const description = normalizeDescription(extractSection(body, 'Description'));
             const prioRaw = extractSingleValue(body, 'Prio');
+
+            const issueTypesRes = await github.graphql(repositoryIssueTypesQuery, {
+              owner: parent.repository.owner.login,
+              repo: parent.repository.name,
+            });
+            const repositoryIssueTypes = (issueTypesRes?.repository?.issueTypes?.nodes || []).filter((node) => node?.isEnabled !== false);
 
             const kickoffEnabled = extractCheckbox(body, 'Kickoff necessaire ?');
             const templateEnabled = extractCheckbox(body, 'Cette page doit etre un template ?');
@@ -318,28 +383,31 @@ jobs:
               subissueDefs.push({
                 key: 'kickoff',
                 name: 'Kickoff',
-                issueType: 'Direction/management',
+                issueType: 'Management/Direction',
               });
             }
 
             subissueDefs.push(
               { key: 'preco', name: 'Preconisations marketing', issueType: 'Specs/Cahier des charges' },
               { key: 'maquettage', name: 'Maquettage', issueType: 'Specs/Cahier des charges' },
-              { key: 'contenus', name: 'Contenus', issueType: 'Developpement/Production' },
+              { key: 'contenus', name: 'Contenus', issueType: 'Développement/Production' },
             );
 
             if (templateEnabled) {
-              subissueDefs.push({ key: 'template', name: 'Production du template', issueType: 'Developpement/Production' });
+              subissueDefs.push({ key: 'template', name: 'Production du template', issueType: 'Développement/Production' });
             }
             if (modulesEnabled) {
-              subissueDefs.push({ key: 'modules', name: 'Nouveau(x) module(s)', issueType: 'Developpement/Production' });
+              subissueDefs.push({ key: 'modules', name: 'Nouveau(x) module(s)', issueType: 'Développement/Production' });
             }
 
             subissueDefs.push(
-              { key: 'integration', name: 'Integration', issueType: 'Developpement/Production' },
+              { key: 'integration', name: 'Integration', issueType: 'Développement/Production' },
               { key: 'validation', name: 'Validation/Test', issueType: 'Test/Validation' },
               { key: 'publication', name: 'Publication', issueType: 'Release/Mise en production' },
             );
+
+            const parentIssueTypeId = resolveIssueTypeId(repositoryIssueTypes, 'Projet');
+            await ensureIssueType(parent.id, parentIssueTypeId);
 
             async function findExistingChildIssue(childKey) {
               const query = [
@@ -425,6 +493,8 @@ jobs:
             for (const def of subissueDefs) {
               const issue = await ensureChildIssue(def);
               createdByKey[def.key] = issue;
+              const childIssueTypeId = resolveIssueTypeId(repositoryIssueTypes, def.issueType);
+              await ensureIssueType(issue.node_id, childIssueTypeId);
               await ensureSubIssueLink(issue.node_id);
             }
 
