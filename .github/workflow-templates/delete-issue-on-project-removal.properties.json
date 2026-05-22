@@ -1,0 +1,9 @@
+{
+  "name": "Delete Issue On Project Removal",
+  "description": "Deletes an issue when it is removed from the organization project source of truth.",
+  "iconName": "octicon trash",
+  "categories": [
+    "Automation",
+    "Project management"
+  ]
+}

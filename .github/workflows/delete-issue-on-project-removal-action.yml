@@ -1,0 +1,247 @@
+name: Delete Issue On Project Removal (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Projects v2 node ID considered as source of truth.
+        required: true
+        type: string
+      issue_node_id:
+        description: Node ID of the issue to delete.
+        required: true
+        type: string
+      item_node_id:
+        description: Optional project item node ID from the source event.
+        required: false
+        type: string
+        default: ""
+      event_action:
+        description: Source event action (for observability only).
+        required: false
+        type: string
+        default: removed
+      source_repository:
+        description: Repository where the source event originated.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: If true, validate and summarize without deleting.
+        required: false
+        type: string
+        default: "false"
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: string
+        default: "false"
+    secrets:
+      automation_pat:
+        description: PAT with permission to delete issues in target repositories.
+        required: true
+
+jobs:
+  delete-issue:
+    name: Delete issue removed from project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Validate source and delete issue
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          retries: 1
+          script: |
+            const projectId = '${{ inputs.project_id }}';
+            const issueNodeId = '${{ inputs.issue_node_id }}';
+            const itemNodeId = '${{ inputs.item_node_id }}';
+            const eventAction = '${{ inputs.event_action }}';
+            const sourceRepository = '${{ inputs.source_repository }}';
+            const dryRun = '${{ inputs.dry_run }}' === 'true';
+            const debug = '${{ inputs.debug }}' === 'true';
+
+            if (!projectId || !issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
+              core.setFailed('Missing required inputs: project_id and issue_node_id are required.');
+              return;
+            }
+
+            const lookupQuery = `
+              query($id: ID!, $after: String) {
+                node(id: $id) {
+                  __typename
+                  ... on Issue {
+                    id
+                    number
+                    title
+                    state
+                    repository {
+                      nameWithOwner
+                    }
+                    projectItems(first: 100, after: $after) {
+                      pageInfo {
+                        hasNextPage
+                        endCursor
+                      }
+                      nodes {
+                        id
+                        project {
+                          id
+                          number
+                          title
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const deleteMutation = `
+              mutation($issueId: ID!) {
+                deleteIssue(input: { issueId: $issueId }) {
+                  clientMutationId
+                }
+              }
+            `;
+
+            let nodeType = null;
+            let issue = null;
+            const projectItems = [];
+            let after = null;
+
+            while (true) {
+              let res;
+              try {
+                res = await github.graphql(lookupQuery, { id: issueNodeId, after });
+              } catch (error) {
+                const message = error?.message || String(error);
+                if (message.toLowerCase().includes('could not resolve to a node')) {
+                  core.warning(`Issue node ${issueNodeId} is already missing. Assuming previously deleted.`);
+                  await core.summary
+                    .addHeading('Project removal issue deletion')
+                    .addRaw(`Project ID: ${projectId}`)
+                    .addEOL()
+                    .addRaw(`Issue node ID: ${issueNodeId}`)
+                    .addEOL()
+                    .addRaw(`Status: already-missing`)
+                    .addEOL()
+                    .addRaw(`Source action: ${eventAction}`)
+                    .addEOL()
+                    .addRaw(`Source repository: ${sourceRepository}`)
+                    .addEOL()
+                    .write();
+                  return;
+                }
+
+                throw error;
+              }
+
+              const node = res?.node;
+              nodeType = node?.__typename || 'Unknown';
+
+              if (!node) {
+                core.warning(`No node found for ${issueNodeId}. Assuming deleted.`);
+                await core.summary
+                  .addHeading('Project removal issue deletion')
+                  .addRaw(`Project ID: ${projectId}`)
+                  .addEOL()
+                  .addRaw(`Issue node ID: ${issueNodeId}`)
+                  .addEOL()
+                  .addRaw('Status: already-missing')
+                  .addEOL()
+                  .write();
+                return;
+              }
+
+              if (nodeType !== 'Issue') {
+                core.warning(`Node ${issueNodeId} is type ${nodeType}; deletion skipped.`);
+                await core.summary
+                  .addHeading('Project removal issue deletion')
+                  .addRaw(`Project ID: ${projectId}`)
+                  .addEOL()
+                  .addRaw(`Issue node ID: ${issueNodeId}`)
+                  .addEOL()
+                  .addRaw(`Node type: ${nodeType}`)
+                  .addEOL()
+                  .addRaw('Status: skipped-non-issue')
+                  .addEOL()
+                  .write();
+                return;
+              }
+
+              issue = node;
+              const pageNodes = node.projectItems?.nodes || [];
+              projectItems.push(...pageNodes);
+
+              const pageInfo = node.projectItems?.pageInfo;
+              if (!pageInfo?.hasNextPage) {
+                break;
+              }
+              after = pageInfo.endCursor;
+            }
+
+            const issueRef = `${issue.repository.nameWithOwner}#${issue.number}`;
+            const stillInTargetProject = projectItems.some((item) => item?.project?.id === projectId);
+
+            if (debug) {
+              core.info(`Source action: ${eventAction}`);
+              core.info(`Source repository: ${sourceRepository}`);
+              core.info(`Item node ID: ${itemNodeId || 'n/a'}`);
+              core.info(`Resolved issue: ${issueRef}`);
+              core.info(`Discovered project item entries on issue: ${projectItems.length}`);
+            }
+
+            if (stillInTargetProject) {
+              core.warning(`Issue ${issueRef} is still attached to project ${projectId}; deletion skipped.`);
+              await core.summary
+                .addHeading('Project removal issue deletion')
+                .addRaw(`Issue: ${issueRef}`)
+                .addEOL()
+                .addRaw(`Project ID: ${projectId}`)
+                .addEOL()
+                .addRaw('Status: skipped-still-in-project')
+                .addEOL()
+                .addRaw(`Source action: ${eventAction}`)
+                .addEOL()
+                .addRaw(`Source repository: ${sourceRepository}`)
+                .addEOL()
+                .write();
+              return;
+            }
+
+            if (dryRun) {
+              core.info(`[dry-run] Would delete issue ${issueRef}.`);
+              await core.summary
+                .addHeading('Project removal issue deletion')
+                .addRaw(`Issue: ${issueRef}`)
+                .addEOL()
+                .addRaw(`Project ID: ${projectId}`)
+                .addEOL()
+                .addRaw('Status: dry-run-no-delete')
+                .addEOL()
+                .addRaw(`Source action: ${eventAction}`)
+                .addEOL()
+                .addRaw(`Source repository: ${sourceRepository}`)
+                .addEOL()
+                .write();
+              return;
+            }
+
+            await github.graphql(deleteMutation, { issueId: issue.id });
+            core.info(`Deleted issue ${issueRef}.`);
+
+            await core.summary
+              .addHeading('Project removal issue deletion')
+              .addRaw(`Issue: ${issueRef}`)
+              .addEOL()
+              .addRaw(`Project ID: ${projectId}`)
+              .addEOL()
+              .addRaw('Status: deleted')
+              .addEOL()
+              .addRaw(`Source action: ${eventAction}`)
+              .addEOL()
+              .addRaw(`Source repository: ${sourceRepository}`)
+              .addEOL()
+              .write();

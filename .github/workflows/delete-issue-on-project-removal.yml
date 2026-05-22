@@ -1,0 +1,47 @@
+name: Delete Issue On Project Removal
+
+on:
+  repository_dispatch:
+    types:
+      - projects-v2-item-removed
+      - projects-v2-item-deleted
+      - projects-v2-item-archived
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Override project ID for manual run.
+        required: false
+        type: string
+      issue_node_id:
+        description: Issue node ID to delete.
+        required: true
+        type: string
+      event_action:
+        description: Source event action for observability.
+        required: false
+        default: removed
+        type: string
+      dry_run:
+        description: Validate only, no deletion.
+        required: false
+        default: true
+        type: boolean
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  delete-issue:
+    uses: ./.github/workflows/delete-issue-on-project-removal-action.yml
+    with:
+      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || 'PVT_kwDOCIcusc4BOGrD' }}
+      issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.client_payload.issue_node_id || github.event.client_payload.content_node_id || '' }}
+      item_node_id: ${{ github.event.client_payload.item_node_id || github.event.client_payload.projects_v2_item_node_id || '' }}
+      event_action: ${{ github.event_name == 'workflow_dispatch' && inputs.event_action || github.event.client_payload.event_action || github.event.client_payload.action || 'removed' }}
+      source_repository: ${{ github.event.client_payload.source_repository || github.repository }}
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event.client_payload.dry_run || 'false' }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || github.event.client_payload.debug || 'false' }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
