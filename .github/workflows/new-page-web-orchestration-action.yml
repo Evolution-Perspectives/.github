@@ -319,20 +319,6 @@ jobs:
             const body = parent.body || '';
             const intakeFormDetected = isNewPageWebIntakeForm(body);
             const alreadyOrchestrated = body.includes(orchestratedMarker);
-            if (!intakeFormDetected) {
-              if (alreadyOrchestrated) {
-                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is already orchestrated. Skipping.`);
-              } else {
-                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} does not match the Nouvelle Page Web form structure. Skipping.`);
-              }
-              return;
-            }
-
-            const typePage = extractSingleValue(body, 'Type de page');
-            const site = extractSingleValue(body, 'Site');
-            const nomPage = extractSingleValue(body, 'Nom de la page');
-            const description = normalizeDescription(extractSection(body, 'Description'));
-            const prioRaw = extractSingleValue(body, 'Prio');
 
             const issueTypesRes = await github.graphql(repositoryIssueTypesQuery, {
               owner: parent.repository.owner.login,
@@ -342,6 +328,72 @@ jobs:
             if (debug) {
               core.info(`Repository issue types fetched: ${repositoryIssueTypes.length}`);
             }
+
+            const childIssueTypeByKey = new Map([
+              ['kickoff', 'Management/Direction'],
+              ['preco', 'Specs/Cahier des charges'],
+              ['maquettage', 'Specs/Cahier des charges'],
+              ['contenus', 'Développement/Production'],
+              ['template', 'Développement/Production'],
+              ['modules', 'Développement/Production'],
+              ['integration', 'Développement/Production'],
+              ['validation', 'Test/Validation'],
+              ['publication', 'Release/Mise en production'],
+            ]);
+
+            if (!intakeFormDetected) {
+              if (alreadyOrchestrated) {
+                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is already orchestrated. Running maintenance type sync.`);
+
+                const parentIssueTypeId = resolveIssueTypeId(repositoryIssueTypes, 'Projet');
+                await ensureIssueType(parent.id, parentIssueTypeId);
+
+                let syncedChildren = 0;
+                for (const [childKey, childIssueTypeName] of childIssueTypeByKey.entries()) {
+                  const query = [
+                    `repo:${parent.repository.nameWithOwner}`,
+                    'is:issue',
+                    'in:body',
+                    `"new-page-web-parent-node:${parent.id}"`,
+                    'in:body',
+                    `"new-page-web-child-key:${childKey}"`,
+                  ].join(' ');
+
+                  const result = await github.rest.search.issuesAndPullRequests({
+                    q: query,
+                    per_page: 1,
+                  });
+
+                  const existing = result?.data?.items?.[0] || null;
+                  if (!existing) continue;
+
+                  const childIssueTypeId = resolveIssueTypeId(repositoryIssueTypes, childIssueTypeName);
+                  await ensureIssueType(existing.node_id, childIssueTypeId);
+                  syncedChildren += 1;
+                }
+
+                await core.summary
+                  .addHeading('New Page Web orchestration')
+                  .addRaw(`Parent: ${parent.repository.nameWithOwner}#${parent.number}`)
+                  .addEOL()
+                  .addRaw('Mode: maintenance type sync')
+                  .addEOL()
+                  .addRaw(`Subissues synced: ${syncedChildren}`)
+                  .addEOL()
+                  .write();
+
+                return;
+              } else {
+                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} does not match the Nouvelle Page Web form structure. Skipping.`);
+                return;
+              }
+            }
+
+            const typePage = extractSingleValue(body, 'Type de page');
+            const site = extractSingleValue(body, 'Site');
+            const nomPage = extractSingleValue(body, 'Nom de la page');
+            const description = normalizeDescription(extractSection(body, 'Description'));
+            const prioRaw = extractSingleValue(body, 'Prio');
 
             const kickoffEnabled = extractCheckbox(body, 'Kickoff necessaire ?');
             const templateEnabled = extractCheckbox(body, 'Cette page doit etre un template ?');
