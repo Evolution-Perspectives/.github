@@ -99,6 +99,15 @@ jobs:
               return value;
             }
 
+            function isNewPageWebIntakeForm(body) {
+              const source = (body || '').replace(/\r/g, '');
+              const requiredLabels = ['Type de page', 'Site', 'Nom de la page', 'Prio'];
+              return requiredLabels.every((label) => {
+                const pattern = new RegExp(`^###\\s*${esc(label)}\\s*$`, 'im');
+                return pattern.test(source);
+              });
+            }
+
             function titleCaseSafe(input) {
               return (input || '').replace(/\s+/g, ' ').trim();
             }
@@ -240,8 +249,14 @@ jobs:
             }
 
             const body = parent.body || '';
-            if (!body.includes(formMarker)) {
-              core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is not a Nouvelle Page Web intake issue. Skipping.`);
+            const intakeFormDetected = isNewPageWebIntakeForm(body);
+            const alreadyOrchestrated = body.includes(orchestratedMarker);
+            if (!intakeFormDetected) {
+              if (alreadyOrchestrated) {
+                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is already orchestrated. Skipping.`);
+              } else {
+                core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} does not match the Nouvelle Page Web form structure. Skipping.`);
+              }
               return;
             }
 
