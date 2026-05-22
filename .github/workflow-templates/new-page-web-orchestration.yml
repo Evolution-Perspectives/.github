@@ -6,6 +6,11 @@ on:
       - opened
   workflow_dispatch:
     inputs:
+      source_repository:
+        description: Optional owner/name repository that contains the intake issue.
+        required: false
+        default: ''
+        type: string
       issue_number:
         description: Intake issue number to process.
         required: true
@@ -36,7 +41,7 @@ jobs:
     with:
       issue_node_id: ''
       issue_number: ${{ fromJSON(format('{0}', inputs.issue_number)) }}
-      source_repository: ${{ github.repository }}
+      source_repository: ${{ inputs.source_repository != '' && inputs.source_repository || github.repository }}
       project_id: PVT_kwDOCIcusc4BOGrD
       priority_field_id: PVTSSF_lADOCIcusc4BOGrDzg852o8
       debug: ${{ inputs.debug == true || inputs.debug == 'true' }}
