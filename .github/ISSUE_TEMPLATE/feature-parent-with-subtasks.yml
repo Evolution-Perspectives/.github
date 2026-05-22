@@ -1,0 +1,84 @@
+name: Feature parent with subtasks
+description: Create a parent feature request and capture child tasks to create via automation.
+title: "[Feature] "
+labels:
+  - type: feature
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for a parent feature that should later spawn child issues.
+        Note: this form only captures the data. Child issue creation requires automation.
+
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+      description: GitHub username responsible for this parent issue.
+      placeholder: octocat
+    validations:
+      required: true
+
+  - type: input
+    id: target_repo
+    attributes:
+      label: Target repository
+      description: Repository where child issues should be created by automation.
+      placeholder: Evolution-Perspectives/some-repo
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0
+        - P1
+        - P2
+        - P3
+      default: 1
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are we solving?
+      placeholder: Describe the user and business problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected outcome
+      description: What does success look like?
+      placeholder: Measurable outcomes, KPI changes, acceptance criteria.
+    validations:
+      required: true
+
+  - type: textarea
+    id: child_tasks
+    attributes:
+      label: Child tasks to create
+      description: One child task per line. Prefix with team or area if useful.
+      placeholder: |
+        API - Add endpoint for summary metrics
+        Web - Add parent issue form in shared .github repo
+        Data - Add rollup validation query
+      render: markdown
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I understand this form does not create child issues by itself.
+          required: true
+        - label: I understand automation must parse this issue to create child issues.
+          required: true
