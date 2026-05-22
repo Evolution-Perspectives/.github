@@ -1,6 +1,9 @@
 name: Nouvelle Page Web
 description: Demande de nouvelle page web avec orchestration automatique parent/subissues.
 title: "Nouvelle "
+labels:
+  - type: feature
+  - needs-triage
 body:
   - type: markdown
     attributes:
@@ -47,7 +50,6 @@ body:
       label: Description
       description: Contexte complémentaire (optionnel).
       placeholder: Objectifs, contraintes, contexte métier...
-      render: markdown
     validations:
       required: false
 
