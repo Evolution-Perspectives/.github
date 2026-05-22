@@ -1,0 +1,9 @@
+{
+  "name": "New Page Web Orchestration",
+  "description": "Creates and wires parent/subissues for Nouvelle Page Web intake with optional kickoff gating.",
+  "iconName": "octicon issue-opened",
+  "categories": [
+    "Automation",
+    "Project management"
+  ]
+}
