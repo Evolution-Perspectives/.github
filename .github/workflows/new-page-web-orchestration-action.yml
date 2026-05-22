@@ -56,6 +56,8 @@ jobs:
             const sourceRepository = '${{ inputs.source_repository }}';
             const issueNodeIdInput = '${{ inputs.issue_node_id }}';
             const issueNumberInput = Number('${{ inputs.issue_number }}');
+            const formMarker = 'new-page-web-form:v1';
+            const orchestratedMarker = 'new-page-web-orchestrated:v1';
 
             const [owner, repo] = sourceRepository.split('/');
             if (!owner || !repo) {
@@ -88,6 +90,13 @@ jobs:
             function extractCheckbox(body, label) {
               const section = extractSection(body, label);
               return /-\s*\[[xX]\]/.test(section);
+            }
+
+            function normalizeDescription(section) {
+              const value = (section || '').replace(/\r/g, '').trim();
+              if (!value) return '';
+              if (/^_?no response_?$/i.test(value)) return '';
+              return value;
             }
 
             function titleCaseSafe(input) {
@@ -231,7 +240,7 @@ jobs:
             }
 
             const body = parent.body || '';
-            if (!body.includes('new-page-web-form:v1')) {
+            if (!body.includes(formMarker)) {
               core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is not a Nouvelle Page Web intake issue. Skipping.`);
               return;
             }
@@ -239,7 +248,7 @@ jobs:
             const typePage = extractSingleValue(body, 'Type de page');
             const site = extractSingleValue(body, 'Site');
             const nomPage = extractSingleValue(body, 'Nom de la page');
-            const description = extractSection(body, 'Description');
+            const description = normalizeDescription(extractSection(body, 'Description'));
             const prioRaw = extractSingleValue(body, 'Prio');
 
             const kickoffEnabled = extractCheckbox(body, 'Kickoff necessaire ?');
@@ -428,6 +437,24 @@ jobs:
                 if (key === 'kickoff') continue;
                 await ensureBlockedBy(item.node_id, createdByKey.kickoff.node_id);
               }
+            }
+
+            const desiredParentBodyLines = [
+              `<!-- ${formMarker} -->`,
+              `<!-- ${orchestratedMarker} -->`,
+            ];
+            if (description) {
+              desiredParentBodyLines.push('', description);
+            }
+            const desiredParentBody = desiredParentBodyLines.join('\n');
+            if ((parent.body || '') !== desiredParentBody) {
+              await github.rest.issues.update({
+                owner: parent.repository.owner.login,
+                repo: parent.repository.name,
+                issue_number: parent.number,
+                body: desiredParentBody,
+              });
+              parent.body = desiredParentBody;
             }
 
             const discovered = Object.keys(createdByKey).length;

@@ -1,0 +1,101 @@
+name: New Page Web Orchestration (Org Scan)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      source_repository:
+        description: Optional owner/name repository that contains the intake issue.
+        required: false
+        default: ''
+        type: string
+      issue_number:
+        description: Optional issue number to process in source_repository.
+        required: false
+        default: 0
+        type: number
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  discover:
+    name: Discover candidate intake issues
+    runs-on: ubuntu-latest
+    outputs:
+      candidates: ${{ steps.collect.outputs.candidates }}
+    steps:
+      - name: Collect candidates
+        id: collect
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.EP_AUTOMATION_PAT }}
+          script: |
+            const manualRepo = ('${{ inputs.source_repository }}' || '').trim();
+            const manualIssue = Number('${{ inputs.issue_number }}');
+            const org = 'Evolution-Perspectives';
+            const formMarker = 'new-page-web-form:v1';
+            const orchestratedMarker = 'new-page-web-orchestrated:v1';
+
+            const candidates = [];
+
+            if (manualRepo && Number.isInteger(manualIssue) && manualIssue > 0) {
+              candidates.push({
+                source_repository: manualRepo,
+                issue_number: manualIssue,
+              });
+            } else {
+              const query = `org:${org} is:issue is:open in:body "${formMarker}"`;
+              const hits = await github.paginate(github.rest.search.issuesAndPullRequests, {
+                q: query,
+                per_page: 100,
+              });
+
+              for (const hit of hits) {
+                if (hit.pull_request) continue;
+                const fullName = hit.repository_url.split('/repos/')[1];
+                if (!fullName) continue;
+                const [owner, repo] = fullName.split('/');
+                if (!owner || !repo) continue;
+
+                const issue = await github.rest.issues.get({
+                  owner,
+                  repo,
+                  issue_number: hit.number,
+                });
+
+                const body = issue?.data?.body || '';
+                if (!body.includes(formMarker)) continue;
+                if (body.includes(orchestratedMarker)) continue;
+
+                candidates.push({
+                  source_repository: `${owner}/${repo}`,
+                  issue_number: hit.number,
+                });
+              }
+            }
+
+            core.info(`Discovered ${candidates.length} candidate issue(s).`);
+            core.setOutput('candidates', JSON.stringify(candidates));
+
+  orchestrate:
+    name: Orchestrate discovered issues
+    needs: discover
+    if: ${{ fromJSON(needs.discover.outputs.candidates)[0] != null }}
+    strategy:
+      matrix:
+        include: ${{ fromJSON(needs.discover.outputs.candidates) }}
+      fail-fast: false
+    uses: ./.github/workflows/new-page-web-orchestration-action.yml
+    with:
+      issue_node_id: ''
+      issue_number: ${{ matrix.issue_number }}
+      source_repository: ${{ matrix.source_repository }}
+      project_id: PVT_kwDOCIcusc4BOGrD
+      priority_field_id: PVTSSF_lADOCIcusc4BOGrDzg852o8
+      debug: ${{ github.event_name == 'workflow_dispatch' && (inputs.debug == true || inputs.debug == 'true') || false }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
