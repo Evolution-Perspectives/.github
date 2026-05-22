@@ -1,0 +1,458 @@
+name: New Page Web Orchestration (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      issue_node_id:
+        description: Node ID of the intake issue.
+        required: false
+        type: string
+        default: ""
+      issue_number:
+        description: Number of the intake issue.
+        required: false
+        type: number
+        default: 0
+      source_repository:
+        description: Repository where intake issue exists (owner/name).
+        required: true
+        type: string
+      project_id:
+        description: Project v2 node ID.
+        required: false
+        type: string
+        default: PVT_kwDOCIcusc4BOGrD
+      priority_field_id:
+        description: Project single-select field ID for parent priority.
+        required: false
+        type: string
+        default: PVTSSF_lADOCIcusc4BOGrDzg852o8
+      debug:
+        description: Enable verbose logging.
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      automation_pat:
+        description: Organization automation token with issue/project write permissions.
+        required: true
+
+jobs:
+  orchestrate:
+    name: Orchestrate new page web issues
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Create/update parent and subissues
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          retries: 2
+          script: |
+            const debug = ${{ inputs.debug }};
+            const projectId = '${{ inputs.project_id }}';
+            const priorityFieldId = '${{ inputs.priority_field_id }}';
+            const sourceRepository = '${{ inputs.source_repository }}';
+            const issueNodeIdInput = '${{ inputs.issue_node_id }}';
+            const issueNumberInput = Number('${{ inputs.issue_number }}');
+
+            const [owner, repo] = sourceRepository.split('/');
+            if (!owner || !repo) {
+              core.setFailed(`Invalid source_repository '${sourceRepository}'. Expected owner/name.`);
+              return;
+            }
+
+            const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            function normalizeLine(value) {
+              return (value || '').replace(/\r/g, '').trim();
+            }
+
+            function extractSection(body, label) {
+              const pattern = new RegExp(`###\\s*${esc(label)}\\s*\\n([\\s\\S]*?)(?=\\n###\\s|$)`, 'i');
+              const match = body.match(pattern);
+              return match ? match[1].trim() : '';
+            }
+
+            function extractSingleValue(body, label) {
+              const section = extractSection(body, label);
+              if (!section) return '';
+              const line = section
+                .split('\n')
+                .map((entry) => normalizeLine(entry))
+                .find((entry) => entry.length > 0 && !entry.startsWith('- ['));
+              return line || '';
+            }
+
+            function extractCheckbox(body, label) {
+              const section = extractSection(body, label);
+              return /-\s*\[[xX]\]/.test(section);
+            }
+
+            function titleCaseSafe(input) {
+              return (input || '').replace(/\s+/g, ' ').trim();
+            }
+
+            function prioOptionIdFromValue(prioRaw) {
+              const value = normalizeLine(prioRaw);
+              if (value.startsWith('🔥Urgent')) return '79628723';
+              if (value.startsWith('⚡Important')) return '0a877460';
+              if (value.startsWith('🌿 Planifié') || value.startsWith('🌿 Planifie')) return 'da944a9c';
+              if (value.startsWith('💧 Secondaire')) return '7a3bdd06';
+              if (value.startsWith('🪼 Optionnel')) return 'ed0703a2';
+              return '';
+            }
+
+            const resolveByNodeQuery = `
+              query($id: ID!) {
+                node(id: $id) {
+                  ... on Issue {
+                    id
+                    number
+                    title
+                    body
+                    state
+                    repository {
+                      name
+                      nameWithOwner
+                      owner {
+                        login
+                      }
+                    }
+                    projectItems(first: 100) {
+                      nodes {
+                        id
+                        project {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const resolveByNumberQuery = `
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  issue(number: $number) {
+                    id
+                    number
+                    title
+                    body
+                    state
+                    repository {
+                      name
+                      nameWithOwner
+                      owner {
+                        login
+                      }
+                    }
+                    projectItems(first: 100) {
+                      nodes {
+                        id
+                        project {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const addProjectItemMutation = `
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            const updatePriorityMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { singleSelectOptionId: $optionId }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            const addSubIssueMutation = `
+              mutation($issueId: ID!, $subIssueId: ID!) {
+                addSubIssue(input: { issueId: $issueId, subIssueId: $subIssueId }) {
+                  issue {
+                    id
+                  }
+                }
+              }
+            `;
+
+            const addBlockedByMutation = `
+              mutation($issueId: ID!, $blockingIssueId: ID!) {
+                addBlockedBy(input: { issueId: $issueId, blockingIssueId: $blockingIssueId }) {
+                  issue {
+                    id
+                  }
+                }
+              }
+            `;
+
+            let parent = null;
+            if (issueNodeIdInput) {
+              const res = await github.graphql(resolveByNodeQuery, { id: issueNodeIdInput });
+              parent = res?.node || null;
+            } else if (issueNumberInput > 0) {
+              const res = await github.graphql(resolveByNumberQuery, { owner, repo, number: issueNumberInput });
+              parent = res?.repository?.issue || null;
+            } else {
+              core.setFailed('Either issue_node_id or issue_number must be provided.');
+              return;
+            }
+
+            if (!parent) {
+              core.setFailed('Intake issue was not found.');
+              return;
+            }
+
+            if (parent.state !== 'OPEN') {
+              core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is not open. Skipping.`);
+              return;
+            }
+
+            const body = parent.body || '';
+            if (!body.includes('new-page-web-form:v1')) {
+              core.info(`Issue ${parent.repository.nameWithOwner}#${parent.number} is not a Nouvelle Page Web intake issue. Skipping.`);
+              return;
+            }
+
+            const typePage = extractSingleValue(body, 'Type de page');
+            const site = extractSingleValue(body, 'Site');
+            const nomPage = extractSingleValue(body, 'Nom de la page');
+            const description = extractSection(body, 'Description');
+            const prioRaw = extractSingleValue(body, 'Prio');
+
+            const kickoffEnabled = extractCheckbox(body, 'Kickoff necessaire ?');
+            const templateEnabled = extractCheckbox(body, 'Cette page doit etre un template ?');
+            const modulesEnabled = extractCheckbox(body, 'Cette page necessite de nouveaux modules ?');
+
+            if (!typePage || !site || !nomPage) {
+              core.setFailed('Unable to parse required form fields (Type de page, Site, Nom de la page).');
+              return;
+            }
+
+            const canonicalTitle = titleCaseSafe(`Nouvelle ${typePage} ${site} ${nomPage}`);
+            if (parent.title !== canonicalTitle) {
+              await github.rest.issues.update({
+                owner: parent.repository.owner.login,
+                repo: parent.repository.name,
+                issue_number: parent.number,
+                title: canonicalTitle,
+              });
+              parent.title = canonicalTitle;
+            }
+
+            const priorityOptionId = prioOptionIdFromValue(prioRaw || '🌿 Planifié');
+            if (priorityOptionId) {
+              let parentItemId = (parent.projectItems?.nodes || []).find((node) => node?.project?.id === projectId)?.id;
+              if (!parentItemId) {
+                const addItemRes = await github.graphql(addProjectItemMutation, {
+                  projectId,
+                  contentId: parent.id,
+                });
+                parentItemId = addItemRes?.addProjectV2ItemById?.item?.id || '';
+              }
+
+              if (parentItemId) {
+                await github.graphql(updatePriorityMutation, {
+                  projectId,
+                  itemId: parentItemId,
+                  fieldId: priorityFieldId,
+                  optionId: priorityOptionId,
+                });
+              }
+            }
+
+            const basePrefix = `Page ${nomPage}`;
+            const commonMeta = [
+              `<!-- new-page-web-parent-node:${parent.id} -->`,
+              `<!-- new-page-web-parent-number:${parent.number} -->`,
+            ].join('\n');
+
+            const subissueDefs = [];
+            if (kickoffEnabled) {
+              subissueDefs.push({
+                key: 'kickoff',
+                name: 'Kickoff',
+                issueType: 'Direction/management',
+              });
+            }
+
+            subissueDefs.push(
+              { key: 'preco', name: 'Preconisations marketing', issueType: 'Specs/Cahier des charges' },
+              { key: 'maquettage', name: 'Maquettage', issueType: 'Specs/Cahier des charges' },
+              { key: 'contenus', name: 'Contenus', issueType: 'Developpement/Production' },
+            );
+
+            if (templateEnabled) {
+              subissueDefs.push({ key: 'template', name: 'Production du template', issueType: 'Developpement/Production' });
+            }
+            if (modulesEnabled) {
+              subissueDefs.push({ key: 'modules', name: 'Nouveau(x) module(s)', issueType: 'Developpement/Production' });
+            }
+
+            subissueDefs.push(
+              { key: 'integration', name: 'Integration', issueType: 'Developpement/Production' },
+              { key: 'validation', name: 'Validation/Test', issueType: 'Test/Validation' },
+              { key: 'publication', name: 'Publication', issueType: 'Release/Mise en production' },
+            );
+
+            async function findExistingChildIssue(childKey) {
+              const query = [
+                `repo:${parent.repository.nameWithOwner}`,
+                'is:issue',
+                'in:body',
+                `"new-page-web-parent-node:${parent.id}"`,
+                'in:body',
+                `"new-page-web-child-key:${childKey}"`,
+              ].join(' ');
+
+              const result = await github.rest.search.issuesAndPullRequests({
+                q: query,
+                per_page: 1,
+              });
+
+              return result?.data?.items?.[0] || null;
+            }
+
+            async function ensureChildIssue(def) {
+              const existing = await findExistingChildIssue(def.key);
+              if (existing) {
+                return {
+                  number: existing.number,
+                  node_id: existing.node_id,
+                  html_url: existing.html_url,
+                  title: existing.title,
+                };
+              }
+
+              const childTitle = `${basePrefix} - ${def.name}`;
+              const childBodyLines = [
+                commonMeta,
+                `<!-- new-page-web-child-key:${def.key} -->`,
+                `Type d'issue: ${def.issueType}`,
+                '',
+                `Parent: ${parent.repository.nameWithOwner}#${parent.number}`,
+              ];
+
+              if (description) {
+                childBodyLines.push('', 'Contexte parent:', description);
+              }
+
+              const created = await github.rest.issues.create({
+                owner: parent.repository.owner.login,
+                repo: parent.repository.name,
+                title: childTitle,
+                body: childBodyLines.join('\n'),
+              });
+
+              return created.data;
+            }
+
+            async function ensureSubIssueLink(childNodeId) {
+              try {
+                await github.graphql(addSubIssueMutation, {
+                  issueId: parent.id,
+                  subIssueId: childNodeId,
+                });
+              } catch (error) {
+                const message = error?.message || String(error);
+                if (!/already|exists|duplicate/i.test(message)) {
+                  throw error;
+                }
+              }
+            }
+
+            async function ensureBlockedBy(issueNodeId, blockerNodeId) {
+              try {
+                await github.graphql(addBlockedByMutation, {
+                  issueId: issueNodeId,
+                  blockingIssueId: blockerNodeId,
+                });
+              } catch (error) {
+                const message = error?.message || String(error);
+                if (!/already|exists|duplicate/i.test(message)) {
+                  throw error;
+                }
+              }
+            }
+
+            const createdByKey = {};
+            for (const def of subissueDefs) {
+              const issue = await ensureChildIssue(def);
+              createdByKey[def.key] = issue;
+              await ensureSubIssueLink(issue.node_id);
+            }
+
+            const deps = [];
+            deps.push(['maquettage', 'preco']);
+            deps.push(['contenus', 'preco']);
+            if (templateEnabled) deps.push(['template', 'maquettage']);
+            if (modulesEnabled) deps.push(['modules', 'maquettage']);
+
+            deps.push(['integration', 'contenus']);
+            if (templateEnabled) deps.push(['integration', 'template']);
+            if (modulesEnabled) deps.push(['integration', 'modules']);
+            deps.push(['validation', 'integration']);
+            deps.push(['publication', 'validation']);
+
+            for (const [targetKey, blockerKey] of deps) {
+              const target = createdByKey[targetKey];
+              const blocker = createdByKey[blockerKey];
+              if (!target || !blocker) continue;
+              await ensureBlockedBy(target.node_id, blocker.node_id);
+            }
+
+            if (kickoffEnabled && createdByKey.kickoff) {
+              for (const [key, item] of Object.entries(createdByKey)) {
+                if (key === 'kickoff') continue;
+                await ensureBlockedBy(item.node_id, createdByKey.kickoff.node_id);
+              }
+            }
+
+            const discovered = Object.keys(createdByKey).length;
+            const summaryLines = Object.entries(createdByKey)
+              .map(([key, item]) => `- ${key}: ${item.title || ''} (#${item.number})`)
+              .join('\n');
+
+            if (debug) {
+              core.info(`Parsed values: typePage='${typePage}', site='${site}', nomPage='${nomPage}', kickoff=${kickoffEnabled}, template=${templateEnabled}, modules=${modulesEnabled}`);
+            }
+
+            await core.summary
+              .addHeading('New Page Web orchestration')
+              .addRaw(`Parent: ${parent.repository.nameWithOwner}#${parent.number}`)
+              .addEOL()
+              .addRaw(`Canonical title: ${canonicalTitle}`)
+              .addEOL()
+              .addRaw(`Subissues ensured: ${discovered}`)
+              .addEOL()
+              .addRaw(`Kickoff enabled: ${kickoffEnabled}`)
+              .addEOL()
+              .addRaw(`Template enabled: ${templateEnabled}`)
+              .addEOL()
+              .addRaw(`New modules enabled: ${modulesEnabled}`)
+              .addEOL()
+              .addEOL()
+              .addRaw(summaryLines)
+              .addEOL()
+              .write();

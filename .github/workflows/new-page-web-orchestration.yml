@@ -1,0 +1,30 @@
+name: New Page Web Orchestration
+
+on:
+  issues:
+    types:
+      - opened
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Intake issue number to process.
+        required: true
+        type: number
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  orchestrate:
+    uses: ./.github/workflows/new-page-web-orchestration-action.yml
+    with:
+      issue_node_id: ${{ github.event_name == 'issues' && github.event.issue.node_id || '' }}
+      issue_number: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_number || github.event.issue.number || 0 }}
+      source_repository: ${{ github.repository }}
+      project_id: PVT_kwDOCIcusc4BOGrD
+      priority_field_id: PVTSSF_lADOCIcusc4BOGrDzg852o8
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || 'false' }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

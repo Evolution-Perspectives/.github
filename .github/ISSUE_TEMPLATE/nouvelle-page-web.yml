@@ -1,0 +1,87 @@
+name: Nouvelle Page Web
+description: Demande de nouvelle page web avec orchestration automatique parent/subissues.
+title: "Nouvelle "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        <!-- new-page-web-form:v1 -->
+        Utilisez ce formulaire pour demander une nouvelle page web.
+        Le flux automatisé crée les subissues et dépendances associées.
+
+  - type: dropdown
+    id: type-page
+    attributes:
+      label: Type de page
+      options:
+        - Landing Page
+        - Page Web
+    validations:
+      required: true
+
+  - type: dropdown
+    id: site
+    attributes:
+      label: Site
+      options:
+        - EP
+        - HEDC
+        - HECI
+        - HEFC
+        - Way2Be
+        - Autre
+    validations:
+      required: true
+
+  - type: input
+    id: nom-page
+    attributes:
+      label: Nom de la page
+      placeholder: Exemple: Formation Coach Pro
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Contexte complémentaire (optionnel).
+      placeholder: Objectifs, contraintes, contexte métier...
+      render: markdown
+    validations:
+      required: false
+
+  - type: dropdown
+    id: prio
+    attributes:
+      label: Prio
+      options:
+        - "🔥Urgent - Situation exceptionnelle nécessitant une prise en charge immédiate"
+        - "⚡Important - À traiter avant le reste pour garantir l'avancement global"
+        - "🌿 Planifié - Travail normal organisé et prévu dans le flux de production"
+        - "💧 Secondaire - À traiter quand possible, lorsqu'une fenêtre se présente"
+        - "🪼 Optionnel - Amélioration bonus, à faire à l'occasion"
+      default: 2
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: kickoff-necessaire
+    attributes:
+      label: Kickoff necessaire ?
+      options:
+        - label: Oui, un kickoff est necessaire
+
+  - type: checkboxes
+    id: page-template
+    attributes:
+      label: Cette page doit etre un template ?
+      options:
+        - label: Oui, cette page doit etre un template
+
+  - type: checkboxes
+    id: nouveaux-modules
+    attributes:
+      label: Cette page necessite de nouveaux modules ?
+      options:
+        - label: Oui, cette page necessite de nouveaux modules
