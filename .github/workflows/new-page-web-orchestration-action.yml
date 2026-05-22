@@ -250,6 +250,15 @@ jobs:
               }
             `;
 
+            const fallbackIssueTypeIdsByKey = new Map([
+              ['projet', 'IT_kwDOCIcusc4B64Nz'],
+              ['specscahierdescharges', 'IT_kwDOCIcusc4B4lwK'],
+              ['developpementproduction', 'IT_kwDOCIcusc4B4kdT'],
+              ['testvalidation', 'IT_kwDOCIcusc4B4kkh'],
+              ['releasemiseenproduction', 'IT_kwDOCIcusc4CAStB'],
+              ['managementdirection', 'IT_kwDOCIcusc4B5VS2'],
+            ]);
+
             const normalizeIssueTypeKey = (value) =>
               (value || '')
                 .normalize('NFD')
@@ -274,7 +283,7 @@ jobs:
                   return issueType.id;
                 }
               }
-              return '';
+              return fallbackIssueTypeIdsByKey.get(desiredKey) || '';
             }
 
             async function ensureIssueType(issueId, issueTypeId) {
@@ -330,6 +339,9 @@ jobs:
               repo: parent.repository.name,
             });
             const repositoryIssueTypes = (issueTypesRes?.repository?.issueTypes?.nodes || []).filter((node) => node?.isEnabled !== false);
+            if (debug) {
+              core.info(`Repository issue types fetched: ${repositoryIssueTypes.length}`);
+            }
 
             const kickoffEnabled = extractCheckbox(body, 'Kickoff necessaire ?');
             const templateEnabled = extractCheckbox(body, 'Cette page doit etre un template ?');
