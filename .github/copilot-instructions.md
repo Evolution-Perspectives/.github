@@ -77,10 +77,23 @@ Before organization rollout, validate at minimum:
 
 A workflow cannot be marked ready if template path validation fails.
 
-## Test Data Hygiene
-1. Any temporary GitHub issues, pull requests, or artifacts created for validation MUST be cleaned up after testing.
-2. Prefer hard delete when the API supports it (for example, GraphQL issue deletion); otherwise close with an explicit reason and record the fallback.
-3. Validation notes MUST include cleanup evidence (what was created, how it was removed, and final verification that no temporary items remain).
+## Safe Validation Protocol (Learned)
+When validating destructive or high-impact workflow behavior, use this strict sequence:
+
+1. Validate from a dedicated feature branch first.
+2. Commit only the artifacts for the current change (no unrelated files).
+3. Push the feature branch before any remote workflow checks.
+4. If `workflow_dispatch` cannot run because the workflow is not on default branch yet, run API-equivalent pre-checks first (for example GraphQL mutation/path validation), then perform full workflow validation immediately after merge/push to default branch.
+5. Execute at least two runtime paths for destructive flows:
+   - Skip path (resource still attached/in-scope, no destructive action)
+   - Destructive path (resource out-of-scope, action executes)
+6. Capture evidence for each path:
+   - Workflow run IDs and conclusions
+   - Runtime proof lines from logs
+   - Final state verification through API/CLI
+7. Use deterministic CLI output during evidence capture (`GH_PAGER=cat`) and prefer short, explicit commands over long multiline scripts when terminal buffering is unreliable.
+8. Verify auth scopes before test setup. If required write scope is missing (for example project write scope), document the limitation, run the maximum safe subset of tests, then complete full validation post-push with available automation credentials.
+9. Clean up temporary validation artifacts and record cleanup evidence.
 
 ## OpenSpec Alignment
 1. New workflow capabilities must start with OpenSpec change artifacts in `openspec/changes/`.
