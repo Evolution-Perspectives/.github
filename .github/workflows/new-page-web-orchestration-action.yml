@@ -96,11 +96,12 @@ jobs:
 
             function prioOptionIdFromValue(prioRaw) {
               const value = normalizeLine(prioRaw);
-              if (value.startsWith('🔥Urgent')) return '79628723';
-              if (value.startsWith('⚡Important')) return '0a877460';
-              if (value.startsWith('🌿 Planifié') || value.startsWith('🌿 Planifie')) return 'da944a9c';
-              if (value.startsWith('💧 Secondaire')) return '7a3bdd06';
-              if (value.startsWith('🪼 Optionnel')) return 'ed0703a2';
+              const folded = value.toLowerCase();
+              if (value.startsWith('🔥Urgent') || folded.startsWith('urgent')) return '79628723';
+              if (value.startsWith('⚡Important') || folded.startsWith('important')) return '0a877460';
+              if (value.startsWith('🌿 Planifié') || value.startsWith('🌿 Planifie') || folded.startsWith('planifie') || folded.startsWith('planifié')) return 'da944a9c';
+              if (value.startsWith('💧 Secondaire') || folded.startsWith('secondaire')) return '7a3bdd06';
+              if (value.startsWith('🪼 Optionnel') || folded.startsWith('optionnel')) return 'ed0703a2';
               return '';
             }
 
