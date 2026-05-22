@@ -32,6 +32,10 @@ on:
         required: false
         default: false
         type: boolean
+      schedule_start_date:
+        description: Optional scheduling anchor date (YYYY-MM-DD). Defaults to today UTC.
+        required: false
+        type: string
 
 jobs:
   apply-rollup:
@@ -39,7 +43,6 @@ jobs:
     with:
       project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] || 'PVT_kwDOCIcusc4BOGrD' }}
       estimate_field_id: ${{ github.event.client_payload.estimate_field_id || vars['EP_ESTIMATE_FIELD_ID'] || 'PVTF_lADOCIcusc4BOGrDzhRQc9k' }}
-      remaining_hours_field_id: ${{ github.event.client_payload.remaining_hours_field_id || vars['EP_REMAINING_HOURS_FIELD_ID'] }}
       forecast_date_field_id: ${{ github.event.client_payload.forecast_date_field_id || vars['EP_FORECAST_DATE_FIELD_ID'] }}
       forecast_state_field_id: ${{ github.event.client_payload.forecast_state_field_id || vars['EP_FORECAST_STATE_FIELD_ID'] }}
       incomplete_forecast_state_option_id: ${{ github.event.client_payload.incomplete_forecast_state_option_id || vars['EP_INCOMPLETE_FORECAST_OPTION_ID'] }}
@@ -54,5 +57,8 @@ jobs:
       fail_fast: ${{ github.event.client_payload.fail_fast || vars['EP_FAIL_FAST'] || 'false' }}
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event.client_payload.dry_run || 'false' }}
       debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || github.event.client_payload.debug || vars['EP_ROLLUP_DEBUG'] || 'false' }}
+      start_date_field_id: ${{ github.event.client_payload.start_date_field_id || vars['EP_START_DATE_FIELD_ID'] || '' }}
+      end_date_field_id: ${{ github.event.client_payload.end_date_field_id || vars['EP_END_DATE_FIELD_ID'] || '' }}
+      schedule_start_date: ${{ github.event_name == 'workflow_dispatch' && inputs.schedule_start_date || github.event.client_payload.schedule_start_date || '' }}
     secrets:
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

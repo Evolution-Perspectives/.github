@@ -19,14 +19,17 @@ Covered scenarios:
 ### Manual Validation Steps
 
 1. No-op path
+
 - Trigger a run where parent fields already match computed values.
 - Confirm workflow summary reports `Items changed: 0` and successful completion.
 
 2. Partial-failure path
+
 - Trigger with an intentionally invalid field ID in dispatch payload while `fail_fast=false`.
 - Confirm one root is recorded as failed and other roots still process.
 
 3. Template-generated path
+
 - Create a pilot repository workflow from template `projects-estimation-rollup.yml`.
 - Trigger a dry run and verify reusable workflow invocation and summary metrics.
 

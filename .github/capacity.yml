@@ -1,0 +1,26 @@
+# Capacity calendar for per-person issue scheduling.
+#
+# Each entry under "users" maps a GitHub login to the number of available
+# working hours per weekday. The scheduler uses these values to compute
+# start and end dates for leaf issues assigned to each person.
+#
+# If a login is missing from this file, issues assigned to that person
+# will be skipped with a warning and will not receive scheduled dates.
+#
+# The scheduler treats any weekday with 0 hours as a non-working day
+# for that person, in addition to the global non_working_weekdays setting.
+
+users:
+  example-user:
+    monday: 6
+    tuesday: 6
+    wednesday: 6
+    thursday: 7
+    friday: 4
+
+# Specific dates to treat as non-working for everyone (YYYY-MM-DD format).
+# These are added on top of the non_working_weekdays workflow input.
+# Leave empty if no exceptions are needed.
+non_working_days: []
+#   - "2026-05-01"
+#   - "2026-07-14"

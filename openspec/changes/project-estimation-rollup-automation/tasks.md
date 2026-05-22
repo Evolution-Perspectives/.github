@@ -13,7 +13,7 @@
 
 ## 3. Forecast Date Automation
 
-- [x] 3.1 Implement forecast-date calculation from rolled-up remaining hours and working-day capacity calendar
+- [x] 3.1 Implement forecast-date calculation from rolled-up estimate hours and working-day capacity calendar
 - [x] 3.2 Implement strict-mode incomplete forecast handling when descendant estimates are missing
 - [x] 3.3 Implement calendar exception handling for weekends and configured non-working dates
 
