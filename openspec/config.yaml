@@ -3,13 +3,26 @@ schema: spec-driven
 context: |
   Validation policy: temporary GitHub issues, pull requests, and test artifacts created during pilot or rollout validation must be cleaned up after testing.
   Preferred cleanup path is hard delete when available; fallback is explicit close/archive with reason and documented evidence.
+  Safe validation policy for workflow changes:
+  - Validate on a dedicated branch before default-branch rollout.
+  - Commit only in-scope artifacts for validation.
+  - For destructive behavior, validate both skip and execute paths.
+  - Capture run IDs, log proof lines, and post-run state verification.
+  - If default-branch workflow registration blocks pre-merge dispatch, run API-equivalent prechecks and then full workflow validation right after pushing to default branch.
+  - Prefer deterministic CLI output (GH_PAGER=cat) during evidence collection.
+  - Verify token scopes before setup; if missing scopes prevent full prechecks, record limitation and complete validation post-push.
 
 rules:
   design:
     - Include a test-data cleanup plan for temporary validation artifacts.
+    - Document safe validation sequence for destructive behavior (branch validation, fallback prechecks, post-default-branch full run).
+    - Document required token scopes and expected behavior when scopes are insufficient during prechecks.
   tasks:
     - Add explicit cleanup tasks for temporary issues/PRs created during testing.
     - Capture evidence that cleanup completed (created item IDs and post-cleanup verification).
+    - Add explicit tasks to validate both skip path and destructive path when behavior can delete or mutate production artifacts.
+    - Add a task to capture workflow run IDs, conclusions, and runtime proof log lines.
+    - Add a task to verify final system state through API/CLI after workflow completion.
 
 # Project context (optional)
 # This is shown to AI when creating artifacts.
