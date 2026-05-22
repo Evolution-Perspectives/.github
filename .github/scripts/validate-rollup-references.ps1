@@ -9,9 +9,9 @@ $templateMetadataPath = Join-Path $repoRoot ".github/workflow-templates/projects
 
 $requiredFiles = @($reusablePath, $triggerPath, $templatePath, $templateMetadataPath)
 foreach ($file in $requiredFiles) {
-  if (-not (Test-Path $file)) {
-    throw "Missing required file: $file"
-  }
+    if (-not (Test-Path $file)) {
+        throw "Missing required file: $file"
+    }
 }
 
 $expectedTriggerReusableRef = "./.github/workflows/projects-estimation-rollup-action.yml"
@@ -21,11 +21,11 @@ $triggerContent = Get-Content -LiteralPath $triggerPath -Raw
 $templateContent = Get-Content -LiteralPath $templatePath -Raw
 
 if ($triggerContent -notmatch [Regex]::Escape($expectedTriggerReusableRef)) {
-  throw "Trigger workflow does not reference expected reusable workflow: $expectedTriggerReusableRef"
+    throw "Trigger workflow does not reference expected reusable workflow: $expectedTriggerReusableRef"
 }
 
 if ($templateContent -notmatch [Regex]::Escape($expectedTemplateReusableRef)) {
-  throw "Template workflow does not reference expected reusable workflow: $expectedTemplateReusableRef"
+    throw "Template workflow does not reference expected reusable workflow: $expectedTemplateReusableRef"
 }
 
 Write-Host "Reference integrity validated for projects-estimation-rollup artifacts."

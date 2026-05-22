@@ -1,4 +1,9 @@
+const fs = require("fs");
+const path = require("path");
+
 const EPSILON = 0.000001;
+
+const WEEKDAY_NAMES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 function toBool(value, fallback = false) {
   if (value === undefined || value === null || value === "") {
@@ -58,13 +63,13 @@ function isWorkingDay(date, nonWorkingWeekdays, nonWorkingDateSet) {
 }
 
 function computeForecastDate({
-  remainingHours,
+  hours,
   capacityHoursPerDay,
   startDate,
   nonWorkingWeekdays,
   nonWorkingDateSet,
 }) {
-  if (!Number.isFinite(remainingHours)) {
+  if (!Number.isFinite(hours)) {
     return null;
   }
 
@@ -77,7 +82,7 @@ function computeForecastDate({
     throw new Error("Invalid start date for forecast calculation.");
   }
 
-  let pending = Math.max(0, remainingHours);
+  let pending = Math.max(0, hours);
 
   if (pending <= EPSILON) {
     while (!isWorkingDay(cursor, nonWorkingWeekdays, nonWorkingDateSet)) {
@@ -256,6 +261,11 @@ async function fetchProjectItems(github, core, projectId, maxItems, debug) {
                   id
                   number
                   title
+                  assignees(first: 5) {
+                    nodes {
+                      login
+                    }
+                  }
                   repository {
                     name
                     nameWithOwner
@@ -420,7 +430,7 @@ function computeRollupForNode(itemId, childMap, itemsByItemId, config, memo, vis
   }
 
   if (visiting.has(itemId)) {
-    const fallback = { estimateHours: 0, remainingHours: 0, missing: true, hasChildren: false };
+    const fallback = { estimateHours: 0, effectiveHours: 0, missing: true, hasChildren: false };
     memo.set(itemId, fallback);
     return fallback;
   }
@@ -433,17 +443,13 @@ function computeRollupForNode(itemId, childMap, itemsByItemId, config, memo, vis
 
   if (children.length === 0) {
     const leafEstimate = normalizeNumber(fieldMap.get(config.estimateFieldId)?.value);
-    const leafRemaining = config.remainingHoursFieldId
-      ? normalizeNumber(fieldMap.get(config.remainingHoursFieldId)?.value)
-      : leafEstimate;
-
+    const leafHours = leafEstimate;
     const missingEstimate = leafEstimate === null;
-    const missingRemaining = config.remainingHoursFieldId ? leafRemaining === null : missingEstimate;
 
     const result = {
       estimateHours: leafEstimate === null ? 0 : leafEstimate,
-      remainingHours: leafRemaining === null ? 0 : leafRemaining,
-      missing: config.strictMode ? (missingEstimate || missingRemaining) : false,
+      effectiveHours: leafHours === null ? 0 : leafHours,
+      missing: config.strictMode ? missingEstimate : false,
       hasChildren: false,
     };
 
@@ -453,19 +459,19 @@ function computeRollupForNode(itemId, childMap, itemsByItemId, config, memo, vis
   }
 
   let estimateTotal = 0;
-  let remainingTotal = 0;
+  let effectiveTotal = 0;
   let missing = false;
 
   for (const childId of children) {
     const child = computeRollupForNode(childId, childMap, itemsByItemId, config, memo, visiting);
     estimateTotal += child.estimateHours;
-    remainingTotal += child.remainingHours;
+    effectiveTotal += child.effectiveHours;
     missing = missing || child.missing;
   }
 
   const result = {
     estimateHours: estimateTotal,
-    remainingHours: remainingTotal,
+    effectiveHours: effectiveTotal,
     missing,
     hasChildren: true,
   };
@@ -561,13 +567,334 @@ async function clearField(github, projectId, itemId, fieldId) {
   });
 }
 
+// ─── Capacity calendar ────────────────────────────────────────────────────────
+
+function parseCapacityYaml(content) {
+  const lines = content.split(/\r?\n/);
+  const result = { users: {}, nonWorkingDays: new Set() };
+  let currentSection = null;
+  let currentUser = null;
+
+  for (const rawLine of lines) {
+    const stripped = rawLine.replace(/#.*$/, "").trimEnd();
+    if (!stripped.trim()) {
+      continue;
+    }
+
+    const indent = stripped.length - stripped.trimStart().length;
+    const trimmed = stripped.trim();
+
+    if (indent === 0) {
+      if (trimmed === "users:") {
+        currentSection = "users";
+        currentUser = null;
+      } else if (trimmed === "non_working_days:") {
+        currentSection = "non_working_days";
+        currentUser = null;
+      } else {
+        currentSection = null;
+        currentUser = null;
+      }
+      continue;
+    }
+
+    if (indent === 2) {
+      if (currentSection === "users") {
+        const match = trimmed.match(/^([\w][\w.-]*):\s*$/);
+        if (match) {
+          currentUser = match[1];
+          result.users[currentUser] = {};
+        }
+      } else if (currentSection === "non_working_days") {
+        const match = trimmed.match(/^-\s+"?([0-9]{4}-[0-9]{2}-[0-9]{2})"?\s*$/);
+        if (match) {
+          result.nonWorkingDays.add(match[1]);
+        }
+      }
+      continue;
+    }
+
+    if (indent === 4 && currentSection === "users" && currentUser) {
+      const match = trimmed.match(/^([a-z]+):\s*(\d+(?:\.\d+)?)\s*$/);
+      if (match) {
+        const day = match[1].toLowerCase();
+        if (WEEKDAY_NAMES.includes(day)) {
+          result.users[currentUser][day] = Number(match[2]);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+function loadCapacityConfig(workspaceDir) {
+  const filePath = path.join(workspaceDir || process.cwd(), ".github", "capacity.yml");
+  let content;
+  try {
+    content = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      const err = new Error(`Capacity config not found: ${filePath}`);
+      err.code = "CAPACITY_FILE_MISSING";
+      throw err;
+    }
+    throw error;
+  }
+
+  const parsed = parseCapacityYaml(content);
+  if (!parsed.users || typeof parsed.users !== "object") {
+    throw new Error('capacity.yml is malformed: missing or invalid "users" section.');
+  }
+  return parsed;
+}
+
+function getUserDayCapacity(userCal, date) {
+  const dayName = WEEKDAY_NAMES[date.getUTCDay()];
+  const capacity = userCal[dayName];
+  return typeof capacity === "number" ? capacity : 0;
+}
+
+function advanceToNextAvailableDay(cursor, userCal, nonWorkingWeekdays, nonWorkingDateSet) {
+  cursor.setUTCDate(cursor.getUTCDate() + 1);
+  while (true) {
+    if (isWorkingDay(cursor, nonWorkingWeekdays, nonWorkingDateSet)) {
+      const cap = getUserDayCapacity(userCal, cursor);
+      if (cap > EPSILON) {
+        return cap;
+      }
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+}
+
+// ─── Scheduling ───────────────────────────────────────────────────────────────
+
+function scheduleAssigneeItems(userCal, items, anchorDate, nonWorkingWeekdays, nonWorkingDateSet, rollupMemo) {
+  const schedule = new Map();
+  if (items.length === 0) {
+    return schedule;
+  }
+
+  const cursor = new Date(anchorDate.getTime());
+  let dayCapRemaining = 0;
+
+  // Advance to the first available working day from anchorDate.
+  while (true) {
+    if (isWorkingDay(cursor, nonWorkingWeekdays, nonWorkingDateSet)) {
+      dayCapRemaining = getUserDayCapacity(userCal, cursor);
+      if (dayCapRemaining > EPSILON) {
+        break;
+      }
+    }
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  for (const item of items) {
+    // If the current day's capacity was exhausted by the previous issue, advance.
+    if (dayCapRemaining <= EPSILON) {
+      dayCapRemaining = advanceToNextAvailableDay(cursor, userCal, nonWorkingWeekdays, nonWorkingDateSet);
+    }
+
+    const startDate = isoDate(cursor);
+    const rollup = rollupMemo.get(item.id);
+    const issueEstimate = rollup ? rollup.estimateHours : 0;
+
+    if (issueEstimate <= EPSILON) {
+      // Zero-estimate: start and end on the same day, consume no capacity.
+      schedule.set(item.id, { startDate, endDate: startDate });
+      continue;
+    }
+
+    let remaining = issueEstimate;
+    while (remaining > EPSILON) {
+      const consume = Math.min(remaining, dayCapRemaining);
+      remaining -= consume;
+      dayCapRemaining -= consume;
+      if (remaining <= EPSILON) {
+        break;
+      }
+      // Day exhausted; find the next available working day.
+      dayCapRemaining = advanceToNextAvailableDay(cursor, userCal, nonWorkingWeekdays, nonWorkingDateSet);
+    }
+
+    schedule.set(item.id, { startDate, endDate: isoDate(cursor) });
+    // cursor stays at endDate with dayCapRemaining reflecting remaining capacity.
+  }
+
+  return schedule;
+}
+
+function deriveParentScheduleDates(itemId, childMap, scheduleMap, visited) {
+  if (visited.has(itemId)) {
+    return scheduleMap.get(itemId) || null;
+  }
+  visited.add(itemId);
+
+  const children = Array.from(childMap.get(itemId) || []);
+  if (children.length === 0) {
+    return scheduleMap.get(itemId) || null;
+  }
+
+  let minStart = null;
+  let maxEnd = null;
+
+  for (const childId of children) {
+    const childDates = deriveParentScheduleDates(childId, childMap, scheduleMap, visited);
+    if (!childDates) {
+      continue;
+    }
+    if (minStart === null || childDates.startDate < minStart) {
+      minStart = childDates.startDate;
+    }
+    if (maxEnd === null || childDates.endDate > maxEnd) {
+      maxEnd = childDates.endDate;
+    }
+  }
+
+  if (minStart !== null && maxEnd !== null) {
+    const parentDates = { startDate: minStart, endDate: maxEnd };
+    scheduleMap.set(itemId, parentDates);
+    return parentDates;
+  }
+  return null;
+}
+
+async function runScheduling(github, core, config, items, itemsByItemId, childMap, rollupMemo, anchorDate) {
+  const scheduleWarnings = [];
+  const scheduleMap = new Map();
+
+  let capacityConfig;
+  try {
+    capacityConfig = loadCapacityConfig();
+  } catch (error) {
+    if (error.code === "CAPACITY_FILE_MISSING") {
+      core.warning("Scheduling phase skipped: .github/capacity.yml not found in repository.");
+      return { scheduled: 0, skipped: 0, written: 0, warnings: [] };
+    }
+    core.warning(`Scheduling phase failed to load config: ${error.message}`);
+    return { scheduled: 0, skipped: 0, written: 0, warnings: [error.message] };
+  }
+
+  const combinedNonWorkingDates = new Set([
+    ...config.nonWorkingDateSet,
+    ...capacityConfig.nonWorkingDays,
+  ]);
+
+  // Group leaf items by first assignee login.
+  const byAssignee = new Map();
+  let skipCount = 0;
+
+  for (const item of items) {
+    const rollup = rollupMemo.get(item.id);
+    if (!rollup || rollup.hasChildren) {
+      continue; // only schedule leaves
+    }
+
+    const assigneeNodes = item.content?.assignees?.nodes || [];
+    const login = assigneeNodes[0]?.login || null;
+
+    if (!login) {
+      scheduleWarnings.push(`Issue #${item.content?.number}: no assignee, cannot schedule`);
+      skipCount++;
+      continue;
+    }
+
+    if (!capacityConfig.users[login]) {
+      scheduleWarnings.push(`Issue #${item.content?.number}: assignee '${login}' not in capacity.yml, skipping`);
+      skipCount++;
+      continue;
+    }
+
+    if (!byAssignee.has(login)) {
+      byAssignee.set(login, []);
+    }
+    byAssignee.get(login).push(item);
+  }
+
+  // Schedule each assignee's items independently (parallel tracks).
+  for (const [login, assigneeItems] of byAssignee) {
+    if (config.debug) {
+      core.info(`Scheduling ${assigneeItems.length} issue(s) for ${login}`);
+    }
+    const userCal = capacityConfig.users[login];
+    const assigneeSchedule = scheduleAssigneeItems(
+      userCal,
+      assigneeItems,
+      anchorDate,
+      config.nonWorkingWeekdays,
+      combinedNonWorkingDates,
+      rollupMemo,
+    );
+    for (const [itemId, dates] of assigneeSchedule) {
+      scheduleMap.set(itemId, dates);
+      if (config.debug) {
+        const item = itemsByItemId.get(itemId);
+        core.info(`  #${item?.content?.number}: ${dates.startDate} → ${dates.endDate}`);
+      }
+    }
+  }
+
+  // Derive parent dates bottom-up from leaf schedule results.
+  const visited = new Set();
+  for (const itemId of itemsByItemId.keys()) {
+    deriveParentScheduleDates(itemId, childMap, scheduleMap, visited);
+  }
+
+  // Write date fields.
+  let written = 0;
+  const hasStartField = !!config.startDateFieldId;
+  const hasEndField = !!config.endDateFieldId;
+
+  if (!hasStartField && !hasEndField) {
+    core.info("Scheduling: start_date_field_id and end_date_field_id not configured; computed dates logged only.");
+  }
+
+  for (const [itemId, dates] of scheduleMap) {
+    const item = itemsByItemId.get(itemId);
+    if (!item) {
+      continue;
+    }
+
+    if (hasStartField) {
+      const current = item._fieldMap.get(config.startDateFieldId)?.value || null;
+      if (current !== dates.startDate) {
+        if (!config.dryRun) {
+          await updateDateField(github, config.projectId, itemId, config.startDateFieldId, dates.startDate);
+        }
+        item._fieldMap.set(config.startDateFieldId, { type: "date", value: dates.startDate });
+        written++;
+      }
+    }
+
+    if (hasEndField) {
+      const current = item._fieldMap.get(config.endDateFieldId)?.value || null;
+      if (current !== dates.endDate) {
+        if (!config.dryRun) {
+          await updateDateField(github, config.projectId, itemId, config.endDateFieldId, dates.endDate);
+        }
+        item._fieldMap.set(config.endDateFieldId, { type: "date", value: dates.endDate });
+        written++;
+      }
+    }
+  }
+
+  for (const warning of scheduleWarnings) {
+    core.warning(`Scheduling: ${warning}`);
+  }
+
+  return { scheduled: scheduleMap.size, skipped: skipCount, written, warnings: scheduleWarnings };
+}
+
 function parseConfig(inputs, context) {
   const projectId = inputs.projectId || "";
   const estimateFieldId = inputs.estimateFieldId || "";
-  const remainingHoursFieldId = inputs.remainingHoursFieldId || "";
   const forecastDateFieldId = inputs.forecastDateFieldId || "";
   const forecastStateFieldId = inputs.forecastStateFieldId || "";
   const incompleteForecastStateOptionId = inputs.incompleteForecastStateOptionId || "";
+  const startDateFieldId = inputs.startDateFieldId || "";
+  const endDateFieldId = inputs.endDateFieldId || "";
+  const scheduleStartDate = inputs.scheduleStartDate || null;
 
   const strictMode = toBool(inputs.strictMode, true);
   const failFast = toBool(inputs.failFast, false);
@@ -589,6 +916,12 @@ function parseConfig(inputs, context) {
   if (!Number.isFinite(maxItems) || maxItems <= 0) {
     throw new Error("max_items must be a positive number.");
   }
+  if (scheduleStartDate) {
+    const d = new Date(`${scheduleStartDate}T00:00:00.000Z`);
+    if (isNaN(d.getTime())) {
+      throw new Error(`Invalid schedule_start_date: '${scheduleStartDate}'. Use YYYY-MM-DD format.`);
+    }
+  }
 
   const correlationId = [
     context.runId,
@@ -599,10 +932,12 @@ function parseConfig(inputs, context) {
   return {
     projectId,
     estimateFieldId,
-    remainingHoursFieldId,
     forecastDateFieldId,
     forecastStateFieldId,
     incompleteForecastStateOptionId,
+    startDateFieldId,
+    endDateFieldId,
+    scheduleStartDate,
     strictMode,
     failFast,
     dryRun,
@@ -682,6 +1017,8 @@ async function run({ github, core, context, inputs }) {
   const today = config.todayIso ? new Date(`${config.todayIso}T00:00:00.000Z`) : new Date();
   const utcStart = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
 
+  const globalMemo = new Map();
+
   for (const rootId of rootIds) {
     try {
       const reachable = collectDescendants(rootId, childMap);
@@ -689,6 +1026,9 @@ async function run({ github, core, context, inputs }) {
       const visiting = new Set();
 
       computeRollupForNode(rootId, childMap, itemsByItemId, config, memo, visiting);
+      for (const [k, v] of memo) {
+        globalMemo.set(k, v);
+      }
 
       let rootChanged = false;
       for (const nodeId of reachable) {
@@ -710,18 +1050,6 @@ async function run({ github, core, context, inputs }) {
           item._fieldMap.set(config.estimateFieldId, { type: "number", value: rollup.estimateHours });
           metrics.changed += 1;
           rootChanged = true;
-        }
-
-        if (config.remainingHoursFieldId) {
-          const currentRemaining = normalizeNumber(item._fieldMap.get(config.remainingHoursFieldId)?.value);
-          if (!nearlyEqual(currentRemaining, rollup.remainingHours)) {
-            if (!config.dryRun) {
-              await updateNumberField(github, config.projectId, nodeId, config.remainingHoursFieldId, rollup.remainingHours);
-            }
-            item._fieldMap.set(config.remainingHoursFieldId, { type: "number", value: rollup.remainingHours });
-            metrics.changed += 1;
-            rootChanged = true;
-          }
         }
       }
 
@@ -763,7 +1091,7 @@ async function run({ github, core, context, inputs }) {
           }
         } else {
           const forecastDate = computeForecastDate({
-            remainingHours: rootRollup.remainingHours,
+            hours: rootRollup.effectiveHours,
             capacityHoursPerDay: config.capacityHoursPerDay,
             startDate: utcStart,
             nonWorkingWeekdays: config.nonWorkingWeekdays,
@@ -809,6 +1137,22 @@ async function run({ github, core, context, inputs }) {
     }
   }
 
+  // ─── Scheduling phase ───────────────────────────────────────────────────────
+  const scheduleAnchor = config.scheduleStartDate
+    ? new Date(`${config.scheduleStartDate}T00:00:00.000Z`)
+    : utcStart;
+
+  const scheduleMetrics = await runScheduling(
+    github,
+    core,
+    config,
+    items,
+    itemsByItemId,
+    childMap,
+    globalMemo,
+    scheduleAnchor,
+  );
+
   const endedAt = new Date().toISOString();
   await core.summary
     .addHeading("Projects Rollup Automation")
@@ -831,6 +1175,12 @@ async function run({ github, core, context, inputs }) {
     .addRaw(`Roots with incomplete forecast: ${metrics.missingForecastRoots}`)
     .addEOL()
     .addRaw(`Roots failed: ${metrics.failed}`)
+    .addEOL()
+    .addRaw(`Scheduling — issues scheduled: ${scheduleMetrics.scheduled}`)
+    .addEOL()
+    .addRaw(`Scheduling — issues skipped: ${scheduleMetrics.skipped}`)
+    .addEOL()
+    .addRaw(`Scheduling — date fields written: ${scheduleMetrics.written}`)
     .addEOL()
     .write();
 
@@ -866,5 +1216,9 @@ module.exports = {
   parseWeekdaysCsv,
   parseDateSetCsv,
   nearlyEqual,
+  parseCapacityYaml,
+  getUserDayCapacity,
+  scheduleAssigneeItems,
+  deriveParentScheduleDates,
   run,
 };

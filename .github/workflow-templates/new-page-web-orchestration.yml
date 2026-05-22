@@ -17,14 +17,28 @@ on:
         type: boolean
 
 jobs:
-  orchestrate:
+  orchestrate_from_issues:
+    if: ${{ github.event_name == 'issues' }}
     uses: Evolution-Perspectives/.github/.github/workflows/new-page-web-orchestration-action.yml@main
     with:
-      issue_node_id: ${{ github.event_name == 'issues' && github.event.issue.node_id || '' }}
-      issue_number: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_number || github.event.issue.number || 0 }}
+      issue_node_id: ${{ github.event.issue.node_id }}
+      issue_number: ${{ github.event.issue.number }}
       source_repository: ${{ github.repository }}
       project_id: PVT_kwDOCIcusc4BOGrD
       priority_field_id: PVTSSF_lADOCIcusc4BOGrDzg852o8
-      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || 'false' }}
+      debug: false
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
+
+  orchestrate_from_dispatch:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    uses: Evolution-Perspectives/.github/.github/workflows/new-page-web-orchestration-action.yml@main
+    with:
+      issue_node_id: ''
+      issue_number: ${{ inputs.issue_number }}
+      source_repository: ${{ github.repository }}
+      project_id: PVT_kwDOCIcusc4BOGrD
+      priority_field_id: PVTSSF_lADOCIcusc4BOGrDzg852o8
+      debug: ${{ inputs.debug }}
     secrets:
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

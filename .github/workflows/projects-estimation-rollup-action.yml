@@ -11,11 +11,6 @@ on:
         description: Project field ID used for estimate hours.
         required: true
         type: string
-      remaining_hours_field_id:
-        description: Optional project field ID for remaining hours.
-        required: false
-        type: string
-        default: ""
       forecast_date_field_id:
         description: Optional project field ID for forecast date output.
         required: false
@@ -86,6 +81,21 @@ on:
         required: false
         type: string
         default: "false"
+      start_date_field_id:
+        description: Optional project field ID for per-issue start date output.
+        required: false
+        type: string
+        default: ""
+      end_date_field_id:
+        description: Optional project field ID for per-issue end date output.
+        required: false
+        type: string
+        default: ""
+      schedule_start_date:
+        description: Optional scheduling anchor date (YYYY-MM-DD). Defaults to today UTC.
+        required: false
+        type: string
+        default: ""
     secrets:
       automation_pat:
         description: Organization automation token with project and issue read/write scope.
@@ -109,7 +119,6 @@ jobs:
         env:
           PROJECT_ID: ${{ inputs.project_id }}
           ESTIMATE_FIELD_ID: ${{ inputs.estimate_field_id }}
-          REMAINING_HOURS_FIELD_ID: ${{ inputs.remaining_hours_field_id }}
           FORECAST_DATE_FIELD_ID: ${{ inputs.forecast_date_field_id }}
           FORECAST_STATE_FIELD_ID: ${{ inputs.forecast_state_field_id }}
           INCOMPLETE_FORECAST_STATE_OPTION_ID: ${{ inputs.incomplete_forecast_state_option_id }}
@@ -124,6 +133,9 @@ jobs:
           FAIL_FAST: ${{ inputs.fail_fast }}
           DRY_RUN: ${{ inputs.dry_run }}
           DEBUG: ${{ inputs.debug }}
+          START_DATE_FIELD_ID: ${{ inputs.start_date_field_id }}
+          END_DATE_FIELD_ID: ${{ inputs.end_date_field_id }}
+          SCHEDULE_START_DATE: ${{ inputs.schedule_start_date }}
         with:
           github-token: ${{ secrets.automation_pat }}
           retries: 2
@@ -136,7 +148,6 @@ jobs:
               inputs: {
                 projectId: process.env.PROJECT_ID,
                 estimateFieldId: process.env.ESTIMATE_FIELD_ID,
-                remainingHoursFieldId: process.env.REMAINING_HOURS_FIELD_ID,
                 forecastDateFieldId: process.env.FORECAST_DATE_FIELD_ID,
                 forecastStateFieldId: process.env.FORECAST_STATE_FIELD_ID,
                 incompleteForecastStateOptionId: process.env.INCOMPLETE_FORECAST_STATE_OPTION_ID,
@@ -151,5 +162,8 @@ jobs:
                 failFast: process.env.FAIL_FAST,
                 dryRun: process.env.DRY_RUN,
                 debug: process.env.DEBUG,
+                startDateFieldId: process.env.START_DATE_FIELD_ID,
+                endDateFieldId: process.env.END_DATE_FIELD_ID,
+                scheduleStartDate: process.env.SCHEDULE_START_DATE,
               },
             });
