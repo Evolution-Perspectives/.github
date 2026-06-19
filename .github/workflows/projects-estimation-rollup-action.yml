@@ -104,7 +104,7 @@ on:
 jobs:
   recompute-estimates:
     name: Recompute project rollups
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
     concurrency:
