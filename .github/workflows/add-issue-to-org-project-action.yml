@@ -49,7 +49,7 @@ on:
 jobs:
   add-to-project:
     name: Add issue to org project
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
