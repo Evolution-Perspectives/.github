@@ -16,10 +16,10 @@
 
 ## 4. Validation (this repo)
 
-- [ ] 4.1 Push workflows to a feature branch, run `add-issue-to-org-project-action.yml` via `workflow_dispatch` with `dry_run: true` against a real issue node ID; confirm summary output and no mutation
-- [ ] 4.2 Create a disposable test issue, run the action with `dry_run: false`, confirm it appears as an item in the main org project
-- [ ] 4.3 Delete the disposable test issue per validation cleanup policy
-- [ ] 4.4 Merge to default branch; confirm opening a real issue in this repo adds it to the project automatically
+- [x] 4.1 Push workflows to a feature branch, run `add-issue-to-org-project-action.yml` via `workflow_dispatch` with `dry_run: true` against a real issue node ID; confirm summary output and no mutation
+- [x] 4.2 Create a disposable test issue, run the action with `dry_run: false`, confirm it appears as an item in the main org project
+- [x] 4.3 Delete the disposable test issue per validation cleanup policy
+- [x] 4.4 Merge to default branch; confirm opening a real issue in this repo adds it to the project automatically
 
 ## 5. Org-wide rollout (requires explicit confirmation before executing — cross-repo write)
 
