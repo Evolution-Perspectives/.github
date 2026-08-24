@@ -1,0 +1,153 @@
+name: Add Issue To Org Project (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Node ID of the target GitHub Projects v2 project.
+        required: true
+        type: string
+      issue_node_id:
+        description: Node ID of the issue to add to the project.
+        required: true
+        type: string
+      issue_number:
+        description: Number of the issue, for reporting.
+        required: false
+        type: string
+        default: unknown
+      source_repository:
+        description: Repository where the issue was opened.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: Validate and report without calling the mutation.
+        required: false
+        type: boolean
+        default: false
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      automation_pat:
+        description: PAT with project scope.
+        required: true
+
+jobs:
+  add-to-project:
+    name: Add issue to org project
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Add issue to project
+        uses: actions/github-script@v7
+        env:
+          PROJECT_ID: ${{ inputs.project_id }}
+          ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          DEBUG: ${{ inputs.debug }}
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          script: |
+            const projectId = process.env.PROJECT_ID || '';
+            const issueNodeId = process.env.ISSUE_NODE_ID || '';
+            const issueNumberInput = process.env.ISSUE_NUMBER || '';
+            const sourceRepository = process.env.SOURCE_REPOSITORY || '';
+            const dryRun = process.env.DRY_RUN === 'true';
+            const debug = process.env.DEBUG === 'true';
+
+            if (!projectId || projectId === 'null' || projectId === 'undefined') {
+              core.setFailed('Missing required project_id input.');
+              return;
+            }
+            if (!issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
+              core.setFailed('Missing required issue_node_id input.');
+              return;
+            }
+
+            const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
+            if (!NODE_ID_PATTERN.test(issueNodeId) || !NODE_ID_PATTERN.test(projectId)) {
+              core.setFailed('Malformed node ID in inputs (issue_node_id or project_id does not match expected node ID shape).');
+              return;
+            }
+
+            const query = `
+              query($id: ID!) {
+                node(id: $id) {
+                  ... on Issue {
+                    id
+                    number
+                    title
+                    repository {
+                      nameWithOwner
+                    }
+                    projectItems(first: 100) {
+                      nodes {
+                        project {
+                          id
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const mutation = `
+              mutation($projectId: ID!, $contentId: ID!) {
+                addProjectV2ItemById(input: {
+                  projectId: $projectId,
+                  contentId: $contentId
+                }) {
+                  item {
+                    id
+                  }
+                }
+              }
+            `;
+
+            const res = await github.graphql(query, { id: issueNodeId });
+            const issue = res?.node;
+
+            if (!issue) {
+              core.setFailed(`No issue found for node ID ${issueNodeId}.`);
+              return;
+            }
+
+            const issueRef = `${issue.repository.nameWithOwner}#${issue.number}`;
+            const alreadyPresent = (issue.projectItems?.nodes || []).some(
+              (item) => item.project?.id === projectId
+            );
+
+            if (debug) {
+              core.info(`Resolved issue: ${issueRef}`);
+              core.info(`Source repository input: ${sourceRepository}`);
+              core.info(`Issue number input: ${issueNumberInput}`);
+              core.info(`Already present: ${alreadyPresent}`);
+            }
+
+            let status;
+            if (alreadyPresent) {
+              status = 'already-present';
+            } else if (dryRun) {
+              status = 'dry-run';
+            } else {
+              await github.graphql(mutation, { projectId, contentId: issueNodeId });
+              status = 'added';
+            }
+
+            core.info(`Issue ${issueRef}: ${status}`);
+
+            await core.summary
+              .addHeading('Add issue to org project')
+              .addRaw(`Issue: ${issueRef}`)
+              .addEOL()
+              .addRaw(`Status: ${status}`)
+              .addEOL()
+              .write();
