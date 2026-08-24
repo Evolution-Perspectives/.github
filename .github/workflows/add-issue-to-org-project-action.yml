@@ -31,6 +31,16 @@ on:
         required: false
         type: boolean
         default: false
+      status_field_id:
+        description: Node ID of the single-select Status field to set on add (skipped if empty).
+        required: false
+        type: string
+        default: ''
+      status_option_id:
+        description: Option ID of the Status value to set on add (e.g. Backlog).
+        required: false
+        type: string
+        default: ''
     secrets:
       automation_pat:
         description: PAT with project scope.
@@ -52,6 +62,8 @@ jobs:
           SOURCE_REPOSITORY: ${{ inputs.source_repository }}
           DRY_RUN: ${{ inputs.dry_run }}
           DEBUG: ${{ inputs.debug }}
+          STATUS_FIELD_ID: ${{ inputs.status_field_id }}
+          STATUS_OPTION_ID: ${{ inputs.status_option_id }}
         with:
           github-token: ${{ secrets.automation_pat }}
           script: |
@@ -61,6 +73,8 @@ jobs:
             const sourceRepository = process.env.SOURCE_REPOSITORY || '';
             const dryRun = process.env.DRY_RUN === 'true';
             const debug = process.env.DEBUG === 'true';
+            const statusFieldId = process.env.STATUS_FIELD_ID || '';
+            const statusOptionId = process.env.STATUS_OPTION_ID || '';
 
             if (!projectId || projectId === 'null' || projectId === 'undefined') {
               core.setFailed('Missing required project_id input.');
@@ -74,6 +88,10 @@ jobs:
             const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
             if (!NODE_ID_PATTERN.test(issueNodeId) || !NODE_ID_PATTERN.test(projectId)) {
               core.setFailed('Malformed node ID in inputs (issue_node_id or project_id does not match expected node ID shape).');
+              return;
+            }
+            if ((statusFieldId && !NODE_ID_PATTERN.test(statusFieldId)) || (statusOptionId && !/^[A-Za-z0-9_-]+$/.test(statusOptionId))) {
+              core.setFailed('Malformed node ID in inputs (status_field_id or status_option_id does not match expected shape).');
               return;
             }
 
@@ -112,6 +130,21 @@ jobs:
               }
             `;
 
+            const setStatusMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId,
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: { singleSelectOptionId: $optionId }
+                }) {
+                  projectV2Item {
+                    id
+                  }
+                }
+              }
+            `;
+
             const res = await github.graphql(query, { id: issueNodeId });
             const issue = res?.node;
 
@@ -138,8 +171,18 @@ jobs:
             } else if (dryRun) {
               status = 'dry-run';
             } else {
-              await github.graphql(mutation, { projectId, contentId: issueNodeId });
+              const addRes = await github.graphql(mutation, { projectId, contentId: issueNodeId });
               status = 'added';
+
+              if (statusFieldId && statusOptionId) {
+                const itemId = addRes.addProjectV2ItemById.item.id;
+                await github.graphql(setStatusMutation, {
+                  projectId,
+                  itemId,
+                  fieldId: statusFieldId,
+                  optionId: statusOptionId,
+                });
+              }
             }
 
             core.info(`Issue ${issueRef}: ${status}`);
