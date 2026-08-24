@@ -1,0 +1,38 @@
+name: Close Issue Sync Status
+
+on:
+  issues:
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      issue_node_id:
+        description: Node ID of the issue to sync.
+        required: true
+        type: string
+      state_reason:
+        description: Close reason override (completed, not_planned, duplicate).
+        required: true
+        type: string
+      dry_run:
+        description: Validate only, no Status write.
+        required: false
+        default: true
+        type: boolean
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync-status:
+    uses: Evolution-Perspectives/.github/.github/workflows/close-issue-sync-status-action.yml@main
+    with:
+      issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}
+      state_reason: ${{ github.event_name == 'workflow_dispatch' && inputs.state_reason || github.event.issue.state_reason }}
+      source_repository: ${{ github.repository }}
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || false }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

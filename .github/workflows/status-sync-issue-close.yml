@@ -1,0 +1,38 @@
+name: Status Sync Issue Close
+
+on:
+  repository_dispatch:
+    types:
+      - projects-v2-item-updated
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Override project ID for manual run.
+        required: false
+        type: string
+      item_node_id:
+        description: Project item node ID to sync.
+        required: true
+        type: string
+      dry_run:
+        description: Validate only, no close/reopen write.
+        required: false
+        default: true
+        type: boolean
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync-close-state:
+    uses: ./.github/workflows/status-sync-issue-close-action.yml
+    with:
+      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] || 'PVT_kwDOCIcusc4BOGrD' }}
+      item_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.item_node_id || github.event.client_payload.item_node_id || github.event.client_payload.projects_v2_item_node_id || '' }}
+      source_repository: ${{ github.event.client_payload.source_repository || github.repository }}
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event.client_payload.dry_run || 'false' }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || github.event.client_payload.debug || 'false' }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

@@ -1,0 +1,229 @@
+name: Status Sync Issue Close (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Projects v2 node ID considered as source of truth.
+        required: true
+        type: string
+      item_node_id:
+        description: Projects v2 item node ID whose Status field changed.
+        required: true
+        type: string
+      status_field_id:
+        description: Projects v2 Status single-select field node ID.
+        required: false
+        type: string
+        default: PVTSSF_lADOCIcusc4BOGrDzg852S8
+      source_repository:
+        description: Repository where the source event originated.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: If true, validate and summarize without closing/reopening the issue.
+        required: false
+        type: string
+        default: "false"
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: string
+        default: "false"
+    secrets:
+      automation_pat:
+        description: PAT with repo and project write scope.
+        required: true
+
+jobs:
+  sync-close-state:
+    name: Close or reopen issue from Project Status
+    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Sync issue close state from Status
+        uses: actions/github-script@v8
+        env:
+          PROJECT_ID: ${{ inputs.project_id }}
+          ITEM_NODE_ID: ${{ inputs.item_node_id }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          DEBUG: ${{ inputs.debug }}
+        with:
+          github-token: ${{ secrets.automation_pat }}
+          retries: 1
+          script: |
+            const projectId = process.env.PROJECT_ID || '';
+            const itemNodeId = process.env.ITEM_NODE_ID || '';
+            const sourceRepository = process.env.SOURCE_REPOSITORY || '';
+            const dryRun = process.env.DRY_RUN === 'true';
+            const debug = process.env.DEBUG === 'true';
+
+            if (!projectId || !itemNodeId || itemNodeId === 'null' || itemNodeId === 'undefined') {
+              core.setFailed('Missing required inputs: project_id and item_node_id are required.');
+              return;
+            }
+
+            const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
+            const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+
+            if (!NODE_ID_PATTERN.test(projectId) || !NODE_ID_PATTERN.test(itemNodeId)) {
+              core.setFailed(`Malformed node ID in inputs (project_id or item_node_id does not match expected node ID shape).`);
+              return;
+            }
+            if (sourceRepository && sourceRepository !== 'unknown' && !REPO_PATTERN.test(sourceRepository)) {
+              core.setFailed(`Malformed source_repository input: "${sourceRepository}".`);
+              return;
+            }
+
+            const DONE_STATUS = '🏆 Done';
+            const CANCELED_STATUS = '❌ Canceled';
+
+            const query = `
+              query($id: ID!) {
+                node(id: $id) {
+                  __typename
+                  ... on ProjectV2Item {
+                    id
+                    project {
+                      id
+                    }
+                    fieldValueByName(name: "Status") {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        optionId
+                        name
+                      }
+                    }
+                    content {
+                      __typename
+                      ... on Issue {
+                        id
+                        number
+                        state
+                        stateReason
+                        repository {
+                          nameWithOwner
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const closeMutation = `
+              mutation($issueId: ID!, $reason: IssueClosedStateReason!) {
+                closeIssue(input: { issueId: $issueId, stateReason: $reason }) {
+                  clientMutationId
+                }
+              }
+            `;
+
+            const reopenMutation = `
+              mutation($issueId: ID!) {
+                reopenIssue(input: { issueId: $issueId }) {
+                  clientMutationId
+                }
+              }
+            `;
+
+            const writeSummary = (issueRef, status, statusName, extra = {}) => {
+              const summary = core.summary
+                .addHeading('Status → issue close/reopen sync')
+                .addRaw(`Item: ${itemNodeId}`)
+                .addEOL()
+                .addRaw(`Issue: ${issueRef || 'n/a'}`)
+                .addEOL()
+                .addRaw(`Status: ${statusName || '(none)'}`)
+                .addEOL()
+                .addRaw(`Result: ${status}`)
+                .addEOL()
+                .addRaw(`Source repository: ${sourceRepository}`)
+                .addEOL();
+              for (const [key, value] of Object.entries(extra)) {
+                summary.addRaw(`${key}: ${value}`).addEOL();
+              }
+              return summary.write();
+            };
+
+            const res = await github.graphql(query, { id: itemNodeId });
+            const item = res?.node;
+
+            if (!item || item.__typename !== 'ProjectV2Item') {
+              core.warning(`Node ${itemNodeId} is not a ProjectV2Item (${item?.__typename || 'missing'}); skipping.`);
+              await writeSummary(null, 'skipped-not-a-project-item', null);
+              return;
+            }
+
+            if (item.project?.id !== projectId) {
+              core.warning(`Item ${itemNodeId} belongs to project ${item.project?.id}, not target ${projectId}; skipping.`);
+              await writeSummary(null, 'skipped-different-project', null);
+              return;
+            }
+
+            const statusName = item.fieldValueByName?.name || null;
+            const content = item.content;
+
+            if (debug) {
+              core.info(`Item: ${itemNodeId}`);
+              core.info(`Status: ${statusName || '(none)'}`);
+              core.info(`Content type: ${content?.__typename || 'none'}`);
+            }
+
+            if (!content || content.__typename !== 'Issue') {
+              core.info(`Item ${itemNodeId} has no linked issue (${content?.__typename || 'draft'}); no close/reopen action.`);
+              await writeSummary(null, 'skipped-no-linked-issue', statusName);
+              return;
+            }
+
+            const issue = content;
+            const issueRef = `${issue.repository.nameWithOwner}#${issue.number}`;
+            const isClosed = issue.state === 'CLOSED';
+
+            let targetReason = null;
+            if (statusName === DONE_STATUS) {
+              targetReason = 'COMPLETED';
+            } else if (statusName === CANCELED_STATUS) {
+              targetReason = 'NOT_PLANNED';
+            }
+
+            if (targetReason) {
+              if (isClosed && issue.stateReason === targetReason) {
+                core.info(`${issueRef} already closed as ${targetReason}; no write needed.`);
+                await writeSummary(issueRef, 'skipped-already-in-sync', statusName, {
+                  'Issue state': issue.state,
+                  'Issue close reason': issue.stateReason || '(none)',
+                });
+                return;
+              }
+
+              if (dryRun) {
+                core.info(`[dry-run] Would close ${issueRef} with reason ${targetReason}.`);
+                await writeSummary(issueRef, 'dry-run-no-write', statusName, { 'Target close reason': targetReason });
+                return;
+              }
+
+              await github.graphql(closeMutation, { issueId: issue.id, reason: targetReason });
+              core.info(`Closed ${issueRef} with reason ${targetReason}.`);
+              await writeSummary(issueRef, 'closed', statusName, { 'Close reason': targetReason });
+              return;
+            }
+
+            // Status is neither Done nor Canceled: reopen if currently closed.
+            if (!isClosed) {
+              core.info(`${issueRef} already open; no write needed.`);
+              await writeSummary(issueRef, 'skipped-already-open', statusName, { 'Issue state': issue.state });
+              return;
+            }
+
+            if (dryRun) {
+              core.info(`[dry-run] Would reopen ${issueRef}.`);
+              await writeSummary(issueRef, 'dry-run-no-write', statusName, { 'Target action': 'reopen' });
+              return;
+            }
+
+            await github.graphql(reopenMutation, { issueId: issue.id });
+            core.info(`Reopened ${issueRef}.`);
+            await writeSummary(issueRef, 'reopened', statusName);

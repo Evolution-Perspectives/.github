@@ -71,3 +71,42 @@ Notes:
 
 - Leaf status is evaluated at runtime. If a user adds sub-issues to a previously-leaf item, the next run will treat it as a parent and start computing its value.
 - If a leaf item has no estimate entered by the user, it is treated as 0h when computing its parent rollup.
+
+---
+
+## Use Case 3 - What Happens to Project Status When an Issue Is Closed
+
+Goal: Clarify how closing a GitHub issue relates to the Project Status field.
+
+Plain rule:
+
+- Closing an issue (via UI, `gh issue close`, commit keyword, PR merge, or API) automatically sets the Project Status field, based on `state_reason`.
+- Setting the Project Status field to `🏆 Done` or `❌ Canceled` automatically closes the linked issue, and moving a closed issue's Status to any other option automatically reopens it.
+- Both directions are idempotent reconciles: no write happens if the issue/Status are already in the target state, so the two directions do not loop off each other.
+
+How it works:
+
+1. `close-issue-sync-status.yml` fires on `issues: closed` for every close and reads `state_reason`:
+   - `completed` → Status `🏆 Done`
+   - `not_planned` or `duplicate` → Status `❌ Canceled`
+2. `status-sync-issue-close.yml` fires on the org-level `projects-v2-item-updated` relay (the same relay `projects-estimation-rollup.yml` consumes) whenever a Project item's fields change, and reconciles the linked issue's close state against the current Status:
+   - Status `🏆 Done` → issue closed as `completed`
+   - Status `❌ Canceled` → issue closed as `not_planned`
+   - Any other Status, while the linked issue is closed → issue reopened
+   - Project items with no linked issue (drafts, PRs) are skipped
+3. `remove-blocking-on-close.yml` still fires independently on `issues: closed` and removes blocking-relationship edges pointing from the closed issue.
+
+Project Status field options (single-select):
+
+- `📦 Backlog`
+- `💎 Ready`
+- `🌱 In Progress`
+- `⏳ Paused`
+- `🧪 In Review`
+- `🏆 Done`
+- `❌ Canceled`
+
+Notes:
+
+- Manually setting a closed issue's Status to a non-Done/Canceled option reopens it, even if the original close reason still applies.
+- Manually flipping Status to `🏆 Done`/`❌ Canceled` on an issue that's open, or closed for a different reason, re-closes it to match — the Status → close mapping always applies, not just at close time.
