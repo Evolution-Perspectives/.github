@@ -2,6 +2,7 @@
 
 - [x] 1.1 Create `.github/workflows/add-issue-to-org-project-action.yml` as a `workflow_call` reusable workflow with inputs: `project_id`, `issue_node_id`, `issue_number`, `source_repository`, `dry_run`, `debug`, and secret `automation_pat`
 - [x] 1.2 Implement `actions/github-script` step: resolve the issue node, call `addProjectV2ItemById` unless `dry_run`, and write a `core.summary` report (status: added / already-present / dry-run)
+- [x] 1.4 Add optional `status_field_id`/`status_option_id` inputs; when set and item is newly added, call `updateProjectV2ItemFieldValue` to set the item's Status (default: Backlog, `f75ad846` on field `PVTSSF_lADOCIcusc4BOGrDzg852S8`)
 - [x] 1.3 Set `runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}` and `permissions: contents: read` to match existing action workflows
 
 ## 2. Real-time trigger in this repo
