@@ -25,7 +25,7 @@ on:
 jobs:
   cleanup:
     name: Cleanup outgoing blocking edges
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

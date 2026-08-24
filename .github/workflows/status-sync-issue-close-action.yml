@@ -39,7 +39,7 @@ on:
 jobs:
   sync-close-state:
     name: Close or reopen issue from Project Status
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
