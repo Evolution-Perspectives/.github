@@ -4,16 +4,40 @@ on:
   issues:
     types:
       - opened
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: Override project ID for manual run.
+        required: false
+        type: string
+      issue_node_id:
+        description: Issue node ID to add.
+        required: true
+        type: string
+      issue_number:
+        description: Issue number, for reporting.
+        required: false
+        type: string
+      dry_run:
+        description: Validate only, no mutation.
+        required: false
+        default: true
+        type: boolean
+      debug:
+        description: Enable verbose logs.
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   add-issue-to-project:
     uses: Evolution-Perspectives/.github/.github/workflows/add-issue-to-org-project-action.yml@main
     with:
-      project_id: PVT_kwDOCIcusc4BOGrD
-      issue_node_id: ${{ github.event.issue.node_id }}
-      issue_number: ${{ github.event.issue.number }}
+      project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || 'PVT_kwDOCIcusc4BOGrD' }}
+      issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}
+      issue_number: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_number || github.event.issue.number }}
       source_repository: ${{ github.repository }}
-      dry_run: false
-      debug: false
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || false }}
     secrets:
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
