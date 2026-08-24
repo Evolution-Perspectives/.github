@@ -31,7 +31,7 @@ on:
 
 jobs:
   add-issue-to-project:
-    uses: Evolution-Perspectives/.github/.github/workflows/add-issue-to-org-project-action.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/add-issue-to-org-project-action.yml@add-issue-to-org-project
     with:
       project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || 'PVT_kwDOCIcusc4BOGrD' }}
       issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}
