@@ -44,7 +44,7 @@ on:
 jobs:
   delete-issue:
     name: Delete issue removed from project
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

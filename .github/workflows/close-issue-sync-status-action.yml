@@ -44,7 +44,7 @@ on:
 jobs:
   sync-status:
     name: Set Project Status from issue close reason
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
