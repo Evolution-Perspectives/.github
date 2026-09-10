@@ -15,14 +15,22 @@ context: |
 rules:
   design:
     - Include a test-data cleanup plan for temporary validation artifacts.
-    - Document safe validation sequence for destructive behavior (branch validation, fallback prechecks, post-default-branch full run).
-    - Document required token scopes and expected behavior when scopes are insufficient during prechecks.
+    - Document safe validation sequence for destructive behavior (branch
+      validation, fallback prechecks, post-default-branch full run).
+    - Document required token scopes and expected behavior when scopes are
+      insufficient during prechecks.
   tasks:
     - Add explicit cleanup tasks for temporary issues/PRs created during testing.
-    - Capture evidence that cleanup completed (created item IDs and post-cleanup verification).
-    - Add explicit tasks to validate both skip path and destructive path when behavior can delete or mutate production artifacts.
-    - Add a task to capture workflow run IDs, conclusions, and runtime proof log lines.
-    - Add a task to verify final system state through API/CLI after workflow completion.
+    - Capture evidence that cleanup completed (created item IDs and post-cleanup
+      verification).
+    - Add explicit tasks to validate both skip path and destructive path when
+      behavior can delete or mutate production artifacts.
+    - Add a task to capture workflow run IDs, conclusions, and runtime proof log
+      lines.
+    - Add a task to verify final system state through API/CLI after workflow
+      completion.
+githubCopilot:
+  cloudAgent: true
 
 # Project context (optional)
 # This is shown to AI when creating artifacts.
