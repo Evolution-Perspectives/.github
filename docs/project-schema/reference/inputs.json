@@ -1,0 +1,1306 @@
+{
+  "AddBlockedByInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue to be blocked."
+    },
+    {
+      "name": "blockingIssueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue that blocks the given issue."
+    }
+  ],
+  "AddLabelsToLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the labelable object to add labels to."
+    },
+    {
+      "name": "labelIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The ids of the labels to add."
+    },
+    {
+      "name": "labels",
+      "type": "[LabelUpdateInput!]",
+      "required": false,
+      "description": "The labels to add, each with optional `rationale` or a `suggest` flag that stores the addition as a pending suggestion. Mutually exclusive with `labelIds`."
+    }
+  ],
+  "AddProjectV2DraftIssueInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to add the draft issue to."
+    },
+    {
+      "name": "title",
+      "type": "String!",
+      "required": true,
+      "description": "The title of the draft issue. A project item can also be created by providing the URL of an Issue or Pull Request if you have access."
+    },
+    {
+      "name": "body",
+      "type": "String",
+      "required": false,
+      "description": "The body of the draft issue."
+    },
+    {
+      "name": "assigneeIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The IDs of the assignees of the draft issue."
+    }
+  ],
+  "AddProjectV2ItemByIdInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to add the item to."
+    },
+    {
+      "name": "contentId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the Issue or Pull Request to add."
+    }
+  ],
+  "AddSubIssueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the issue."
+    },
+    {
+      "name": "subIssueId",
+      "type": "ID",
+      "required": false,
+      "description": "The id of the sub-issue."
+    },
+    {
+      "name": "subIssueUrl",
+      "type": "String",
+      "required": false,
+      "description": "The url of the sub-issue."
+    },
+    {
+      "name": "replaceParent",
+      "type": "Boolean",
+      "required": false,
+      "description": "Option to replace parent issue if one already exists"
+    }
+  ],
+  "ArchiveProjectV2ItemInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to archive the item from."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the ProjectV2Item to archive."
+    }
+  ],
+  "ClearLabelsFromLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the labelable object to clear the labels from."
+    }
+  ],
+  "ClearProjectV2ItemFieldValueInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the item to be cleared."
+    },
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to be cleared."
+    }
+  ],
+  "ConvertProjectV2DraftIssueItemToIssueInput": [
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the draft issue ProjectV2Item to convert."
+    },
+    {
+      "name": "repositoryId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the repository to create the issue in."
+    }
+  ],
+  "CopyProjectV2Input": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the source Project to copy."
+    },
+    {
+      "name": "ownerId",
+      "type": "ID!",
+      "required": true,
+      "description": "The owner ID of the new project."
+    },
+    {
+      "name": "title",
+      "type": "String!",
+      "required": true,
+      "description": "The title of the project."
+    },
+    {
+      "name": "includeDraftIssues",
+      "type": "Boolean",
+      "required": false,
+      "description": "Include draft issues in the new project"
+    }
+  ],
+  "CreateIssueFieldInput": [
+    {
+      "name": "ownerId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the organization where the issue field will be created."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the issue field."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A description of the issue field."
+    },
+    {
+      "name": "dataType",
+      "type": "IssueFieldDataType!",
+      "required": true,
+      "description": "The data type of the issue field."
+    },
+    {
+      "name": "options",
+      "type": "[IssueFieldSingleSelectOptionInput!]",
+      "required": false,
+      "description": "The options for the issue field if applicable."
+    },
+    {
+      "name": "visibility",
+      "type": "IssueFieldVisibility",
+      "required": false,
+      "description": "The visibility of the issue field."
+    }
+  ],
+  "CreateIssueFieldValueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue."
+    },
+    {
+      "name": "issueField",
+      "type": "IssueFieldCreateOrUpdateInput!",
+      "required": true,
+      "description": "The field value to create."
+    }
+  ],
+  "CreateIssueTypeInput": [
+    {
+      "name": "ownerId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID for the organization on which the issue type is created"
+    },
+    {
+      "name": "isEnabled",
+      "type": "Boolean!",
+      "required": true,
+      "description": "Whether or not the issue type is enabled on the org level"
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "Name of the new issue type"
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "Description of the new issue type"
+    },
+    {
+      "name": "color",
+      "type": "IssueTypeColor",
+      "required": false,
+      "description": "Color for the issue type"
+    }
+  ],
+  "CreateLabelInput": [
+    {
+      "name": "repositoryId",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the repository."
+    },
+    {
+      "name": "color",
+      "type": "String!",
+      "required": true,
+      "description": "A 6 character hex code, without the leading #, identifying the color of the label."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the label."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A brief description of the label, such as its purpose."
+    }
+  ],
+  "CreateProjectV2FieldInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to create the field in."
+    },
+    {
+      "name": "dataType",
+      "type": "ProjectV2CustomFieldType!",
+      "required": true,
+      "description": "The data type of the field."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the field."
+    },
+    {
+      "name": "singleSelectOptions",
+      "type": "[ProjectV2SingleSelectFieldOptionInput!]",
+      "required": false,
+      "description": "Options for a single select field. At least one value is required if data_type is SINGLE_SELECT"
+    },
+    {
+      "name": "multiSelectOptions",
+      "type": "[ProjectV2MultiSelectFieldOptionInput!]",
+      "required": false,
+      "description": "Options for a multi select field. At least one value is required if data_type is MULTI_SELECT"
+    },
+    {
+      "name": "iterationConfiguration",
+      "type": "ProjectV2IterationFieldConfigurationInput",
+      "required": false,
+      "description": "Configuration for an iteration field."
+    }
+  ],
+  "CreateProjectV2Input": [
+    {
+      "name": "ownerId",
+      "type": "ID!",
+      "required": true,
+      "description": "The owner ID to create the project under."
+    },
+    {
+      "name": "title",
+      "type": "String!",
+      "required": true,
+      "description": "The title of the project."
+    },
+    {
+      "name": "repositoryId",
+      "type": "ID",
+      "required": false,
+      "description": "The repository to link the project to."
+    },
+    {
+      "name": "teamId",
+      "type": "ID",
+      "required": false,
+      "description": "The team to link the project to. The team will be granted read permissions."
+    }
+  ],
+  "CreateProjectV2IssueFieldInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to create the field in."
+    },
+    {
+      "name": "issueFieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the IssueField to create the field for."
+    }
+  ],
+  "CreateProjectV2StatusUpdateInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to create the status update in."
+    },
+    {
+      "name": "startDate",
+      "type": "Date",
+      "required": false,
+      "description": "The start date of the status update."
+    },
+    {
+      "name": "targetDate",
+      "type": "Date",
+      "required": false,
+      "description": "The target date of the status update."
+    },
+    {
+      "name": "status",
+      "type": "ProjectV2StatusUpdateStatus",
+      "required": false,
+      "description": "The status of the status update."
+    },
+    {
+      "name": "body",
+      "type": "String",
+      "required": false,
+      "description": "The body of the status update."
+    }
+  ],
+  "CreateProjectV2ViewInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to create a view in."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the view."
+    },
+    {
+      "name": "layout",
+      "type": "ProjectV2ViewLayout!",
+      "required": true,
+      "description": "The layout of the view."
+    },
+    {
+      "name": "configuration",
+      "type": "ProjectV2ViewConfigurationInput",
+      "required": false,
+      "description": "The configuration for the view."
+    }
+  ],
+  "DeleteIssueFieldInput": [
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to delete."
+    }
+  ],
+  "DeleteIssueFieldValueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue."
+    },
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to delete."
+    }
+  ],
+  "DeleteIssueTypeInput": [
+    {
+      "name": "issueTypeId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue type to delete"
+    }
+  ],
+  "DeleteLabelInput": [
+    {
+      "name": "id",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the label to be deleted."
+    }
+  ],
+  "DeleteProjectV2FieldInput": [
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to delete."
+    }
+  ],
+  "DeleteProjectV2Input": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to delete."
+    }
+  ],
+  "DeleteProjectV2ItemInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project from which the item should be removed."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the item to be removed."
+    }
+  ],
+  "DeleteProjectV2StatusUpdateInput": [
+    {
+      "name": "statusUpdateId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the status update to be removed."
+    }
+  ],
+  "DeleteProjectV2ViewInput": [
+    {
+      "name": "viewId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the view to delete."
+    }
+  ],
+  "DeleteProjectV2WorkflowInput": [
+    {
+      "name": "workflowId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the workflow to be removed."
+    }
+  ],
+  "IssueFieldCreateOrUpdateInput": [
+    {
+      "name": "rationale",
+      "type": "String",
+      "required": false,
+      "description": "Optional rationale describing why this value was selected. Max 280 characters."
+    },
+    {
+      "name": "suggest",
+      "type": "Boolean",
+      "required": false,
+      "description": "If true, the value is stored as a pending suggestion for human review rather than being applied directly."
+    },
+    {
+      "name": "confidence",
+      "type": "IssueEventConfidenceLevel",
+      "required": false,
+      "description": "The confidence level the agent had when selecting this value."
+    },
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue field"
+    },
+    {
+      "name": "textValue",
+      "type": "String",
+      "required": false,
+      "description": "The text value, for a text field"
+    },
+    {
+      "name": "dateValue",
+      "type": "String",
+      "required": false,
+      "description": "The date value, for a date field"
+    },
+    {
+      "name": "singleSelectOptionId",
+      "type": "ID",
+      "required": false,
+      "description": "The ID of the selected option, for a single select field"
+    },
+    {
+      "name": "multiSelectOptionIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The IDs of the selected options, for a multi select field"
+    },
+    {
+      "name": "numberValue",
+      "type": "Float",
+      "required": false,
+      "description": "The numeric value, for a number field"
+    },
+    {
+      "name": "delete",
+      "type": "Boolean",
+      "required": false,
+      "description": "Set to true to delete the field value"
+    }
+  ],
+  "IssueFieldSingleSelectOptionInput": [
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the option."
+    },
+    {
+      "name": "color",
+      "type": "IssueFieldSingleSelectOptionColor!",
+      "required": true,
+      "description": "The color associated with the option."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A description of the option."
+    },
+    {
+      "name": "priority",
+      "type": "Int!",
+      "required": true,
+      "description": "The priority of the option in the list."
+    }
+  ],
+  "LabelUpdateInput": [
+    {
+      "name": "rationale",
+      "type": "String",
+      "required": false,
+      "description": "Optional rationale describing why this value was selected. Max 280 characters."
+    },
+    {
+      "name": "suggest",
+      "type": "Boolean",
+      "required": false,
+      "description": "If true, the value is stored as a pending suggestion for human review rather than being applied directly."
+    },
+    {
+      "name": "confidence",
+      "type": "IssueEventConfidenceLevel",
+      "required": false,
+      "description": "The confidence level the agent had when selecting this value."
+    },
+    {
+      "name": "labelId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Label."
+    }
+  ],
+  "LinkProjectV2ToRepositoryInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to link to the repository."
+    },
+    {
+      "name": "repositoryId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the repository to link to the project."
+    }
+  ],
+  "LinkProjectV2ToTeamInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to link to the team."
+    },
+    {
+      "name": "teamId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the team to link to the project."
+    }
+  ],
+  "MarkProjectV2AsTemplateInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to mark as a template."
+    }
+  ],
+  "ProjectV2Collaborator": [
+    {
+      "name": "userId",
+      "type": "ID",
+      "required": false,
+      "description": "The ID of the user as a collaborator."
+    },
+    {
+      "name": "teamId",
+      "type": "ID",
+      "required": false,
+      "description": "The ID of the team as a collaborator."
+    },
+    {
+      "name": "role",
+      "type": "ProjectV2Roles!",
+      "required": true,
+      "description": "The role to grant the collaborator"
+    }
+  ],
+  "ProjectV2FieldValue": [
+    {
+      "name": "text",
+      "type": "String",
+      "required": false,
+      "description": "The text to set on the field."
+    },
+    {
+      "name": "number",
+      "type": "Float",
+      "required": false,
+      "description": "The number to set on the field."
+    },
+    {
+      "name": "date",
+      "type": "Date",
+      "required": false,
+      "description": "The ISO 8601 date to set on the field."
+    },
+    {
+      "name": "singleSelectOptionId",
+      "type": "String",
+      "required": false,
+      "description": "The id of the single select option to set on the field."
+    },
+    {
+      "name": "multiSelectOptionIds",
+      "type": "[String!]",
+      "required": false,
+      "description": "The ids of the multi select options to set on the field."
+    },
+    {
+      "name": "iterationId",
+      "type": "String",
+      "required": false,
+      "description": "The id of the iteration to set on the field."
+    }
+  ],
+  "ProjectV2Iteration": [
+    {
+      "name": "id",
+      "type": "String",
+      "required": false,
+      "description": "The ID of an existing iteration. Include this to preserve the iteration's identity during replacement updates."
+    },
+    {
+      "name": "startDate",
+      "type": "Date!",
+      "required": true,
+      "description": "The start date for the iteration."
+    },
+    {
+      "name": "duration",
+      "type": "Int!",
+      "required": true,
+      "description": "The duration of the iteration, in days."
+    },
+    {
+      "name": "title",
+      "type": "String!",
+      "required": true,
+      "description": "The title for the iteration."
+    }
+  ],
+  "ProjectV2IterationFieldConfigurationInput": [
+    {
+      "name": "startDate",
+      "type": "Date!",
+      "required": true,
+      "description": "The start date for the first iteration."
+    },
+    {
+      "name": "duration",
+      "type": "Int!",
+      "required": true,
+      "description": "The duration of each iteration, in days."
+    },
+    {
+      "name": "iterations",
+      "type": "[ProjectV2Iteration!]!",
+      "required": true,
+      "description": "Zero or more iterations for the field."
+    }
+  ],
+  "ProjectV2MultiSelectFieldOptionInput": [
+    {
+      "name": "id",
+      "type": "String",
+      "required": false,
+      "description": "The ID of an existing multi select option. Include this to preserve the option's identity during updates, preventing item field values from being cleared."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the option"
+    },
+    {
+      "name": "color",
+      "type": "ProjectV2SingleSelectFieldOptionColor!",
+      "required": true,
+      "description": "The display color of the option"
+    },
+    {
+      "name": "description",
+      "type": "String!",
+      "required": true,
+      "description": "The description text of the option"
+    }
+  ],
+  "ProjectV2SingleSelectFieldOptionInput": [
+    {
+      "name": "id",
+      "type": "String",
+      "required": false,
+      "description": "The ID of an existing single select option. Include this to preserve the option's identity during updates, preventing item field values from being cleared."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the option"
+    },
+    {
+      "name": "color",
+      "type": "ProjectV2SingleSelectFieldOptionColor!",
+      "required": true,
+      "description": "The display color of the option"
+    },
+    {
+      "name": "description",
+      "type": "String!",
+      "required": true,
+      "description": "The description text of the option"
+    }
+  ],
+  "ProjectV2ViewConfigurationInput": [
+    {
+      "name": "visibleFieldIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The ordered IDs of the fields visible in the view."
+    }
+  ],
+  "RemoveBlockedByInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the blocked issue."
+    },
+    {
+      "name": "blockingIssueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the blocking issue."
+    }
+  ],
+  "RemoveLabelsFromLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the Labelable to remove labels from."
+    },
+    {
+      "name": "labelIds",
+      "type": "[ID!]!",
+      "required": true,
+      "description": "The ids of labels to remove."
+    }
+  ],
+  "RemoveSubIssueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the issue."
+    },
+    {
+      "name": "subIssueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the sub-issue."
+    }
+  ],
+  "ReprioritizeSubIssueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the parent issue."
+    },
+    {
+      "name": "subIssueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the sub-issue to reprioritize."
+    },
+    {
+      "name": "afterId",
+      "type": "ID",
+      "required": false,
+      "description": "The id of the sub-issue to be prioritized after (either positional argument after OR before should be specified)."
+    },
+    {
+      "name": "beforeId",
+      "type": "ID",
+      "required": false,
+      "description": "The id of the sub-issue to be prioritized before (either positional argument after OR before should be specified)."
+    }
+  ],
+  "SetIssueFieldValueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Issue to set the field value on."
+    },
+    {
+      "name": "issueFields",
+      "type": "[IssueFieldCreateOrUpdateInput!]!",
+      "required": true,
+      "description": "The issue fields to set on the issue."
+    }
+  ],
+  "UnarchiveProjectV2ItemInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to archive the item from."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the ProjectV2Item to unarchive."
+    }
+  ],
+  "UnlinkProjectV2FromRepositoryInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to unlink from the repository."
+    },
+    {
+      "name": "repositoryId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the repository to unlink from the project."
+    }
+  ],
+  "UnlinkProjectV2FromTeamInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to unlink from the team."
+    },
+    {
+      "name": "teamId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the team to unlink from the project."
+    }
+  ],
+  "UnmarkProjectV2AsTemplateInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to unmark as a template."
+    }
+  ],
+  "UpdateIssueFieldInput": [
+    {
+      "name": "id",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue field to update."
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The name of the issue field."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A description of the issue field."
+    },
+    {
+      "name": "options",
+      "type": "[IssueFieldSingleSelectOptionInput!]",
+      "required": false,
+      "description": "The options for the issue field if applicable."
+    },
+    {
+      "name": "visibility",
+      "type": "IssueFieldVisibility",
+      "required": false,
+      "description": "The visibility of the issue field."
+    }
+  ],
+  "UpdateIssueFieldValueInput": [
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue."
+    },
+    {
+      "name": "issueField",
+      "type": "IssueFieldCreateOrUpdateInput!",
+      "required": true,
+      "description": "The field value to update. May include an optional `rationale` or be flagged with `suggest: true` to be stored as a pending suggestion instead of being applied directly."
+    }
+  ],
+  "UpdateIssueIssueTypeInput": [
+    {
+      "name": "issueTypeId",
+      "type": "ID",
+      "required": false,
+      "description": "The ID of the issue type to update on the issue"
+    },
+    {
+      "name": "issueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue to update"
+    }
+  ],
+  "UpdateIssueTypeInput": [
+    {
+      "name": "issueTypeId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the issue type to update"
+    },
+    {
+      "name": "isEnabled",
+      "type": "Boolean",
+      "required": false,
+      "description": "Whether or not the issue type is enabled for the organization"
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The name of the issue type"
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "The description of the issue type"
+    },
+    {
+      "name": "color",
+      "type": "IssueTypeColor",
+      "required": false,
+      "description": "Color for the issue type"
+    }
+  ],
+  "UpdateLabelInput": [
+    {
+      "name": "id",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the label to be updated."
+    },
+    {
+      "name": "color",
+      "type": "String",
+      "required": false,
+      "description": "A 6 character hex code, without the leading #, identifying the updated color of the label."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A brief description of the label, such as its purpose."
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The updated name of the label."
+    }
+  ],
+  "UpdateProjectV2CollaboratorsInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the project to update the collaborators for."
+    },
+    {
+      "name": "collaborators",
+      "type": "[ProjectV2Collaborator!]!",
+      "required": true,
+      "description": "The collaborators to update."
+    }
+  ],
+  "UpdateProjectV2DraftIssueInput": [
+    {
+      "name": "draftIssueId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the draft issue to update."
+    },
+    {
+      "name": "title",
+      "type": "String",
+      "required": false,
+      "description": "The title of the draft issue."
+    },
+    {
+      "name": "body",
+      "type": "String",
+      "required": false,
+      "description": "The body of the draft issue."
+    },
+    {
+      "name": "assigneeIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The IDs of the assignees of the draft issue."
+    }
+  ],
+  "UpdateProjectV2FieldInput": [
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to update."
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The name to update."
+    },
+    {
+      "name": "singleSelectOptions",
+      "type": "[ProjectV2SingleSelectFieldOptionInput!]",
+      "required": false,
+      "description": "Options for a field of type SINGLE_SELECT. Empty input is ignored, provided values overwrite existing options, and existing options should be fetched for partial updates."
+    },
+    {
+      "name": "multiSelectOptions",
+      "type": "[ProjectV2MultiSelectFieldOptionInput!]",
+      "required": false,
+      "description": "Options for a field of type MULTI_SELECT. Empty input is ignored, provided values overwrite existing options, and existing options should be fetched for partial updates."
+    },
+    {
+      "name": "iterationConfiguration",
+      "type": "ProjectV2IterationFieldConfigurationInput",
+      "required": false,
+      "description": "Configuration for a field of type ITERATION. Empty input is ignored, provided values overwrite the existing configuration, and existing configuration should be fetched for partial updates."
+    }
+  ],
+  "UpdateProjectV2Input": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project to update."
+    },
+    {
+      "name": "title",
+      "type": "String",
+      "required": false,
+      "description": "Set the title of the project."
+    },
+    {
+      "name": "shortDescription",
+      "type": "String",
+      "required": false,
+      "description": "Set the short description of the project."
+    },
+    {
+      "name": "readme",
+      "type": "String",
+      "required": false,
+      "description": "Set the readme description of the project."
+    },
+    {
+      "name": "closed",
+      "type": "Boolean",
+      "required": false,
+      "description": "Set the project to closed or open."
+    },
+    {
+      "name": "public",
+      "type": "Boolean",
+      "required": false,
+      "description": "Set the project to public or private."
+    }
+  ],
+  "UpdateProjectV2ItemFieldValueInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the item to be updated."
+    },
+    {
+      "name": "fieldId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the field to be updated."
+    },
+    {
+      "name": "value",
+      "type": "ProjectV2FieldValue!",
+      "required": true,
+      "description": "The value which will be set on the field."
+    }
+  ],
+  "UpdateProjectV2ItemPositionInput": [
+    {
+      "name": "projectId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Project."
+    },
+    {
+      "name": "itemId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the item to be moved."
+    },
+    {
+      "name": "afterId",
+      "type": "ID",
+      "required": false,
+      "description": "The ID of the item to position this item after. If omitted or set to null the item will be moved to top."
+    }
+  ],
+  "UpdateProjectV2StatusUpdateInput": [
+    {
+      "name": "statusUpdateId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the status update to be updated."
+    },
+    {
+      "name": "startDate",
+      "type": "Date",
+      "required": false,
+      "description": "The start date of the status update."
+    },
+    {
+      "name": "targetDate",
+      "type": "Date",
+      "required": false,
+      "description": "The target date of the status update."
+    },
+    {
+      "name": "status",
+      "type": "ProjectV2StatusUpdateStatus",
+      "required": false,
+      "description": "The status of the status update."
+    },
+    {
+      "name": "body",
+      "type": "String",
+      "required": false,
+      "description": "The body of the status update."
+    }
+  ],
+  "UpdateProjectV2ViewInput": [
+    {
+      "name": "viewId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the view to update."
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The new name for the view."
+    },
+    {
+      "name": "layout",
+      "type": "ProjectV2ViewLayout",
+      "required": false,
+      "description": "The new layout for the view."
+    },
+    {
+      "name": "filter",
+      "type": "String",
+      "required": false,
+      "description": "The new filter for the view."
+    },
+    {
+      "name": "configuration",
+      "type": "ProjectV2ViewConfigurationInput",
+      "required": false,
+      "description": "The new configuration for the view."
+    }
+  ]
+}

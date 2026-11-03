@@ -1,0 +1,30 @@
+{
+  "field": "Entity",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg857gY",
+  "options": [
+    {
+      "name": "Way2Be",
+      "id": "b21b2d6c",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "Sites Web",
+      "id": "7da81e3b",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "IT",
+      "id": "f06324df",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "Automatisations",
+      "id": "04a97a2d",
+      "color": "GREEN",
+      "description": null
+    }
+  ]
+}

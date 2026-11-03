@@ -1,0 +1,130 @@
+[
+  {
+    "name": "Title",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852S0",
+    "dataType": "TITLE"
+  },
+  {
+    "name": "Assignees",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852S4",
+    "dataType": "ASSIGNEES"
+  },
+  {
+    "name": "Status",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg852S8",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/status.json"
+  },
+  {
+    "name": "Labels",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TA",
+    "dataType": "LABELS"
+  },
+  {
+    "name": "Linked pull requests",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TE",
+    "dataType": "LINKED_PULL_REQUESTS"
+  },
+  {
+    "name": "Milestone",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TI",
+    "dataType": "MILESTONE"
+  },
+  {
+    "name": "Repository",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TM",
+    "dataType": "REPOSITORY"
+  },
+  {
+    "name": "Reviewers",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TU",
+    "dataType": "REVIEWERS"
+  },
+  {
+    "name": "Parent issue",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852TY",
+    "dataType": "PARENT_ISSUE"
+  },
+  {
+    "name": "Prio",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg852o8",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/prio.json"
+  },
+  {
+    "name": "Entity",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg857gY",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/entity.json"
+  },
+  {
+    "name": "Projet",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg9L3-o",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/projet.json"
+  },
+  {
+    "name": "Feature",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg86GDw",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/feature.json"
+  },
+  {
+    "name": "Domaine",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg86DNA",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/domaine.json"
+  },
+  {
+    "name": "Size",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/size.json"
+  },
+  {
+    "name": "Estimate Days",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852pE",
+    "dataType": "NUMBER"
+  },
+  {
+    "name": "Estimate Hours",
+    "id": "PVTF_lADOCIcusc4BOGrDzhRQc9k",
+    "dataType": "NUMBER"
+  },
+  {
+    "name": "Fiabilite",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg86YYg",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/fiabilite.json"
+  },
+  {
+    "name": "Start date",
+    "id": "PVTF_lADOCIcusc4BOGrDzg9L4lg",
+    "dataType": "DATE"
+  },
+  {
+    "name": "End date",
+    "id": "PVTF_lADOCIcusc4BOGrDzg86WOk",
+    "dataType": "DATE"
+  },
+  {
+    "name": "Sub-issues progress",
+    "id": "PVTF_lADOCIcusc4BOGrDzg852Tc",
+    "dataType": "SUB_ISSUES_PROGRESS"
+  },
+  {
+    "name": "Created",
+    "id": "PVTF_lADOCIcusc4BOGrDzhPdSgg",
+    "dataType": "CREATED"
+  },
+  {
+    "name": "Updated",
+    "id": "PVTF_lADOCIcusc4BOGrDzhPdSgw",
+    "dataType": "UPDATED"
+  },
+  {
+    "name": "Closed",
+    "id": "PVTF_lADOCIcusc4BOGrDzhPdShE",
+    "dataType": "CLOSED"
+  }
+]

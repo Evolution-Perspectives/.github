@@ -1,0 +1,36 @@
+{
+  "field": "Fiabilite",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg86YYg",
+  "options": [
+    {
+      "name": "🍀Très confiant ±10%",
+      "id": "b63baf56",
+      "color": "GREEN",
+      "description": "Vision claire sur le sujet, très peu de chances de surprises"
+    },
+    {
+      "name": "✨Confiant ±20%",
+      "id": "7165508f",
+      "color": "YELLOW",
+      "description": "Bonne compréhension globale, quelques points mineurs restent à valider"
+    },
+    {
+      "name": "🛠️Mitigé ±35%",
+      "id": "4d1cca16",
+      "color": "ORANGE",
+      "description": "Sujet globalement faisable, mais nécessite un approfondissement pour fiabiliser l’estimation"
+    },
+    {
+      "name": "⛔Incertain ±50%",
+      "id": "7a4b0b8e",
+      "color": "RED",
+      "description": "Implications techniques ou externes significatives, avec des zones de méconnaissance du sujet"
+    },
+    {
+      "name": "🛰️Exploratoire ±100%",
+      "id": "a847a5e1",
+      "color": "PURPLE",
+      "description": "Point de départ à zéro, forte variabilité possible, beaucoup d'analyse et de recherche à faire"
+    }
+  ]
+}

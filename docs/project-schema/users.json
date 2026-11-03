@@ -1,0 +1,50 @@
+[
+  {
+    "login": "Alice-EP-Helance",
+    "name": "Alice",
+    "id": "U_kgDOD9h2Yw",
+    "role": "ADMIN"
+  },
+  {
+    "login": "CoraliePB",
+    "name": null,
+    "id": "U_kgDOD-sJcw",
+    "role": "MEMBER"
+  },
+  {
+    "login": "EnzoLYEP",
+    "name": null,
+    "id": "U_kgDOECcmSA",
+    "role": "MEMBER"
+  },
+  {
+    "login": "FilipeCardante",
+    "name": null,
+    "id": "U_kgDODsh0zg",
+    "role": "ADMIN"
+  },
+  {
+    "login": "Logan-EP",
+    "name": null,
+    "id": "U_kgDOC5zJhg",
+    "role": "ADMIN"
+  },
+  {
+    "login": "max-imiliennn",
+    "name": null,
+    "id": "U_kgDOD5_o5g",
+    "role": "ADMIN"
+  },
+  {
+    "login": "NicolasCesariEP",
+    "name": null,
+    "id": "U_kgDOB3AjAQ",
+    "role": "ADMIN"
+  },
+  {
+    "login": "NLV-EP",
+    "name": "Nicolas Lemaigre-Voreaux",
+    "id": "U_kgDOEMm9VA",
+    "role": "MEMBER"
+  }
+]

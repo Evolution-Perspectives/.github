@@ -5,6 +5,10 @@
 This repository is the organization source of truth for reusable GitHub workflow automation.
 Every workflow must be designed for organization-wide reuse, with first-class support for centralized issue and pull request operations.
 
+## Project Schema Reference
+
+Field IDs, single-select option IDs, issue types and views of the org Project "Projets Digitaux" are snapshotted in `docs/project-schema/` (see its README). Use them as a lookup when writing or reviewing workflows. They are a cached copy: workflows must still resolve IDs live and never import these files at runtime.
+
 ## Mandatory 4-Artifact Set
 
 A workflow change is complete only when all artifacts below are present and aligned:

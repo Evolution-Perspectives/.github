@@ -1,0 +1,60 @@
+{
+  "field": "Status",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg852S8",
+  "options": [
+    {
+      "name": "📦 Backlog",
+      "id": "f75ad846",
+      "color": "GRAY",
+      "description": "Sujet identifié, non lancé"
+    },
+    {
+      "name": "💎 Ready",
+      "id": "e18bf179",
+      "color": "BLUE",
+      "description": "Planifié, prêt à démarrer"
+    },
+    {
+      "name": "🌱 In Progress",
+      "id": "47fc9ee4",
+      "color": "GREEN",
+      "description": "Travail en cours, avance activement"
+    },
+    {
+      "name": "⏳ Paused",
+      "id": "9a24fdbd",
+      "color": "ORANGE",
+      "description": "Travail interrompu temporairement, en attente"
+    },
+    {
+      "name": "📡 Pending Deploy",
+      "id": "898085c8",
+      "color": "BLUE",
+      "description": "Développement terminé, déploiement en attente"
+    },
+    {
+      "name": "🧪 In Review",
+      "id": "aba860b9",
+      "color": "PURPLE",
+      "description": "Contrôle qualité en cours"
+    },
+    {
+      "name": "📤 Pending Release",
+      "id": "ba8247ce",
+      "color": "PINK",
+      "description": "Contrôle qualité validé, en attente de mise en production"
+    },
+    {
+      "name": "🏆 Done",
+      "id": "98236657",
+      "color": "YELLOW",
+      "description": "Livré, validé et clôturé"
+    },
+    {
+      "name": "❌ Canceled",
+      "id": "69f90333",
+      "color": "RED",
+      "description": "Clôturé sans suite"
+    }
+  ]
+}

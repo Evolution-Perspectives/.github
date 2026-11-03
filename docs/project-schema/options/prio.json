@@ -1,0 +1,36 @@
+{
+  "field": "Prio",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg852o8",
+  "options": [
+    {
+      "name": "🔥Urgent",
+      "id": "79628723",
+      "color": "RED",
+      "description": "Situation exceptionnelle nécessitant une prise en charge immédiate"
+    },
+    {
+      "name": "⚡Important",
+      "id": "0a877460",
+      "color": "YELLOW",
+      "description": "À traiter avant le reste pour garantir l’avancement global"
+    },
+    {
+      "name": "🌿 Planifié",
+      "id": "da944a9c",
+      "color": "GREEN",
+      "description": "Travail normal organisé et prévu dans le flux de production"
+    },
+    {
+      "name": "💧 Secondaire",
+      "id": "7a3bdd06",
+      "color": "BLUE",
+      "description": "À traiter quand possible, lorsqu'une fenêtre se présente"
+    },
+    {
+      "name": "🪼  Optionnel",
+      "id": "ed0703a2",
+      "color": "PURPLE",
+      "description": "Amélioration bonus, à faire à l'occasion"
+    }
+  ]
+}

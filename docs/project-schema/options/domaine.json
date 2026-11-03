@@ -1,0 +1,66 @@
+{
+  "field": "Domaine",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg86DNA",
+  "options": [
+    {
+      "name": "Dev",
+      "id": "9a2e0903",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "IT",
+      "id": "664e8370",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "Design",
+      "id": "d4bb1333",
+      "color": "RED",
+      "description": null
+    },
+    {
+      "name": "Market",
+      "id": "0ca9c6fb",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "Sales",
+      "id": "ca3ea087",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "Com",
+      "id": "a61237c9",
+      "color": "YELLOW",
+      "description": null
+    },
+    {
+      "name": "Pedago",
+      "id": "16e1f485",
+      "color": "GREEN",
+      "description": null
+    },
+    {
+      "name": "RH/Admin",
+      "id": "63d292d3",
+      "color": "GRAY",
+      "description": null
+    },
+    {
+      "name": "Direction",
+      "id": "c3a82a17",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "Video",
+      "id": "55399b65",
+      "color": "GREEN",
+      "description": null
+    }
+  ]
+}

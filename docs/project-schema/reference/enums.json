@@ -1,0 +1,386 @@
+{
+  "IssueEventConfidenceLevel": [
+    {
+      "value": "LOW",
+      "description": "Low confidence."
+    },
+    {
+      "value": "MEDIUM",
+      "description": "Medium confidence."
+    },
+    {
+      "value": "HIGH",
+      "description": "High confidence."
+    }
+  ],
+  "IssueFieldDataType": [
+    {
+      "value": "TEXT",
+      "description": "Text"
+    },
+    {
+      "value": "SINGLE_SELECT",
+      "description": "Single Select"
+    },
+    {
+      "value": "DATE",
+      "description": "Date"
+    },
+    {
+      "value": "NUMBER",
+      "description": "Number"
+    },
+    {
+      "value": "MULTI_SELECT",
+      "description": "Multi Select"
+    }
+  ],
+  "IssueFieldSingleSelectOptionColor": [
+    {
+      "value": "GRAY",
+      "description": "gray"
+    },
+    {
+      "value": "BLUE",
+      "description": "blue"
+    },
+    {
+      "value": "GREEN",
+      "description": "green"
+    },
+    {
+      "value": "YELLOW",
+      "description": "yellow"
+    },
+    {
+      "value": "ORANGE",
+      "description": "orange"
+    },
+    {
+      "value": "RED",
+      "description": "red"
+    },
+    {
+      "value": "PINK",
+      "description": "pink"
+    },
+    {
+      "value": "PURPLE",
+      "description": "purple"
+    }
+  ],
+  "IssueFieldUpdateOperation": [
+    {
+      "value": "SET",
+      "description": "Replaces the field value."
+    },
+    {
+      "value": "ADD",
+      "description": "Sets a scalar field or adds options to a multi-select field."
+    },
+    {
+      "value": "REMOVE",
+      "description": "Removes options from a multi-select field."
+    },
+    {
+      "value": "CLEAR",
+      "description": "Clears the field value."
+    }
+  ],
+  "IssueFieldVisibility": [
+    {
+      "value": "ORG_ONLY",
+      "description": "Org Only"
+    },
+    {
+      "value": "ALL",
+      "description": "All"
+    }
+  ],
+  "IssueTypeColor": [
+    {
+      "value": "GRAY",
+      "description": "gray"
+    },
+    {
+      "value": "BLUE",
+      "description": "blue"
+    },
+    {
+      "value": "GREEN",
+      "description": "green"
+    },
+    {
+      "value": "YELLOW",
+      "description": "yellow"
+    },
+    {
+      "value": "ORANGE",
+      "description": "orange"
+    },
+    {
+      "value": "RED",
+      "description": "red"
+    },
+    {
+      "value": "PINK",
+      "description": "pink"
+    },
+    {
+      "value": "PURPLE",
+      "description": "purple"
+    }
+  ],
+  "ProjectV2CustomFieldType": [
+    {
+      "value": "TEXT",
+      "description": "Text"
+    },
+    {
+      "value": "SINGLE_SELECT",
+      "description": "Single Select"
+    },
+    {
+      "value": "MULTI_SELECT",
+      "description": "Multi Select"
+    },
+    {
+      "value": "NUMBER",
+      "description": "Number"
+    },
+    {
+      "value": "DATE",
+      "description": "Date"
+    },
+    {
+      "value": "ITERATION",
+      "description": "Iteration"
+    }
+  ],
+  "ProjectV2FieldType": [
+    {
+      "value": "ASSIGNEES",
+      "description": "Assignees"
+    },
+    {
+      "value": "LINKED_PULL_REQUESTS",
+      "description": "Linked Pull Requests"
+    },
+    {
+      "value": "REVIEWERS",
+      "description": "Reviewers"
+    },
+    {
+      "value": "LABELS",
+      "description": "Labels"
+    },
+    {
+      "value": "MILESTONE",
+      "description": "Milestone"
+    },
+    {
+      "value": "REPOSITORY",
+      "description": "Repository"
+    },
+    {
+      "value": "TITLE",
+      "description": "Title"
+    },
+    {
+      "value": "TEXT",
+      "description": "Text"
+    },
+    {
+      "value": "SINGLE_SELECT",
+      "description": "Single Select"
+    },
+    {
+      "value": "MULTI_SELECT",
+      "description": "Multi Select"
+    },
+    {
+      "value": "NUMBER",
+      "description": "Number"
+    },
+    {
+      "value": "DATE",
+      "description": "Date"
+    },
+    {
+      "value": "ITERATION",
+      "description": "Iteration"
+    },
+    {
+      "value": "TRACKS",
+      "description": "Tracks"
+    },
+    {
+      "value": "TRACKED_BY",
+      "description": "Tracked by"
+    },
+    {
+      "value": "ISSUE_TYPE",
+      "description": "Issue type"
+    },
+    {
+      "value": "PARENT_ISSUE",
+      "description": "Parent issue"
+    },
+    {
+      "value": "SUB_ISSUES_PROGRESS",
+      "description": "Sub-issues progress"
+    },
+    {
+      "value": "CREATED",
+      "description": "Created"
+    },
+    {
+      "value": "UPDATED",
+      "description": "Updated"
+    },
+    {
+      "value": "CLOSED",
+      "description": "Closed"
+    }
+  ],
+  "ProjectV2ItemArchivedState": [
+    {
+      "value": "ARCHIVED",
+      "description": "A project item that is archived"
+    },
+    {
+      "value": "NOT_ARCHIVED",
+      "description": "A project item that is not archived"
+    }
+  ],
+  "ProjectV2ItemType": [
+    {
+      "value": "ISSUE",
+      "description": "Issue"
+    },
+    {
+      "value": "PULL_REQUEST",
+      "description": "Pull Request"
+    },
+    {
+      "value": "DRAFT_ISSUE",
+      "description": "Draft Issue"
+    },
+    {
+      "value": "REDACTED",
+      "description": "Redacted Item"
+    }
+  ],
+  "ProjectV2PermissionLevel": [
+    {
+      "value": "READ",
+      "description": "The collaborator can view the project"
+    },
+    {
+      "value": "WRITE",
+      "description": "The collaborator can view and edit the project"
+    },
+    {
+      "value": "ADMIN",
+      "description": "The collaborator can view, edit, and maange the settings of the project"
+    }
+  ],
+  "ProjectV2Roles": [
+    {
+      "value": "NONE",
+      "description": "The collaborator has no direct access to the project"
+    },
+    {
+      "value": "READER",
+      "description": "The collaborator can view the project"
+    },
+    {
+      "value": "WRITER",
+      "description": "The collaborator can view and edit the project"
+    },
+    {
+      "value": "ADMIN",
+      "description": "The collaborator can view, edit, and maange the settings of the project"
+    }
+  ],
+  "ProjectV2SingleSelectFieldOptionColor": [
+    {
+      "value": "GRAY",
+      "description": "GRAY"
+    },
+    {
+      "value": "BLUE",
+      "description": "BLUE"
+    },
+    {
+      "value": "GREEN",
+      "description": "GREEN"
+    },
+    {
+      "value": "YELLOW",
+      "description": "YELLOW"
+    },
+    {
+      "value": "ORANGE",
+      "description": "ORANGE"
+    },
+    {
+      "value": "RED",
+      "description": "RED"
+    },
+    {
+      "value": "PINK",
+      "description": "PINK"
+    },
+    {
+      "value": "PURPLE",
+      "description": "PURPLE"
+    }
+  ],
+  "ProjectV2State": [
+    {
+      "value": "OPEN",
+      "description": "A project v2 that is still open"
+    },
+    {
+      "value": "CLOSED",
+      "description": "A project v2 that has been closed"
+    }
+  ],
+  "ProjectV2StatusUpdateStatus": [
+    {
+      "value": "INACTIVE",
+      "description": "A project v2 that is inactive."
+    },
+    {
+      "value": "ON_TRACK",
+      "description": "A project v2 that is on track with no risks."
+    },
+    {
+      "value": "AT_RISK",
+      "description": "A project v2 that is at risk and encountering some challenges."
+    },
+    {
+      "value": "OFF_TRACK",
+      "description": "A project v2 that is off track and needs attention."
+    },
+    {
+      "value": "COMPLETE",
+      "description": "A project v2 that is complete."
+    }
+  ],
+  "ProjectV2ViewLayout": [
+    {
+      "value": "BOARD_LAYOUT",
+      "description": "Board layout"
+    },
+    {
+      "value": "TABLE_LAYOUT",
+      "description": "Table layout"
+    },
+    {
+      "value": "ROADMAP_LAYOUT",
+      "description": "Roadmap layout"
+    }
+  ]
+}

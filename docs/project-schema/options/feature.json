@@ -1,0 +1,66 @@
+{
+  "field": "Feature",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg86GDw",
+  "options": [
+    {
+      "name": "W2B - Visio",
+      "id": "72bdad8d",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "W2B - Authentification",
+      "id": "f79367b9",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "SW - ICF",
+      "id": "2876654e",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "SW - Theme Source",
+      "id": "c9d46b5e",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "SW - Module",
+      "id": "065ea5bc",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "SW - Template",
+      "id": "910e6d4b",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "SW - Page",
+      "id": "1de81464",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "AT - Remontées Certifs",
+      "id": "5851e188",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "AT - Dates désactivations Apolearn",
+      "id": "d3afe854",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "AT - Syncho Hubspot Dendreo",
+      "id": "0e47c47a",
+      "color": "PURPLE",
+      "description": null
+    }
+  ]
+}

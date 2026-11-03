@@ -1,0 +1,272 @@
+[
+  {
+    "name": "addBlockedBy",
+    "input": "AddBlockedByInput",
+    "description": "Adds a 'blocked by' relationship to an issue."
+  },
+  {
+    "name": "addLabelsToLabelable",
+    "input": "AddLabelsToLabelableInput",
+    "description": "Adds labels to a labelable object."
+  },
+  {
+    "name": "addProjectV2DraftIssue",
+    "input": "AddProjectV2DraftIssueInput",
+    "description": "Creates a new draft issue and add it to a Project."
+  },
+  {
+    "name": "addProjectV2ItemById",
+    "input": "AddProjectV2ItemByIdInput",
+    "description": "Links an existing content instance to a Project."
+  },
+  {
+    "name": "addSubIssue",
+    "input": "AddSubIssueInput",
+    "description": "Adds a sub-issue to a given issue"
+  },
+  {
+    "name": "archiveProjectV2Item",
+    "input": "ArchiveProjectV2ItemInput",
+    "description": "Archives a ProjectV2Item"
+  },
+  {
+    "name": "clearLabelsFromLabelable",
+    "input": "ClearLabelsFromLabelableInput",
+    "description": "Clears all labels from a labelable object."
+  },
+  {
+    "name": "clearProjectV2ItemFieldValue",
+    "input": "ClearProjectV2ItemFieldValueInput",
+    "description": "This mutation clears the value of a field for an item in a Project. Currently only text, number, date, assignees, labels, single-select, multi-select, iteration and milestone fields are supported."
+  },
+  {
+    "name": "convertProjectV2DraftIssueItemToIssue",
+    "input": "ConvertProjectV2DraftIssueItemToIssueInput",
+    "description": "Converts a projectV2 draft issue item to an issue."
+  },
+  {
+    "name": "copyProjectV2",
+    "input": "CopyProjectV2Input",
+    "description": "Copy a project."
+  },
+  {
+    "name": "createIssueField",
+    "input": "CreateIssueFieldInput",
+    "description": "Creates a new issue field."
+  },
+  {
+    "name": "createIssueFieldValue",
+    "input": "CreateIssueFieldValueInput",
+    "description": "Creates a new issue field value for an issue."
+  },
+  {
+    "name": "createIssueType",
+    "input": "CreateIssueTypeInput",
+    "description": "Creates a new issue type"
+  },
+  {
+    "name": "createLabel",
+    "input": "CreateLabelInput",
+    "description": "Creates a new label."
+  },
+  {
+    "name": "createProjectV2",
+    "input": "CreateProjectV2Input",
+    "description": "Creates a new project."
+  },
+  {
+    "name": "createProjectV2Field",
+    "input": "CreateProjectV2FieldInput",
+    "description": "Create a new project field."
+  },
+  {
+    "name": "createProjectV2IssueField",
+    "input": "CreateProjectV2IssueFieldInput",
+    "description": "Create a new project issue field."
+  },
+  {
+    "name": "createProjectV2StatusUpdate",
+    "input": "CreateProjectV2StatusUpdateInput",
+    "description": "Creates a status update within a Project."
+  },
+  {
+    "name": "createProjectV2View",
+    "input": "CreateProjectV2ViewInput",
+    "description": "Creates a new view in a project."
+  },
+  {
+    "name": "deleteIssueField",
+    "input": "DeleteIssueFieldInput",
+    "description": "Deletes an issue field."
+  },
+  {
+    "name": "deleteIssueFieldValue",
+    "input": "DeleteIssueFieldValueInput",
+    "description": "Deletes an issue field value from an issue."
+  },
+  {
+    "name": "deleteIssueType",
+    "input": "DeleteIssueTypeInput",
+    "description": "Delete an issue type"
+  },
+  {
+    "name": "deleteLabel",
+    "input": "DeleteLabelInput",
+    "description": "Deletes a label."
+  },
+  {
+    "name": "deleteProjectV2",
+    "input": "DeleteProjectV2Input",
+    "description": "Delete a project."
+  },
+  {
+    "name": "deleteProjectV2Field",
+    "input": "DeleteProjectV2FieldInput",
+    "description": "Delete a project field."
+  },
+  {
+    "name": "deleteProjectV2Item",
+    "input": "DeleteProjectV2ItemInput",
+    "description": "Deletes an item from a Project."
+  },
+  {
+    "name": "deleteProjectV2StatusUpdate",
+    "input": "DeleteProjectV2StatusUpdateInput",
+    "description": "Deletes a project status update."
+  },
+  {
+    "name": "deleteProjectV2View",
+    "input": "DeleteProjectV2ViewInput",
+    "description": "Deletes a view from a project."
+  },
+  {
+    "name": "deleteProjectV2Workflow",
+    "input": "DeleteProjectV2WorkflowInput",
+    "description": "Deletes a project workflow."
+  },
+  {
+    "name": "linkProjectV2ToRepository",
+    "input": "LinkProjectV2ToRepositoryInput",
+    "description": "Links a project to a repository."
+  },
+  {
+    "name": "linkProjectV2ToTeam",
+    "input": "LinkProjectV2ToTeamInput",
+    "description": "Links a project to a team."
+  },
+  {
+    "name": "markProjectV2AsTemplate",
+    "input": "MarkProjectV2AsTemplateInput",
+    "description": "Mark a project as a template. Note that only projects which are owned by an Organization can be marked as a template."
+  },
+  {
+    "name": "removeBlockedBy",
+    "input": "RemoveBlockedByInput",
+    "description": "Removes a 'blocked by' relationship from an issue."
+  },
+  {
+    "name": "removeLabelsFromLabelable",
+    "input": "RemoveLabelsFromLabelableInput",
+    "description": "Removes labels from a Labelable object."
+  },
+  {
+    "name": "removeSubIssue",
+    "input": "RemoveSubIssueInput",
+    "description": "Removes a sub-issue from a given issue"
+  },
+  {
+    "name": "reprioritizeSubIssue",
+    "input": "ReprioritizeSubIssueInput",
+    "description": "Reprioritizes a sub-issue to a different position in the parent list."
+  },
+  {
+    "name": "setIssueFieldValue",
+    "input": "SetIssueFieldValueInput",
+    "description": "Sets the value of an IssueFieldValue."
+  },
+  {
+    "name": "unarchiveProjectV2Item",
+    "input": "UnarchiveProjectV2ItemInput",
+    "description": "Unarchives a ProjectV2Item"
+  },
+  {
+    "name": "unlinkProjectV2FromRepository",
+    "input": "UnlinkProjectV2FromRepositoryInput",
+    "description": "Unlinks a project from a repository."
+  },
+  {
+    "name": "unlinkProjectV2FromTeam",
+    "input": "UnlinkProjectV2FromTeamInput",
+    "description": "Unlinks a project to a team."
+  },
+  {
+    "name": "unmarkProjectV2AsTemplate",
+    "input": "UnmarkProjectV2AsTemplateInput",
+    "description": "Unmark a project as a template."
+  },
+  {
+    "name": "updateIssueField",
+    "input": "UpdateIssueFieldInput",
+    "description": "Updates an issue field."
+  },
+  {
+    "name": "updateIssueFieldValue",
+    "input": "UpdateIssueFieldValueInput",
+    "description": "Updates an existing issue field value for an issue."
+  },
+  {
+    "name": "updateIssueIssueType",
+    "input": "UpdateIssueIssueTypeInput",
+    "description": "Updates the issue type on an issue"
+  },
+  {
+    "name": "updateIssueType",
+    "input": "UpdateIssueTypeInput",
+    "description": "Update an issue type"
+  },
+  {
+    "name": "updateLabel",
+    "input": "UpdateLabelInput",
+    "description": "Updates an existing label."
+  },
+  {
+    "name": "updateProjectV2",
+    "input": "UpdateProjectV2Input",
+    "description": "Updates an existing project."
+  },
+  {
+    "name": "updateProjectV2Collaborators",
+    "input": "UpdateProjectV2CollaboratorsInput",
+    "description": "Update the collaborators on a team or a project"
+  },
+  {
+    "name": "updateProjectV2DraftIssue",
+    "input": "UpdateProjectV2DraftIssueInput",
+    "description": "Updates a draft issue within a Project."
+  },
+  {
+    "name": "updateProjectV2Field",
+    "input": "UpdateProjectV2FieldInput",
+    "description": "Update a project field."
+  },
+  {
+    "name": "updateProjectV2ItemFieldValue",
+    "input": "UpdateProjectV2ItemFieldValueInput",
+    "description": "This mutation updates the value of a field for an item in a Project. Currently only single-select, multi-select, text, number, date, and iteration fields are supported."
+  },
+  {
+    "name": "updateProjectV2ItemPosition",
+    "input": "UpdateProjectV2ItemPositionInput",
+    "description": "This mutation updates the position of the item in the project, where the position represents the priority of an item."
+  },
+  {
+    "name": "updateProjectV2StatusUpdate",
+    "input": "UpdateProjectV2StatusUpdateInput",
+    "description": "Updates a status update within a Project."
+  },
+  {
+    "name": "updateProjectV2View",
+    "input": "UpdateProjectV2ViewInput",
+    "description": "Updates an existing view in a project."
+  }
+]

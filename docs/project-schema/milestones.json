@@ -1,0 +1,86 @@
+{
+  "Evolution-Perspectives/.github": [],
+  "Evolution-Perspectives/hubspot-theme": [
+    {
+      "title": "Kickoff theme + inté MyLea",
+      "state": "OPEN",
+      "dueOn": null,
+      "description": "Cookiebot et outils SEO/Market\nMyLea\nLanding pages\nGolden Rule: SEO First !!!!!!"
+    }
+  ],
+  "Evolution-Perspectives/intercobot": [
+    {
+      "title": "Margot va saisir les prochains contacts MHD",
+      "state": "OPEN",
+      "dueOn": "2026-03-12T00:00:00Z",
+      "description": "Margot va saisir les prochains contacts MHD, il faut donc que l'interco fonctionne"
+    },
+    {
+      "title": "Prochain traitement des certifs Dendreo/Hubspot",
+      "state": "OPEN",
+      "dueOn": null,
+      "description": "Margot va commencer à passer les certifs en terminé il faut donc que tout soit prêt au niveau de l'interco"
+    },
+    {
+      "title": "Saisie nouvelles certifs rncp par Margot",
+      "state": "OPEN",
+      "dueOn": "2026-09-30T00:00:00Z",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/IT": [
+    {
+      "title": "Fin des abonnements 365 de Formation & Co",
+      "state": "OPEN",
+      "dueOn": "2026-04-20T00:00:00Z",
+      "description": "Tout archivage doit être bouclé avant"
+    },
+    {
+      "title": "Mois de mai",
+      "state": "OPEN",
+      "dueOn": "2026-05-11T00:00:00Z",
+      "description": null
+    },
+    {
+      "title": "Renouvellement Serveur Sage",
+      "state": "OPEN",
+      "dueOn": "2026-07-24T00:00:00Z",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/maquette-demo-sites-web": [
+    {
+      "title": "Présentation Maquettes HEDC",
+      "state": "OPEN",
+      "dueOn": "2026-10-22T00:00:00Z",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/template-formations": [],
+  "Evolution-Perspectives/way2be": [
+    {
+      "title": "100% des accompagnements BP sur Way2Be",
+      "state": "OPEN",
+      "dueOn": "2026-03-21T00:00:00Z",
+      "description": null
+    },
+    {
+      "title": "Démarrage cahier des charges Way2Be Mutuelles",
+      "state": "OPEN",
+      "dueOn": "2026-06-01T00:00:00Z",
+      "description": null
+    },
+    {
+      "title": "Présentation Way2Be V2 CODIR",
+      "state": "OPEN",
+      "dueOn": "2026-09-17T00:00:00Z",
+      "description": null
+    },
+    {
+      "title": "Way2Be Fonctionnel selon cahier des charges originel de 2025",
+      "state": "OPEN",
+      "dueOn": "2026-04-01T00:00:00Z",
+      "description": null
+    }
+  ]
+}
