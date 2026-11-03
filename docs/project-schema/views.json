@@ -246,7 +246,7 @@
     "name": "Assignation",
     "id": "PVTV_lADOCIcusc4BOGrDzgJoNKM",
     "layout": "TABLE_LAYOUT",
-    "filter": "no:assignee -type:Externe,Métier,Management/Direction",
+    "filter": "no:assignee -type:\"🟠 Externe\",\"🟧 Management/Direction\",\"Produit/Métier\"",
     "visibleFields": [
       "Title",
       "Assignees",
@@ -294,7 +294,7 @@
     "name": "Roadmap Globale",
     "id": "PVTV_lADOCIcusc4BOGrDzgKN5yE",
     "layout": "ROADMAP_LAYOUT",
-    "filter": "type:Projet is:open -status:\"📦 Backlog\" -has:parent-issue",
+    "filter": "type:\"🔷 Projet\" is:open -status:\"📦 Backlog\" -has:parent-issue",
     "visibleFields": [],
     "groupBy": [],
     "verticalGroupBy": [],
