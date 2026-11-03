@@ -10,7 +10,7 @@
     "name": "Dette technique/Refacto",
     "id": "IT_kwDOCIcusc4CASvQ",
     "color": "GRAY",
-    "description": null,
+    "description": "Travail technique prévisible, sans urgence immédiate. À traiter avant que son coût ne grandisse et qu'il ne pèse sur la vitesse, l'efficacité et la sécurité des futurs développements.",
     "isEnabled": true
   },
   {
@@ -59,7 +59,7 @@
     "name": "Release/Mise en production",
     "id": "IT_kwDOCIcusc4CAStB",
     "color": "GREEN",
-    "description": null,
+    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
     "isEnabled": true
   },
   {
