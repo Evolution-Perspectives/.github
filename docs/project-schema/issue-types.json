@@ -73,7 +73,7 @@
     "name": "Support",
     "id": "IT_kwDOCIcusc4B4knB",
     "color": "PINK",
-    "description": "Assistance utilisateur, aide ponctuelle sur un fonctionnement ou correction rapide non structurante.",
+    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
     "isEnabled": true
   },
   {
