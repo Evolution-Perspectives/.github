@@ -17,7 +17,7 @@ live so a stale file can never break production.
 | `iterations/<field>.json` | Iteration fields, if any are ever added |
 | `issue-types.json` | Org issue types with IDs |
 | `views.json` | Project views with layout and filter |
-| `repos.json` | Repositories linked to the project (may be empty: items can come from any repo) |
+| `repos.json` | `linked`: repos attached in project settings (currently empty). `withItems`: repos that actually have items in the project. `itemTypes`: item types present (ISSUE, PULL_REQUEST, DRAFT_ISSUE) |
 
 ## Refresh
 

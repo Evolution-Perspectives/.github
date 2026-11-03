@@ -67,6 +67,45 @@ query($org: String!, $number: Int!) {
   }
 }`;
 
+const ITEMS_QUERY = `
+query($org: String!, $number: Int!, $cursor: String) {
+  organization(login: $org) {
+    projectV2(number: $number) {
+      items(first: 100, after: $cursor) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          type
+          content {
+            ... on Issue { repository { nameWithOwner } }
+            ... on PullRequest { repository { nameWithOwner } }
+          }
+        }
+      }
+    }
+  }
+}`;
+
+// Distinct repositories and item types present in the project (paginated).
+function fetchItemSources() {
+  const repos = new Set();
+  const types = new Set();
+  let cursor = null;
+  for (;;) {
+    const args = ['api', 'graphql', '-f', `query=${ITEMS_QUERY}`, '-f', `org=${ORG}`, '-F', `number=${NUMBER}`];
+    if (cursor) args.push('-f', `cursor=${cursor}`);
+    const json = JSON.parse(execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }));
+    if (json.errors) throw new Error(JSON.stringify(json.errors));
+    const items = json.data.organization.projectV2.items;
+    for (const n of items.nodes) {
+      types.add(n.type);
+      if (n.content && n.content.repository) repos.add(n.content.repository.nameWithOwner);
+    }
+    if (!items.pageInfo.hasNextPage) break;
+    cursor = items.pageInfo.endCursor;
+  }
+  return { repos: [...repos].sort(), types: [...types].sort() };
+}
+
 function fetchSchema() {
   const out = execFileSync(
     'gh',
@@ -77,6 +116,7 @@ function fetchSchema() {
   if (json.errors) throw new Error(JSON.stringify(json.errors));
   const org = json.data && json.data.organization;
   if (!org || !org.projectV2) throw new Error(`Project ${ORG}#${NUMBER} not found`);
+  org.itemSources = fetchItemSources();
   return org;
 }
 
@@ -171,7 +211,13 @@ function buildFiles(org) {
       }))
   );
 
-  files.set('repos.json', p.repositories.nodes.map((r) => r.nameWithOwner).sort());
+  // "linked" = repos attached in project settings (often empty); the real
+  // source of items is "withItems", derived from the items themselves.
+  files.set('repos.json', {
+    linked: p.repositories.nodes.map((r) => r.nameWithOwner).sort(),
+    withItems: org.itemSources.repos,
+    itemTypes: org.itemSources.types,
+  });
 
   return files;
 }

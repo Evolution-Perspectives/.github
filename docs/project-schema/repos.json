@@ -1,1 +1,15 @@
-[]
+{
+  "linked": [],
+  "withItems": [
+    "Evolution-Perspectives/.github",
+    "Evolution-Perspectives/IT",
+    "Evolution-Perspectives/hubspot-theme",
+    "Evolution-Perspectives/intercobot",
+    "Evolution-Perspectives/maquette-demo-sites-web",
+    "Evolution-Perspectives/template-formations",
+    "Evolution-Perspectives/way2be"
+  ],
+  "itemTypes": [
+    "ISSUE"
+  ]
+}
