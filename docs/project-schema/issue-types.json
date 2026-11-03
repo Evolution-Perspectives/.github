@@ -16,7 +16,7 @@
   {
     "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
-    "color": "GRAY",
+    "color": "ORANGE",
     "description": "Réponse ou livraison attendue d'un acteur externe à l'entreprise.",
     "isEnabled": true
   },
@@ -37,7 +37,7 @@
   {
     "name": "Produit/Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
-    "color": "GRAY",
+    "color": "PINK",
     "description": "Intervention du produit ou du métier : réalisation d'une tâche, apport d'une information, validation.",
     "isEnabled": true
   },
@@ -51,7 +51,7 @@
   {
     "name": "Recherche/Veille technique",
     "id": "IT_kwDOCIcusc4B4kr-",
-    "color": "GRAY",
+    "color": "YELLOW",
     "description": "Analyse technique en amont en vue de la production, étude de l'existant, évaluation des impacts",
     "isEnabled": true
   },
@@ -65,7 +65,7 @@
   {
     "name": "Specs/Cahier des charges",
     "id": "IT_kwDOCIcusc4B4lwK",
-    "color": "GRAY",
+    "color": "YELLOW",
     "description": "Rédaction/affinage des besoins et cadrage fonctionnel.",
     "isEnabled": true
   },
@@ -79,7 +79,7 @@
   {
     "name": "Tâche",
     "id": "IT_kwDOCIcusc4BNM3f",
-    "color": "YELLOW",
+    "color": "GRAY",
     "description": "Tâche opérationnelle à exécuter",
     "isEnabled": true
   },
