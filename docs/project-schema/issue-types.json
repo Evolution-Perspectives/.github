@@ -1,9 +1,37 @@
 [
   {
-    "name": "Bug",
+    "name": "🔴 Bug",
     "id": "IT_kwDOCIcusc4BNM3j",
     "color": "RED",
     "description": "Comportement non prévu/incorrect ou défaut à corriger.",
+    "isEnabled": true
+  },
+  {
+    "name": "🔵 Fonctionnalité",
+    "id": "IT_kwDOCIcusc4BNM3l",
+    "color": "BLUE",
+    "description": "Nouvelle fonctionnalité ou évolution produit.",
+    "isEnabled": true
+  },
+  {
+    "name": "🔷 Projet",
+    "id": "IT_kwDOCIcusc4B64Nz",
+    "color": "BLUE",
+    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
+    "isEnabled": true
+  },
+  {
+    "name": "🟠 Externe",
+    "id": "IT_kwDOCIcusc4B4knI",
+    "color": "ORANGE",
+    "description": "Réponse ou livraison attendue d'un acteur externe à l'entreprise.",
+    "isEnabled": true
+  },
+  {
+    "name": "🟧 Management/Direction",
+    "id": "IT_kwDOCIcusc4B5VS2",
+    "color": "ORANGE",
+    "description": "Décision ou arbitrage attendu de la direction.",
     "isEnabled": true
   },
   {
@@ -14,38 +42,10 @@
     "isEnabled": true
   },
   {
-    "name": "Externe",
-    "id": "IT_kwDOCIcusc4B4knI",
-    "color": "ORANGE",
-    "description": "Réponse ou livraison attendue d'un acteur externe à l'entreprise.",
-    "isEnabled": true
-  },
-  {
-    "name": "Fonctionnalité",
-    "id": "IT_kwDOCIcusc4BNM3l",
-    "color": "BLUE",
-    "description": "Nouvelle fonctionnalité ou évolution produit.",
-    "isEnabled": true
-  },
-  {
-    "name": "Management/Direction",
-    "id": "IT_kwDOCIcusc4B5VS2",
-    "color": "ORANGE",
-    "description": "Décision ou arbitrage attendu de la direction.",
-    "isEnabled": true
-  },
-  {
     "name": "Produit/Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
     "color": "PINK",
     "description": "Intervention du produit ou du métier : réalisation d'une tâche, apport d'une information, validation.",
-    "isEnabled": true
-  },
-  {
-    "name": "Projet",
-    "id": "IT_kwDOCIcusc4B64Nz",
-    "color": "BLUE",
-    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
     "isEnabled": true
   },
   {
