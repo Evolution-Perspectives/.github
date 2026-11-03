@@ -31,7 +31,7 @@
     "name": "Management/Direction",
     "id": "IT_kwDOCIcusc4B5VS2",
     "color": "GRAY",
-    "description": null,
+    "description": "Attente d'une décision ou d'un arbitrage de la direction. Suivi uniquement : se ferme quand la décision est prise.",
     "isEnabled": true
   },
   {
