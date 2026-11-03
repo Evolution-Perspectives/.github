@@ -38,7 +38,7 @@
     "name": "Produit/Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
     "color": "GRAY",
-    "description": "Contribution attendue d'un collaborateur de l'entreprise.",
+    "description": "Intervention du produit ou du métier : réalisation d'une tâche, apport d'une information, validation.",
     "isEnabled": true
   },
   {
