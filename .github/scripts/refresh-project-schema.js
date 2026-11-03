@@ -31,9 +31,11 @@ const QUERY = `
 query($org: String!, $number: Int!) {
   organization(login: $org) {
     issueTypes(first: 50) {
+      pageInfo { hasNextPage }
       nodes { id name color description isEnabled }
     }
     issueFields(first: 50) {
+      pageInfo { hasNextPage }
       nodes {
         __typename
         ... on IssueFieldCommon { name dataType description visibility }
@@ -48,6 +50,7 @@ query($org: String!, $number: Int!) {
       closed
       url
       fields(first: 100) {
+        pageInfo { hasNextPage }
         nodes {
           ... on ProjectV2FieldCommon { id name dataType }
           ... on ProjectV2SingleSelectField {
@@ -64,20 +67,23 @@ query($org: String!, $number: Int!) {
         }
       }
       workflows(first: 50) {
+        pageInfo { hasNextPage }
         nodes { id number name enabled }
       }
       views(first: 50) {
+        pageInfo { hasNextPage }
         nodes {
           id name number layout filter
           configuration {
-            visibleFields(first: 50) { nodes { ... on ProjectV2FieldCommon { name } } }
+            visibleFields(first: 50) { pageInfo { hasNextPage } nodes { ... on ProjectV2FieldCommon { name } } }
           }
-          groupByFields(first: 10) { nodes { ... on ProjectV2FieldCommon { name } } }
-          verticalGroupByFields(first: 10) { nodes { ... on ProjectV2FieldCommon { name } } }
-          sortByFields(first: 10) { nodes { direction field { ... on ProjectV2FieldCommon { name } } } }
+          groupByFields(first: 10) { pageInfo { hasNextPage } nodes { ... on ProjectV2FieldCommon { name } } }
+          verticalGroupByFields(first: 10) { pageInfo { hasNextPage } nodes { ... on ProjectV2FieldCommon { name } } }
+          sortByFields(first: 10) { pageInfo { hasNextPage } nodes { direction field { ... on ProjectV2FieldCommon { name } } } }
         }
       }
       repositories(first: 100) {
+        pageInfo { hasNextPage }
         nodes { nameWithOwner }
       }
     }
@@ -210,6 +216,29 @@ function buildReference() {
   return { enums, inputs, mutations: mutationRows };
 }
 
+// Fail loudly instead of silently truncating when a bounded query is too small.
+function assertComplete(label, conn) {
+  if (conn && conn.pageInfo && conn.pageInfo.hasNextPage) {
+    throw new Error(`${label}: more results than the query limit; raise "first:" or paginate`);
+  }
+}
+
+function assertAllComplete(org) {
+  const p = org.projectV2;
+  assertComplete('issueTypes', org.issueTypes);
+  assertComplete('issueFields', org.issueFields);
+  assertComplete('project fields', p.fields);
+  assertComplete('project workflows', p.workflows);
+  assertComplete('project views', p.views);
+  assertComplete('project repositories', p.repositories);
+  for (const v of p.views.nodes) {
+    assertComplete(`view "${v.name}" visibleFields`, v.configuration.visibleFields);
+    assertComplete(`view "${v.name}" groupByFields`, v.groupByFields);
+    assertComplete(`view "${v.name}" verticalGroupByFields`, v.verticalGroupByFields);
+    assertComplete(`view "${v.name}" sortByFields`, v.sortByFields);
+  }
+}
+
 function fetchSchema() {
   const out = execFileSync(
     'gh',
@@ -220,6 +249,7 @@ function fetchSchema() {
   if (json.errors) throw new Error(JSON.stringify(json.errors));
   const org = json.data && json.data.organization;
   if (!org || !org.projectV2) throw new Error(`Project ${ORG}#${NUMBER} not found`);
+  assertAllComplete(org);
   org.itemSources = fetchItemSources();
   org.reference = buildReference();
   return org;
@@ -375,16 +405,18 @@ function main() {
     }
   }
 
-  // Generated sub-folders only: files for fields/iterations that no longer exist.
-  for (const sub of ['options', 'iterations', 'reference']) {
-    const dir = path.join(OUT_DIR, sub);
-    if (!fs.existsSync(dir)) continue;
-    for (const name of fs.readdirSync(dir)) {
-      const rel = `${sub}/${name}`;
-      if (!name.endsWith('.json') || files.has(rel)) continue;
-      drift.push(`${rel} (removed)`);
-      if (!CHECK) fs.rmSync(path.join(dir, name));
-    }
+  // Remove any .json under OUT_DIR that this run did not generate (stale or stray).
+  const walk = (dir) =>
+    fs.existsSync(dir)
+      ? fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+          e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]
+        )
+      : [];
+  for (const file of walk(OUT_DIR)) {
+    const rel = path.relative(OUT_DIR, file).split(path.sep).join('/');
+    if (!rel.endsWith('.json') || files.has(rel)) continue;
+    drift.push(`${rel} (removed)`);
+    if (!CHECK) fs.rmSync(file);
   }
 
   if (drift.length === 0) {
