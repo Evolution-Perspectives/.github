@@ -38,7 +38,7 @@
     "name": "Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
     "color": "GRAY",
-    "description": "Tâche effectuée par le coeur de métier",
+    "description": "Contribution attendue d'un collaborateur de l'entreprise.",
     "isEnabled": true
   },
   {
