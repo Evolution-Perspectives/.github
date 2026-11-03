@@ -17,6 +17,7 @@ live so a stale file can never break production.
 | `workflows.json` | Built-in project automations (Settings > Workflows) and whether each is enabled. Currently all disabled: this repo's Actions replace them |
 | `issue-fields.json` | Org-level issue fields (distinct from project fields). Currently none |
 | `users.json` | Org members: login, name, node ID, role (ADMIN/MEMBER). The people Assignees and Reviewers can point at. No emails |
+| `teams.json` | Org teams: slug, name, node ID, privacy, parent, member logins. Empty until teams are created |
 | `labels.json` | Labels (name, color, description) per repo in `repos.json` `withItems` |
 | `milestones.json` | Milestones (title, state, due date) per repo in `withItems` |
 | `iterations/<field>.json` | Iteration fields, if any are ever added |
@@ -57,5 +58,5 @@ renamed or removed option may affect automations that reference it.
 ## Not covered on purpose
 
 - **Items and their field values**: change constantly; query live when needed.
-- **Access (collaborators, teams, roles)**: sensitive and needs admin scope.
-- **Org teams and repo custom properties**: no automation here depends on them.
+- **Access (project collaborators, per-project roles)**: sensitive and needs admin scope.
+- **Repo custom properties**: no automation here depends on them.

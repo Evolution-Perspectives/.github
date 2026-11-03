@@ -38,6 +38,14 @@ query($org: String!, $number: Int!) {
       pageInfo { hasNextPage }
       edges { role node { id login name } }
     }
+    teams(first: 100) {
+      pageInfo { hasNextPage }
+      nodes {
+        id slug name description privacy
+        parentTeam { slug }
+        members(first: 100) { pageInfo { hasNextPage } nodes { login } }
+      }
+    }
     issueFields(first: 50) {
       pageInfo { hasNextPage }
       nodes {
@@ -232,6 +240,8 @@ function assertAllComplete(org) {
   assertComplete('issueTypes', org.issueTypes);
   assertComplete('issueFields', org.issueFields);
   assertComplete('org members', org.membersWithRole);
+  assertComplete('org teams', org.teams);
+  for (const t of org.teams.nodes) assertComplete(`team "${t.slug}" members`, t.members);
   assertComplete('project fields', p.fields);
   assertComplete('project workflows', p.workflows);
   assertComplete('project views', p.views);
@@ -422,6 +432,22 @@ function buildFiles(org) {
     org.membersWithRole.edges
       .map((e) => ({ login: e.node.login, name: e.node.name || null, id: e.node.id, role: e.role }))
       .sort((a, b) => a.login.localeCompare(b.login, 'en', { sensitivity: 'base' }))
+  );
+
+  // Org teams (assignable as reviewers, linkable to the project). Empty until created.
+  files.set(
+    'teams.json',
+    org.teams.nodes
+      .map((t) => ({
+        slug: t.slug,
+        name: t.name,
+        id: t.id,
+        description: t.description || null,
+        privacy: t.privacy,
+        parent: t.parentTeam ? t.parentTeam.slug : null,
+        members: t.members.nodes.map((m) => m.login).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })),
+      }))
+      .sort((a, b) => a.slug.localeCompare(b.slug, 'en'))
   );
 
   const ref = org.reference;
