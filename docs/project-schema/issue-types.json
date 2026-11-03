@@ -56,6 +56,13 @@
     "isEnabled": true
   },
   {
+    "name": "🟩 Release/Mise en production",
+    "id": "IT_kwDOCIcusc4CAStB",
+    "color": "GREEN",
+    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
+    "isEnabled": true
+  },
+  {
     "name": "🟪 Dette technique/Refacto",
     "id": "IT_kwDOCIcusc4CASvQ",
     "color": "PURPLE",
@@ -74,13 +81,6 @@
     "id": "IT_kwDOCIcusc4B4kr-",
     "color": "YELLOW",
     "description": "Analyse technique en amont en vue de la production, étude de l'existant, évaluation des impacts",
-    "isEnabled": true
-  },
-  {
-    "name": "Release/Mise en production",
-    "id": "IT_kwDOCIcusc4CAStB",
-    "color": "GREEN",
-    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
     "isEnabled": true
   },
   {
