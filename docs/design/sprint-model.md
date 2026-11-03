@@ -14,7 +14,7 @@ Structure and IDs of the project are in `docs/project-schema/`.
 ## What goes in a sprint
 
 - Only leaf issues. Parents never carry a sprint.
-- Blocker stand-ins (types `Externe`, `Support`, `Métier`, `Management/Direction`) have no estimate and no sprint.
+- Blocker stand-ins (types `Externe`, `Métier`, `Management/Direction`) have no estimate and no sprint. `Support` is a normal work type and is planned like any other.
 
 ## Review
 
@@ -25,7 +25,8 @@ Structure and IDs of the project are in `docs/project-schema/`.
 ## Issue types
 
 - `Développement/Production` is retired: merged into `Tâche` (52 issues retyped on 2026-11-03). The new-page automation creates `Tâche`.
-- `Externe`, `Support`, `Métier`, `Management/Direction` mark something blocking whose details live outside the project. Link with "blocked by", no estimate, no sprint.
+- `Externe`, `Métier`, `Management/Direction` mark something blocking whose details live outside the project. Link with "blocked by", no estimate, no sprint.
+- `Support` is real support work (user assistance, quick fixes), not a blocker.
 - Keep `Projet` as the only level marker.
 
 ## Planning and deadlines
