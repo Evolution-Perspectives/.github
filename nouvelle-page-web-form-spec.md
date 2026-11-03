@@ -249,7 +249,7 @@ Sortie attendue:
 
 Type d'issue:
 
-- Developpement/Production
+- Tache
 
 Bloquee par:
 
@@ -277,7 +277,7 @@ Sortie attendue:
 
 Type d'issue:
 
-- Developpement/Production
+- Tache
 
 Bloquee par:
 
@@ -305,7 +305,7 @@ Sortie attendue:
 
 Type d'issue:
 
-- Developpement/Production
+- Tache
 
 Bloquee par:
 
@@ -329,7 +329,7 @@ Sortie attendue:
 
 Type d'issue:
 
-- Developpement/Production
+- Tache
 
 Bloquee par:
 

@@ -360,10 +360,17 @@ function buildFiles(org) {
   }
 
   for (const f of fields.filter((x) => x.configuration)) {
+    // Active and completed iterations are merged into one date-sorted list:
+    // a sprint moving to "completed" as time passes is not a structural change
+    // and must not make the weekly refresh open a PR.
+    const { iterations, completedIterations, ...settings } = f.configuration;
     files.set(`iterations/${slug(f.name)}.json`, {
       field: f.name,
       fieldId: f.id,
-      ...f.configuration,
+      ...settings,
+      iterations: [...completedIterations, ...iterations]
+        .map(({ id, title, startDate, duration }) => ({ id, title, startDate, duration }))
+        .sort((a, b) => a.startDate.localeCompare(b.startDate)),
     });
   }
 

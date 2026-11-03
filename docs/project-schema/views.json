@@ -18,7 +18,8 @@
       "Feature",
       "End date",
       "Fiabilite",
-      "Estimate Hours"
+      "Estimate Hours",
+      "Sprint"
     ],
     "groupBy": [],
     "verticalGroupBy": [

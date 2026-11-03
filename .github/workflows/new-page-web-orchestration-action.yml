@@ -253,7 +253,7 @@ jobs:
             const fallbackIssueTypeIdsByKey = new Map([
               ['projet', 'IT_kwDOCIcusc4B64Nz'],
               ['specscahierdescharges', 'IT_kwDOCIcusc4B4lwK'],
-              ['developpementproduction', 'IT_kwDOCIcusc4B4kdT'],
+              ['tache', 'IT_kwDOCIcusc4BNM3f'],
               ['testvalidation', 'IT_kwDOCIcusc4B4kkh'],
               ['releasemiseenproduction', 'IT_kwDOCIcusc4CAStB'],
               ['managementdirection', 'IT_kwDOCIcusc4B5VS2'],
@@ -271,7 +271,6 @@ jobs:
               const aliasMap = new Map([
                 ['directionmanagement', 'managementdirection'],
                 ['managementdirection', 'managementdirection'],
-                ['developpementproduction', 'developpementproduction'],
               ]);
               const desiredRawKey = normalizeIssueTypeKey(desiredName);
               const desiredKey = aliasMap.get(desiredRawKey) || desiredRawKey;
@@ -333,10 +332,10 @@ jobs:
               ['kickoff', 'Management/Direction'],
               ['preco', 'Specs/Cahier des charges'],
               ['maquettage', 'Specs/Cahier des charges'],
-              ['contenus', 'Développement/Production'],
-              ['template', 'Développement/Production'],
-              ['modules', 'Développement/Production'],
-              ['integration', 'Développement/Production'],
+              ['contenus', 'Tâche'],
+              ['template', 'Tâche'],
+              ['modules', 'Tâche'],
+              ['integration', 'Tâche'],
               ['validation', 'Test/Validation'],
               ['publication', 'Release/Mise en production'],
             ]);
@@ -454,18 +453,18 @@ jobs:
             subissueDefs.push(
               { key: 'preco', name: 'Preconisations marketing', issueType: 'Specs/Cahier des charges' },
               { key: 'maquettage', name: 'Maquettage', issueType: 'Specs/Cahier des charges' },
-              { key: 'contenus', name: 'Contenus', issueType: 'Développement/Production' },
+              { key: 'contenus', name: 'Contenus', issueType: 'Tâche' },
             );
 
             if (templateEnabled) {
-              subissueDefs.push({ key: 'template', name: 'Production du template', issueType: 'Développement/Production' });
+              subissueDefs.push({ key: 'template', name: 'Production du template', issueType: 'Tâche' });
             }
             if (modulesEnabled) {
-              subissueDefs.push({ key: 'modules', name: 'Nouveau(x) module(s)', issueType: 'Développement/Production' });
+              subissueDefs.push({ key: 'modules', name: 'Nouveau(x) module(s)', issueType: 'Tâche' });
             }
 
             subissueDefs.push(
-              { key: 'integration', name: 'Integration', issueType: 'Développement/Production' },
+              { key: 'integration', name: 'Integration', issueType: 'Tâche' },
               { key: 'validation', name: 'Validation/Test', issueType: 'Test/Validation' },
               { key: 'publication', name: 'Publication', issueType: 'Release/Mise en production' },
             );

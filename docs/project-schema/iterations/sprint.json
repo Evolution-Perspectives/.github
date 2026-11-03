@@ -1,0 +1,38 @@
+{
+  "field": "Sprint",
+  "fieldId": "PVTIF_lADOCIcusc4BOGrDzhoY2HU",
+  "duration": 7,
+  "startDay": 4,
+  "iterations": [
+    {
+      "id": "00b5841f",
+      "title": "Sprint 1",
+      "startDate": "2026-11-06",
+      "duration": 7
+    },
+    {
+      "id": "41fb5cc4",
+      "title": "Sprint 2",
+      "startDate": "2026-11-13",
+      "duration": 7
+    },
+    {
+      "id": "33cc7317",
+      "title": "Sprint 3",
+      "startDate": "2026-11-20",
+      "duration": 7
+    },
+    {
+      "id": "25206873",
+      "title": "Sprint 4",
+      "startDate": "2026-11-27",
+      "duration": 7
+    },
+    {
+      "id": "8c46e4b5",
+      "title": "Sprint 5",
+      "startDate": "2026-12-04",
+      "duration": 7
+    }
+  ]
+}

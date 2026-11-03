@@ -24,7 +24,7 @@
     "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
     "color": "GRAY",
-    "description": "Sujet dépendant d’un client/prestataire/partenaire externe.",
+    "description": "Sujet dépendant d'un client/prestataire/partenaire externe. Sert de bloquant : détail hors projet, relié par « bloqué par », sans estimation ni sprint.",
     "isEnabled": true
   },
   {
@@ -38,14 +38,14 @@
     "name": "Management/Direction",
     "id": "IT_kwDOCIcusc4B5VS2",
     "color": "GRAY",
-    "description": null,
+    "description": "Attente d'une décision ou d'un arbitrage de la direction. Sert de bloquant : détail hors projet, relié par « bloqué par », sans estimation ni sprint.",
     "isEnabled": true
   },
   {
     "name": "Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
     "color": "GRAY",
-    "description": "Tâche effectuée par le coeur de métier",
+    "description": "Attente du coeur de métier. Sert de bloquant : détail hors projet, relié par « bloqué par », sans estimation ni sprint.",
     "isEnabled": true
   },
   {
@@ -80,7 +80,7 @@
     "name": "Support",
     "id": "IT_kwDOCIcusc4B4knB",
     "color": "PINK",
-    "description": "Assistance utilisateur, aide ponctuelle sur un fonctionnement ou correction rapide non structurante.",
+    "description": "Assistance utilisateur, aide ponctuelle ou correction rapide non structurante. Peut servir de bloquant : détail hors projet, relié par « bloqué par », sans estimation ni sprint.",
     "isEnabled": true
   },
   {
@@ -94,7 +94,7 @@
     "name": "Test/Validation",
     "id": "IT_kwDOCIcusc4B4kkh",
     "color": "GREEN",
-    "description": "Vérification qualité, tests de fonctionnalité, validation fonctionnelle/technique",
+    "description": "Vérification qualité, tests de fonctionnalité, validation fonctionnelle/technique. Réservé aux validations importantes (visibles utilisateur, risquées, multi-personnes ou avec checklist propre) ; les autres se valident dans l'issue, au statut 🧪 In Review.",
     "isEnabled": true
   }
 ]
