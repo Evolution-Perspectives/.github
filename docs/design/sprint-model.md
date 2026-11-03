@@ -35,3 +35,12 @@ Structure and IDs of the project are in `docs/project-schema/`.
 
 - Plan the whole project upfront by placing leaves in future sprints. A parent's deadline is the end of the latest sprint among its descendants.
 - Hours/days estimates and the capacity scheduler are not part of this model.
+
+## Statuses and issue state
+
+- A closed issue means the team has nothing left to do on it.
+- `📤 Pending Release`: dev done, reviewed, on staging; only the release is left. The issue is **closed** (as completed), so native progress, burn-up and sprint commitment count it. `🏆 Done` means released.
+- `📡 Pending Deploy` is an **open** state.
+- Closing an issue sets `🏆 Done`, except: closed from `🧪 In Review` gives `📤 Pending Release`, and an issue already in `📤 Pending Release` keeps it.
+- Parents show 100% when all children are in `📤 Pending Release`; do not close a parent by hand before the release.
+- Rollover only moves open issues, so `📤 Pending Release` items are never rolled over.

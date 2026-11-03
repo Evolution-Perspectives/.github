@@ -95,6 +95,14 @@ jobs:
 
             const target = TARGET_BY_REASON[stateReason];
 
+            // A completed close does not always mean "released":
+            // - already Pending Release: team work is finished, only the release is left; keep it.
+            // - closed from In Review: reviewed, so it waits for the release (Pending Release).
+            // - otherwise: Done, as before.
+            const PENDING_RELEASE_STATUS = '📤 Pending Release';
+            const IN_REVIEW_STATUS = '🧪 In Review';
+            const PENDING_RELEASE_TARGET = { optionId: 'ba8247ce', name: PENDING_RELEASE_STATUS };
+
             const writeSummary = (issueRef, status, extra = {}) => {
               const summary = core.summary
                 .addHeading('Close issue → Status sync')
@@ -208,17 +216,29 @@ jobs:
             const currentOptionId = item.fieldValueByName?.optionId;
             const currentName = item.fieldValueByName?.name || '(none)';
 
-            if (currentOptionId === target.optionId) {
-              core.info(`Status already ${target.name} for ${issueRef}; no write needed.`);
+            let effectiveTarget = target;
+            if (stateReason === 'completed') {
+              if (currentName === PENDING_RELEASE_STATUS) {
+                core.info(`${issueRef} is already ${PENDING_RELEASE_STATUS}; Status kept.`);
+                await writeSummary(issueRef, 'skipped-keep-pending-release', { 'Current Status': currentName });
+                return;
+              }
+              if (currentName === IN_REVIEW_STATUS) {
+                effectiveTarget = PENDING_RELEASE_TARGET;
+              }
+            }
+
+            if (currentOptionId === effectiveTarget.optionId) {
+              core.info(`Status already ${effectiveTarget.name} for ${issueRef}; no write needed.`);
               await writeSummary(issueRef, 'skipped-already-in-sync', { 'Current Status': currentName });
               return;
             }
 
             if (dryRun) {
-              core.info(`[dry-run] Would set Status of ${issueRef} from "${currentName}" to "${target.name}".`);
+              core.info(`[dry-run] Would set Status of ${issueRef} from "${currentName}" to "${effectiveTarget.name}".`);
               await writeSummary(issueRef, 'dry-run-no-write', {
                 'Current Status': currentName,
-                'Target Status': target.name,
+                'Target Status': effectiveTarget.name,
               });
               return;
             }
@@ -227,11 +247,11 @@ jobs:
               projectId,
               itemId: item.id,
               fieldId: statusFieldId,
-              optionId: target.optionId,
+              optionId: effectiveTarget.optionId,
             });
 
-            core.info(`Set Status of ${issueRef} from "${currentName}" to "${target.name}".`);
+            core.info(`Set Status of ${issueRef} from "${currentName}" to "${effectiveTarget.name}".`);
             await writeSummary(issueRef, 'updated', {
               'Previous Status': currentName,
-              'New Status': target.name,
+              'New Status': effectiveTarget.name,
             });

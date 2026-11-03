@@ -81,16 +81,19 @@ Goal: Clarify how closing a GitHub issue relates to the Project Status field.
 Plain rule:
 
 - Closing an issue (via UI, `gh issue close`, commit keyword, PR merge, or API) automatically sets the Project Status field, based on `state_reason`.
-- Setting the Project Status field to `🏆 Done` or `❌ Canceled` automatically closes the linked issue, and moving a closed issue's Status to any other option automatically reopens it.
+- Setting the Project Status field to `🏆 Done`, `📤 Pending Release` or `❌ Canceled` automatically closes the linked issue, and moving a closed issue's Status to any other option automatically reopens it.
+- `📤 Pending Release` means the team's work is finished (reviewed, on staging) and only the release is left. The issue is closed so progress and burn-up count it; `🏆 Done` then means released.
+- `📡 Pending Deploy` is an open state: the issue stays open (a closed issue moved there is reopened).
 - Both directions are idempotent reconciles: no write happens if the issue/Status are already in the target state, so the two directions do not loop off each other.
 
 How it works:
 
 1. `close-issue-sync-status.yml` fires on `issues: closed` for every close and reads `state_reason`:
-   - `completed` → Status `🏆 Done`
+   - `completed` → Status `🏆 Done`, except: closed while in `🧪 In Review` → Status `📤 Pending Release`; already in `📤 Pending Release` → Status kept
    - `not_planned` or `duplicate` → Status `❌ Canceled`
 2. `status-sync-issue-close.yml` fires on the org-level `projects-v2-item-updated` relay (the same relay `projects-estimation-rollup.yml` consumes) whenever a Project item's fields change, and reconciles the linked issue's close state against the current Status:
    - Status `🏆 Done` → issue closed as `completed`
+   - Status `📤 Pending Release` → issue closed as `completed` (an already closed issue is left alone, whatever its close reason)
    - Status `❌ Canceled` → issue closed as `not_planned`
    - Any other Status, while the linked issue is closed → issue reopened
    - Project items with no linked issue (drafts, PRs) are skipped
@@ -102,7 +105,9 @@ Project Status field options (single-select):
 - `💎 Ready`
 - `🌱 In Progress`
 - `⏳ Paused`
+- `📡 Pending Deploy`
 - `🧪 In Review`
+- `📤 Pending Release`
 - `🏆 Done`
 - `❌ Canceled`
 
@@ -110,3 +115,5 @@ Notes:
 
 - Manually setting a closed issue's Status to a non-Done/Canceled option reopens it, even if the original close reason still applies.
 - Manually flipping Status to `🏆 Done`/`❌ Canceled` on an issue that's open, or closed for a different reason, re-closes it to match — the Status → close mapping always applies, not just at close time.
+- Closing an issue that is not in `🧪 In Review` or `📤 Pending Release` still means `🏆 Done`, so for work that has a release step, set `📤 Pending Release` (or close from `🧪 In Review`) instead of closing early.
+- Closing an issue also removes its blocking links (`remove-blocking-on-close.yml`), so dependents are unblocked when an item reaches `📤 Pending Release`, not when it is released.
