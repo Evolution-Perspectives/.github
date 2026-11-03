@@ -17,7 +17,7 @@
     "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
     "color": "GRAY",
-    "description": "Sujet dépendant d’un client/prestataire/partenaire externe.",
+    "description": "Attente d'une réponse ou d'une livraison venant d'un acteur externe à l'entreprise.",
     "isEnabled": true
   },
   {
