@@ -126,5 +126,11 @@
     "name": "Closed",
     "id": "PVTF_lADOCIcusc4BOGrDzhPdShE",
     "dataType": "CLOSED"
+  },
+  {
+    "name": "Sprint",
+    "id": "PVTIF_lADOCIcusc4BOGrDzhoY2HU",
+    "dataType": "ITERATION",
+    "iterationsFile": "iterations/sprint.json"
   }
 ]

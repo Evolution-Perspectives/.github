@@ -18,7 +18,8 @@
       "Feature",
       "End date",
       "Fiabilite",
-      "Estimate Hours"
+      "Estimate Hours",
+      "Sprint"
     ],
     "groupBy": [],
     "verticalGroupBy": [
@@ -245,7 +246,7 @@
     "name": "Assignation",
     "id": "PVTV_lADOCIcusc4BOGrDzgJoNKM",
     "layout": "TABLE_LAYOUT",
-    "filter": "no:assignee -type:Externe,Métier,Management/Direction",
+    "filter": "no:assignee -type:Externe,Management/Direction,Produit/Métier",
     "visibleFields": [
       "Title",
       "Assignees",

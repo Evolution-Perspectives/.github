@@ -9,22 +9,15 @@
   {
     "name": "Dette technique/Refacto",
     "id": "IT_kwDOCIcusc4CASvQ",
-    "color": "GRAY",
-    "description": null,
-    "isEnabled": true
-  },
-  {
-    "name": "Développement/Production",
-    "id": "IT_kwDOCIcusc4B4kdT",
     "color": "PURPLE",
-    "description": "Exécution opérationnelle : réalisation des actions planifiées et passage en production/mise en service selon le contexte",
+    "description": "Travail technique prévisible. À traiter avant que son coût ne grandisse et qu'il ne pèse sur la vitesse, l'efficacité et la sécurité des futurs développements.",
     "isEnabled": true
   },
   {
     "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
-    "color": "GRAY",
-    "description": "Sujet dépendant d’un client/prestataire/partenaire externe.",
+    "color": "ORANGE",
+    "description": "Réponse ou livraison attendue d'un acteur externe à l'entreprise.",
     "isEnabled": true
   },
   {
@@ -37,28 +30,28 @@
   {
     "name": "Management/Direction",
     "id": "IT_kwDOCIcusc4B5VS2",
-    "color": "GRAY",
-    "description": null,
+    "color": "ORANGE",
+    "description": "Décision ou arbitrage attendu de la direction.",
     "isEnabled": true
   },
   {
-    "name": "Métier",
+    "name": "Produit/Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
-    "color": "GRAY",
-    "description": "Tâche effectuée par le coeur de métier",
+    "color": "PINK",
+    "description": "Intervention du produit ou du métier : réalisation d'une tâche, apport d'une information, validation.",
     "isEnabled": true
   },
   {
     "name": "Projet",
     "id": "IT_kwDOCIcusc4B64Nz",
     "color": "BLUE",
-    "description": "Ensemble d'issues correspondant à une iteration, un projet, un objectif clair, avec un début et une fin",
+    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
     "isEnabled": true
   },
   {
     "name": "Recherche/Veille technique",
     "id": "IT_kwDOCIcusc4B4kr-",
-    "color": "GRAY",
+    "color": "YELLOW",
     "description": "Analyse technique en amont en vue de la production, étude de l'existant, évaluation des impacts",
     "isEnabled": true
   },
@@ -66,13 +59,13 @@
     "name": "Release/Mise en production",
     "id": "IT_kwDOCIcusc4CAStB",
     "color": "GREEN",
-    "description": null,
+    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
     "isEnabled": true
   },
   {
     "name": "Specs/Cahier des charges",
     "id": "IT_kwDOCIcusc4B4lwK",
-    "color": "GRAY",
+    "color": "YELLOW",
     "description": "Rédaction/affinage des besoins et cadrage fonctionnel.",
     "isEnabled": true
   },
@@ -80,13 +73,13 @@
     "name": "Support",
     "id": "IT_kwDOCIcusc4B4knB",
     "color": "PINK",
-    "description": "Assistance utilisateur, aide ponctuelle sur un fonctionnement ou correction rapide non structurante.",
+    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
     "isEnabled": true
   },
   {
     "name": "Tâche",
     "id": "IT_kwDOCIcusc4BNM3f",
-    "color": "YELLOW",
+    "color": "GRAY",
     "description": "Tâche opérationnelle à exécuter",
     "isEnabled": true
   },
@@ -94,7 +87,7 @@
     "name": "Test/Validation",
     "id": "IT_kwDOCIcusc4B4kkh",
     "color": "GREEN",
-    "description": "Vérification qualité, tests de fonctionnalité, validation fonctionnelle/technique",
+    "description": "Session de test d'un produit ou d'un ensemble de fonctionnalités : préparation, passage des scénarios, synthèse des anomalies et des écarts.",
     "isEnabled": true
   }
 ]
