@@ -87,7 +87,7 @@
     "name": "Test/Validation",
     "id": "IT_kwDOCIcusc4B4kkh",
     "color": "GREEN",
-    "description": "Vérification qualité, tests de fonctionnalité, validation fonctionnelle/technique",
+    "description": "Test d'envergure d'un livrable avant validation, avec préparation, passage des scénarios et synthèse des anomalies.",
     "isEnabled": true
   }
 ]
