@@ -1,72 +1,37 @@
 [
   {
-    "name": "⚪ Support",
-    "id": "IT_kwDOCIcusc4B4knB",
-    "color": "PINK",
-    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
-    "isEnabled": true
-  },
-  {
-    "name": "⚫ Tâche",
-    "id": "IT_kwDOCIcusc4BNM3f",
-    "color": "GRAY",
-    "description": "Tâche opérationnelle à exécuter",
-    "isEnabled": true
-  },
-  {
-    "name": "🔴 Bug",
+    "name": "Bug",
     "id": "IT_kwDOCIcusc4BNM3j",
     "color": "RED",
     "description": "Comportement non prévu/incorrect ou défaut à corriger.",
     "isEnabled": true
   },
   {
-    "name": "🔵 Fonctionnalité",
-    "id": "IT_kwDOCIcusc4BNM3l",
-    "color": "BLUE",
-    "description": "Nouvelle fonctionnalité ou évolution produit.",
+    "name": "Dette technique/Refacto",
+    "id": "IT_kwDOCIcusc4CASvQ",
+    "color": "PURPLE",
+    "description": "Travail technique prévisible. À traiter avant que son coût ne grandisse et qu'il ne pèse sur la vitesse, l'efficacité et la sécurité des futurs développements.",
     "isEnabled": true
   },
   {
-    "name": "🔷 Projet",
-    "id": "IT_kwDOCIcusc4B64Nz",
-    "color": "BLUE",
-    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
-    "isEnabled": true
-  },
-  {
-    "name": "🟠 Externe",
+    "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
     "color": "ORANGE",
     "description": "Réponse ou livraison attendue d'un acteur externe à l'entreprise.",
     "isEnabled": true
   },
   {
-    "name": "🟢 Test/Validation",
-    "id": "IT_kwDOCIcusc4B4kkh",
-    "color": "GREEN",
-    "description": "Session de test d'un produit ou d'un ensemble de fonctionnalités : préparation, passage des scénarios, synthèse des anomalies et des écarts.",
+    "name": "Fonctionnalité",
+    "id": "IT_kwDOCIcusc4BNM3l",
+    "color": "BLUE",
+    "description": "Nouvelle fonctionnalité ou évolution produit.",
     "isEnabled": true
   },
   {
-    "name": "🟧 Management/Direction",
+    "name": "Management/Direction",
     "id": "IT_kwDOCIcusc4B5VS2",
     "color": "ORANGE",
     "description": "Décision ou arbitrage attendu de la direction.",
-    "isEnabled": true
-  },
-  {
-    "name": "🟩 Release/Mise en production",
-    "id": "IT_kwDOCIcusc4CAStB",
-    "color": "GREEN",
-    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
-    "isEnabled": true
-  },
-  {
-    "name": "🟪 Dette technique/Refacto",
-    "id": "IT_kwDOCIcusc4CASvQ",
-    "color": "PURPLE",
-    "description": "Travail technique prévisible. À traiter avant que son coût ne grandisse et qu'il ne pèse sur la vitesse, l'efficacité et la sécurité des futurs développements.",
     "isEnabled": true
   },
   {
@@ -77,6 +42,13 @@
     "isEnabled": true
   },
   {
+    "name": "Projet",
+    "id": "IT_kwDOCIcusc4B64Nz",
+    "color": "BLUE",
+    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
+    "isEnabled": true
+  },
+  {
     "name": "Recherche/Veille technique",
     "id": "IT_kwDOCIcusc4B4kr-",
     "color": "YELLOW",
@@ -84,10 +56,38 @@
     "isEnabled": true
   },
   {
+    "name": "Release/Mise en production",
+    "id": "IT_kwDOCIcusc4CAStB",
+    "color": "GREEN",
+    "description": "Mise en production planifiée : déploiement, publication, communication de la livraison.",
+    "isEnabled": true
+  },
+  {
     "name": "Specs/Cahier des charges",
     "id": "IT_kwDOCIcusc4B4lwK",
     "color": "YELLOW",
     "description": "Rédaction/affinage des besoins et cadrage fonctionnel.",
+    "isEnabled": true
+  },
+  {
+    "name": "Support",
+    "id": "IT_kwDOCIcusc4B4knB",
+    "color": "PINK",
+    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
+    "isEnabled": true
+  },
+  {
+    "name": "Tâche",
+    "id": "IT_kwDOCIcusc4BNM3f",
+    "color": "GRAY",
+    "description": "Tâche opérationnelle à exécuter",
+    "isEnabled": true
+  },
+  {
+    "name": "Test/Validation",
+    "id": "IT_kwDOCIcusc4B4kkh",
+    "color": "GREEN",
+    "description": "Session de test d'un produit ou d'un ensemble de fonctionnalités : préparation, passage des scénarios, synthèse des anomalies et des écarts.",
     "isEnabled": true
   }
 ]
