@@ -1,0 +1,241 @@
+{
+  "Evolution-Perspectives/.github": [
+    {
+      "name": "bug",
+      "color": "d73a4a",
+      "description": "Something isn't working"
+    },
+    {
+      "name": "documentation",
+      "color": "0075ca",
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "name": "enhancement",
+      "color": "a2eeef",
+      "description": "New feature or request"
+    },
+    {
+      "name": "good first issue",
+      "color": "7057ff",
+      "description": "Good for newcomers"
+    },
+    {
+      "name": "help wanted",
+      "color": "008672",
+      "description": "Extra attention is needed"
+    },
+    {
+      "name": "invalid",
+      "color": "e4e669",
+      "description": "This doesn't seem right"
+    },
+    {
+      "name": "question",
+      "color": "d876e3",
+      "description": "Further information is requested"
+    },
+    {
+      "name": "wontfix",
+      "color": "ffffff",
+      "description": "This will not be worked on"
+    }
+  ],
+  "Evolution-Perspectives/hubspot-theme": [
+    {
+      "name": "Backend",
+      "color": "6cc24a",
+      "description": null
+    },
+    {
+      "name": "CMS",
+      "color": "d93f0b",
+      "description": null
+    },
+    {
+      "name": "Database",
+      "color": "fc4b85",
+      "description": null
+    },
+    {
+      "name": "DevOps",
+      "color": "ff9900",
+      "description": null
+    },
+    {
+      "name": "Frontend",
+      "color": "00d8ff",
+      "description": null
+    },
+    {
+      "name": "RGPD/Legal",
+      "color": "4e3ae7",
+      "description": null
+    },
+    {
+      "name": "SEO",
+      "color": "2ECC71",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/intercobot": [
+    {
+      "name": "Backend",
+      "color": "6cc24a",
+      "description": null
+    },
+    {
+      "name": "Database",
+      "color": "fc4b85",
+      "description": null
+    },
+    {
+      "name": "DevOps",
+      "color": "ff9900",
+      "description": null
+    },
+    {
+      "name": "Frontend",
+      "color": "00d8ff",
+      "description": null
+    },
+    {
+      "name": "SEO",
+      "color": "2ECC71",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/IT": [
+    {
+      "name": "Hardware",
+      "color": "fef923",
+      "description": null
+    },
+    {
+      "name": "Hostinger",
+      "color": "674CC4",
+      "description": null
+    },
+    {
+      "name": "Hubspot",
+      "color": "FF7A59",
+      "description": null
+    },
+    {
+      "name": "Microsoft 365",
+      "color": "008AD7",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/maquette-demo-sites-web": [
+    {
+      "name": "bug",
+      "color": "d73a4a",
+      "description": "Something isn't working"
+    },
+    {
+      "name": "documentation",
+      "color": "0075ca",
+      "description": "Improvements or additions to documentation"
+    },
+    {
+      "name": "duplicate",
+      "color": "cfd3d7",
+      "description": "This issue or pull request already exists"
+    },
+    {
+      "name": "enhancement",
+      "color": "a2eeef",
+      "description": "New feature or request"
+    },
+    {
+      "name": "good first issue",
+      "color": "7057ff",
+      "description": "Good for newcomers"
+    },
+    {
+      "name": "help wanted",
+      "color": "008672",
+      "description": "Extra attention is needed"
+    },
+    {
+      "name": "invalid",
+      "color": "e4e669",
+      "description": "This doesn't seem right"
+    },
+    {
+      "name": "question",
+      "color": "d876e3",
+      "description": "Further information is requested"
+    },
+    {
+      "name": "wontfix",
+      "color": "ffffff",
+      "description": "This will not be worked on"
+    }
+  ],
+  "Evolution-Perspectives/template-formations": [
+    {
+      "name": "Backend",
+      "color": "6cc24a",
+      "description": null
+    },
+    {
+      "name": "Database",
+      "color": "fc4b85",
+      "description": null
+    },
+    {
+      "name": "DevOps",
+      "color": "ff9900",
+      "description": null
+    },
+    {
+      "name": "Frontend",
+      "color": "00d8ff",
+      "description": null
+    },
+    {
+      "name": "OTHER",
+      "color": "612dd5",
+      "description": null
+    },
+    {
+      "name": "SEO",
+      "color": "46e054",
+      "description": null
+    }
+  ],
+  "Evolution-Perspectives/way2be": [
+    {
+      "name": "Backend",
+      "color": "6cc24a",
+      "description": null
+    },
+    {
+      "name": "Database",
+      "color": "fc4b85",
+      "description": null
+    },
+    {
+      "name": "DevOps",
+      "color": "ff9900",
+      "description": null
+    },
+    {
+      "name": "Frontend",
+      "color": "00d8ff",
+      "description": null
+    },
+    {
+      "name": "SEO",
+      "color": "2ECC71",
+      "description": null
+    }
+  ]
+}

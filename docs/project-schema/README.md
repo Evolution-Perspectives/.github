@@ -16,6 +16,8 @@ live so a stale file can never break production.
 | `options/<field>.json` | One file per single-select field (Status, Prio, Entity, Projet, Feature, Domaine, Size, Fiabilite): field ID and options with IDs, in display order |
 | `workflows.json` | Built-in project automations (Settings > Workflows) and whether each is enabled. Currently all disabled: this repo's Actions replace them |
 | `issue-fields.json` | Org-level issue fields (distinct from project fields). Currently none |
+| `labels.json` | Labels (name, color, description) per repo in `repos.json` `withItems` |
+| `milestones.json` | Milestones (title, state, due date) per repo in `withItems` |
 | `iterations/<field>.json` | Iteration fields, if any are ever added |
 | `issue-types.json` | Org issue types with IDs |
 | `views.json` | Project views: layout, filter, visible fields, grouping, sort |
@@ -31,7 +33,7 @@ could be added without guessing:
 |---|---|
 | `reference/enums.json` | Allowed values: field types (`ProjectV2CustomFieldType`, `ProjectV2FieldType`), view layouts, option colors, item types, roles, status-update states, issue field types... |
 | `reference/inputs.json` | Exact shape of every input object used to create or change project structure (fields, options, views, iterations, issue types, issue fields), with `required` flags |
-| `reference/mutations.json` | Every project, issue-type, issue-field, sub-issue, blocked-by mutation, with its input type |
+| `reference/mutations.json` | Every project, issue-type, issue-field, sub-issue, blocked-by, label and milestone mutation, with its input type |
 
 It only changes when GitHub changes its API, so a diff there is a signal that
 new capabilities (or deprecations) appeared.
@@ -53,7 +55,6 @@ renamed or removed option may affect automations that reference it.
 
 ## Not covered on purpose
 
-- **Labels, milestones and anything written by users in other repos**: this repo is public and the source repos are private, so free text from them must never be committed here.
 - **Items and their field values**: change constantly; query live when needed.
 - **Access (collaborators, teams, roles)**: sensitive and needs admin scope.
 - **Org teams and repo custom properties**: no automation here depends on them.

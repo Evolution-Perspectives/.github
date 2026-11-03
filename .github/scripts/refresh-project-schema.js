@@ -163,7 +163,7 @@ function buildReference() {
   const schema = json.data.__schema;
   const types = new Map(schema.types.map((t) => [t.name, t]));
 
-  const MUTATION_RE = /ProjectV2|IssueType|IssueField|SubIssue|BlockedBy/;
+  const MUTATION_RE = /ProjectV2|IssueType|IssueField|SubIssue|BlockedBy|Label|Milestone/;
   const mutations = schema.mutationType.fields.filter((m) => MUTATION_RE.test(m.name));
 
   // Closure: every input object / enum reachable from the selected mutations.
@@ -239,6 +239,39 @@ function assertAllComplete(org) {
   }
 }
 
+// Labels and milestones of the repos that feed the project (Labels / Milestone
+// are project fields). One aliased query for all repos.
+function fetchRepoMetadata(repos) {
+  const aliases = repos.map((full, i) => {
+    const [owner, name] = full.split('/');
+    return `r${i}: repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)}) {
+      nameWithOwner
+      labels(first: 100) { pageInfo { hasNextPage } nodes { name color description } }
+      milestones(first: 100, states: [OPEN, CLOSED]) { pageInfo { hasNextPage } nodes { title state dueOn description } }
+    }`;
+  });
+  const out = execFileSync('gh', ['api', 'graphql', '-f', `query={${aliases.join('\n')}}`], {
+    encoding: 'utf8',
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  const json = JSON.parse(out);
+  if (json.errors) throw new Error(JSON.stringify(json.errors));
+  const labels = {};
+  const milestones = {};
+  for (const r of Object.values(json.data)) {
+    assertComplete(`${r.nameWithOwner} labels`, r.labels);
+    assertComplete(`${r.nameWithOwner} milestones`, r.milestones);
+    labels[r.nameWithOwner] = r.labels.nodes
+      .map(({ name, color, description }) => ({ name, color, description: description || null }))
+      .sort(byName);
+    milestones[r.nameWithOwner] = r.milestones.nodes
+      .map(({ title, state, dueOn, description }) => ({ title, state, dueOn: dueOn || null, description: description || null }))
+      .sort((a, b) => a.title.localeCompare(b.title, 'en'));
+  }
+  const sortObj = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => a.localeCompare(b, 'en')));
+  return { labels: sortObj(labels), milestones: sortObj(milestones) };
+}
+
 function fetchSchema() {
   const out = execFileSync(
     'gh',
@@ -251,6 +284,7 @@ function fetchSchema() {
   if (!org || !org.projectV2) throw new Error(`Project ${ORG}#${NUMBER} not found`);
   assertAllComplete(org);
   org.itemSources = fetchItemSources();
+  org.repoMetadata = fetchRepoMetadata(org.itemSources.repos);
   org.reference = buildReference();
   return org;
 }
@@ -372,6 +406,9 @@ function buildFiles(org) {
       visibility,
     }))
   );
+
+  files.set('labels.json', org.repoMetadata.labels);
+  files.set('milestones.json', org.repoMetadata.milestones);
 
   const ref = org.reference;
   files.set('reference/enums.json', ref.enums);

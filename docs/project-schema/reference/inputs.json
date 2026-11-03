@@ -13,6 +13,26 @@
       "description": "The ID of the issue that blocks the given issue."
     }
   ],
+  "AddLabelsToLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the labelable object to add labels to."
+    },
+    {
+      "name": "labelIds",
+      "type": "[ID!]",
+      "required": false,
+      "description": "The ids of the labels to add."
+    },
+    {
+      "name": "labels",
+      "type": "[LabelUpdateInput!]",
+      "required": false,
+      "description": "The labels to add, each with optional `rationale` or a `suggest` flag that stores the addition as a pending suggestion. Mutually exclusive with `labelIds`."
+    }
+  ],
   "AddProjectV2DraftIssueInput": [
     {
       "name": "projectId",
@@ -91,6 +111,14 @@
       "type": "ID!",
       "required": true,
       "description": "The ID of the ProjectV2Item to archive."
+    }
+  ],
+  "ClearLabelsFromLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the labelable object to clear the labels from."
     }
   ],
   "ClearProjectV2ItemFieldValueInput": [
@@ -235,6 +263,32 @@
       "type": "IssueTypeColor",
       "required": false,
       "description": "Color for the issue type"
+    }
+  ],
+  "CreateLabelInput": [
+    {
+      "name": "repositoryId",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the repository."
+    },
+    {
+      "name": "color",
+      "type": "String!",
+      "required": true,
+      "description": "A 6 character hex code, without the leading #, identifying the color of the label."
+    },
+    {
+      "name": "name",
+      "type": "String!",
+      "required": true,
+      "description": "The name of the label."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A brief description of the label, such as its purpose."
     }
   ],
   "CreateProjectV2FieldInput": [
@@ -403,6 +457,14 @@
       "description": "The ID of the issue type to delete"
     }
   ],
+  "DeleteLabelInput": [
+    {
+      "name": "id",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the label to be deleted."
+    }
+  ],
   "DeleteProjectV2FieldInput": [
     {
       "name": "fieldId",
@@ -543,6 +605,32 @@
       "type": "Int!",
       "required": true,
       "description": "The priority of the option in the list."
+    }
+  ],
+  "LabelUpdateInput": [
+    {
+      "name": "rationale",
+      "type": "String",
+      "required": false,
+      "description": "Optional rationale describing why this value was selected. Max 280 characters."
+    },
+    {
+      "name": "suggest",
+      "type": "Boolean",
+      "required": false,
+      "description": "If true, the value is stored as a pending suggestion for human review rather than being applied directly."
+    },
+    {
+      "name": "confidence",
+      "type": "IssueEventConfidenceLevel",
+      "required": false,
+      "description": "The confidence level the agent had when selecting this value."
+    },
+    {
+      "name": "labelId",
+      "type": "ID!",
+      "required": true,
+      "description": "The ID of the Label."
     }
   ],
   "LinkProjectV2ToRepositoryInput": [
@@ -759,6 +847,20 @@
       "description": "The ID of the blocking issue."
     }
   ],
+  "RemoveLabelsFromLabelableInput": [
+    {
+      "name": "labelableId",
+      "type": "ID!",
+      "required": true,
+      "description": "The id of the Labelable to remove labels from."
+    },
+    {
+      "name": "labelIds",
+      "type": "[ID!]!",
+      "required": true,
+      "description": "The ids of labels to remove."
+    }
+  ],
   "RemoveSubIssueInput": [
     {
       "name": "issueId",
@@ -953,6 +1055,32 @@
       "type": "IssueTypeColor",
       "required": false,
       "description": "Color for the issue type"
+    }
+  ],
+  "UpdateLabelInput": [
+    {
+      "name": "id",
+      "type": "ID!",
+      "required": true,
+      "description": "The Node ID of the label to be updated."
+    },
+    {
+      "name": "color",
+      "type": "String",
+      "required": false,
+      "description": "A 6 character hex code, without the leading #, identifying the updated color of the label."
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "required": false,
+      "description": "A brief description of the label, such as its purpose."
+    },
+    {
+      "name": "name",
+      "type": "String",
+      "required": false,
+      "description": "The updated name of the label."
     }
   ],
   "UpdateProjectV2CollaboratorsInput": [

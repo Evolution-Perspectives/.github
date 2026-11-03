@@ -5,6 +5,11 @@
     "description": "Adds a 'blocked by' relationship to an issue."
   },
   {
+    "name": "addLabelsToLabelable",
+    "input": "AddLabelsToLabelableInput",
+    "description": "Adds labels to a labelable object."
+  },
+  {
     "name": "addProjectV2DraftIssue",
     "input": "AddProjectV2DraftIssueInput",
     "description": "Creates a new draft issue and add it to a Project."
@@ -23,6 +28,11 @@
     "name": "archiveProjectV2Item",
     "input": "ArchiveProjectV2ItemInput",
     "description": "Archives a ProjectV2Item"
+  },
+  {
+    "name": "clearLabelsFromLabelable",
+    "input": "ClearLabelsFromLabelableInput",
+    "description": "Clears all labels from a labelable object."
   },
   {
     "name": "clearProjectV2ItemFieldValue",
@@ -53,6 +63,11 @@
     "name": "createIssueType",
     "input": "CreateIssueTypeInput",
     "description": "Creates a new issue type"
+  },
+  {
+    "name": "createLabel",
+    "input": "CreateLabelInput",
+    "description": "Creates a new label."
   },
   {
     "name": "createProjectV2",
@@ -93,6 +108,11 @@
     "name": "deleteIssueType",
     "input": "DeleteIssueTypeInput",
     "description": "Delete an issue type"
+  },
+  {
+    "name": "deleteLabel",
+    "input": "DeleteLabelInput",
+    "description": "Deletes a label."
   },
   {
     "name": "deleteProjectV2",
@@ -143,6 +163,11 @@
     "name": "removeBlockedBy",
     "input": "RemoveBlockedByInput",
     "description": "Removes a 'blocked by' relationship from an issue."
+  },
+  {
+    "name": "removeLabelsFromLabelable",
+    "input": "RemoveLabelsFromLabelableInput",
+    "description": "Removes labels from a Labelable object."
   },
   {
     "name": "removeSubIssue",
@@ -198,6 +223,11 @@
     "name": "updateIssueType",
     "input": "UpdateIssueTypeInput",
     "description": "Update an issue type"
+  },
+  {
+    "name": "updateLabel",
+    "input": "UpdateLabelInput",
+    "description": "Updates an existing label."
   },
   {
     "name": "updateProjectV2",
