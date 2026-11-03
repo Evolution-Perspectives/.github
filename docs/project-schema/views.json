@@ -4,104 +4,320 @@
     "name": "Main Kanban",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtiU",
     "layout": "BOARD_LAYOUT",
-    "filter": "no:parent-issue"
+    "filter": "no:parent-issue",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress",
+      "Prio",
+      "Size",
+      "Estimate Days",
+      "Entity",
+      "Feature",
+      "End date",
+      "Fiabilite",
+      "Estimate Hours"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Status"
+    ],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 2,
     "name": "Bloquants",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtmU",
     "layout": "TABLE_LAYOUT",
-    "filter": "has:blocking"
+    "filter": "has:blocking",
+    "visibleFields": [
+      "Title",
+      "Start date",
+      "End date"
+    ],
+    "groupBy": [
+      "Domaine"
+    ],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Start date",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 3,
     "name": "Priorisation",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtmY",
     "layout": "TABLE_LAYOUT",
-    "filter": "no:prio no:parent-issue"
+    "filter": "no:prio no:parent-issue",
+    "visibleFields": [
+      "Title"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Prio"
+    ],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 6,
     "name": "Nico",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtmk",
     "layout": "TABLE_LAYOUT",
-    "filter": "assignee:NicolasCesariEP -is:closed status:\"💎 Ready\",\"🌱 In Progress\",\"⏳ Paused\""
+    "filter": "assignee:NicolasCesariEP -is:closed status:\"💎 Ready\",\"🌱 In Progress\",\"⏳ Paused\"",
+    "visibleFields": [
+      "Title",
+      "Prio",
+      "Status"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 9,
     "name": "Raw",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhis",
     "layout": "TABLE_LAYOUT",
-    "filter": null
+    "filter": null,
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
   },
   {
     "number": 10,
     "name": "Logan",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhqo",
     "layout": "BOARD_LAYOUT",
-    "filter": "assignee:Logan-EP "
+    "filter": "assignee:Logan-EP ",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Sub-issues progress",
+      "Size",
+      "Projet"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Status"
+    ],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 12,
     "name": "Alice",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhsA",
     "layout": "TABLE_LAYOUT",
-    "filter": null
+    "filter": null,
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
   },
   {
     "number": 13,
     "name": "Filipe",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhsQ",
     "layout": "TABLE_LAYOUT",
-    "filter": null
+    "filter": null,
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
   },
   {
     "number": 14,
     "name": "Max",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhtA",
     "layout": "TABLE_LAYOUT",
-    "filter": "assignee:max-imiliennn"
+    "filter": "assignee:max-imiliennn",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
   },
   {
     "number": 15,
     "name": "Com",
     "id": "PVTV_lADOCIcusc4BOGrDzgJmsMM",
     "layout": "BOARD_LAYOUT",
-    "filter": "assignee:Logan-EP,EnzoLYEP"
+    "filter": "assignee:Logan-EP,EnzoLYEP",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress",
+      "Prio",
+      "Size",
+      "Estimate Days",
+      "Entity",
+      "Feature",
+      "End date",
+      "Fiabilite"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Status"
+    ],
+    "sortBy": []
   },
   {
     "number": 16,
     "name": "Micro Kanban",
     "id": "PVTV_lADOCIcusc4BOGrDzgJnYQk",
     "layout": "BOARD_LAYOUT",
-    "filter": "has:parent-issue"
+    "filter": "has:parent-issue",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress",
+      "Parent issue",
+      "Start date",
+      "End date",
+      "Estimate Days"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Status"
+    ],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 18,
     "name": "Assignation",
     "id": "PVTV_lADOCIcusc4BOGrDzgJoNKM",
     "layout": "TABLE_LAYOUT",
-    "filter": "no:assignee -type:Externe,Métier,Management/Direction"
+    "filter": "no:assignee -type:Externe,Métier,Management/Direction",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Labels",
+      "Prio"
+    ],
+    "groupBy": [
+      "Assignees"
+    ],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 20,
     "name": "Enzo",
     "id": "PVTV_lADOCIcusc4BOGrDzgJxmh8",
     "layout": "BOARD_LAYOUT",
-    "filter": "has:parent-issue assignee:EnzoLYEP"
+    "filter": "has:parent-issue assignee:EnzoLYEP",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress",
+      "Parent issue"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Status"
+    ],
+    "sortBy": [
+      {
+        "field": "Prio",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 22,
     "name": "Roadmap Globale",
     "id": "PVTV_lADOCIcusc4BOGrDzgKN5yE",
     "layout": "ROADMAP_LAYOUT",
-    "filter": "type:Projet is:open -status:\"📦 Backlog\" -has:parent-issue"
+    "filter": "type:Projet is:open -status:\"📦 Backlog\" -has:parent-issue",
+    "visibleFields": [],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Start date",
+        "direction": "ASC"
+      }
+    ]
   },
   {
     "number": 23,
     "name": "Reviews",
     "id": "PVTV_lADOCIcusc4BOGrDzgLpvys",
     "layout": "TABLE_LAYOUT",
-    "filter": "status:\"🧪 In Review\""
+    "filter": "status:\"🧪 In Review\"",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Prio"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
   }
 ]

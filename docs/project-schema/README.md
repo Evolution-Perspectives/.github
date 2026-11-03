@@ -14,10 +14,27 @@ live so a stale file can never break production.
 | `project.json` | Project node ID, number, title, URL |
 | `fields.json` | Every field: name, ID, `dataType` (display order kept) |
 | `options/<field>.json` | One file per single-select field (Status, Prio, Entity, Projet, Feature, Domaine, Size, Fiabilite): field ID and options with IDs, in display order |
+| `workflows.json` | Built-in project automations (Settings > Workflows) and whether each is enabled. Currently all disabled: this repo's Actions replace them |
+| `issue-fields.json` | Org-level issue fields (distinct from project fields). Currently none |
 | `iterations/<field>.json` | Iteration fields, if any are ever added |
 | `issue-types.json` | Org issue types with IDs |
-| `views.json` | Project views with layout and filter |
+| `views.json` | Project views: layout, filter, visible fields, grouping, sort |
 | `repos.json` | `linked`: repos attached in project settings (currently empty). `withItems`: repos that actually have items in the project. `itemTypes`: item types present (ISSUE, PULL_REQUEST, DRAFT_ISSUE) |
+
+## Reference: what *can* exist
+
+`reference/` is generated from GitHub's GraphQL schema (introspection), not
+from the project. It describes the possible vocabulary, so you can see what
+could be added without guessing:
+
+| File | Content |
+|---|---|
+| `reference/enums.json` | Allowed values: field types (`ProjectV2CustomFieldType`, `ProjectV2FieldType`), view layouts, option colors, item types, roles, status-update states, issue field types... |
+| `reference/inputs.json` | Exact shape of every input object used to create or change project structure (fields, options, views, iterations, issue types, issue fields), with `required` flags |
+| `reference/mutations.json` | Every project, issue-type, issue-field, sub-issue and blocked-by mutation, with its input type |
+
+It only changes when GitHub changes its API, so a diff there is a signal that
+new capabilities (or deprecations) appeared.
 
 ## Refresh
 

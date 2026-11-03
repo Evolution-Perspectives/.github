@@ -33,6 +33,12 @@ query($org: String!, $number: Int!) {
     issueTypes(first: 50) {
       nodes { id name color description isEnabled }
     }
+    issueFields(first: 50) {
+      nodes {
+        __typename
+        ... on IssueFieldCommon { name dataType description visibility }
+      }
+    }
     projectV2(number: $number) {
       id
       number
@@ -57,8 +63,19 @@ query($org: String!, $number: Int!) {
           }
         }
       }
+      workflows(first: 50) {
+        nodes { id number name enabled }
+      }
       views(first: 50) {
-        nodes { id name number layout filter }
+        nodes {
+          id name number layout filter
+          configuration {
+            visibleFields(first: 50) { nodes { ... on ProjectV2FieldCommon { name } } }
+          }
+          groupByFields(first: 10) { nodes { ... on ProjectV2FieldCommon { name } } }
+          verticalGroupByFields(first: 10) { nodes { ... on ProjectV2FieldCommon { name } } }
+          sortByFields(first: 10) { nodes { direction field { ... on ProjectV2FieldCommon { name } } } }
+        }
       }
       repositories(first: 100) {
         nodes { nameWithOwner }
@@ -106,6 +123,93 @@ function fetchItemSources() {
   return { repos: [...repos].sort(), types: [...types].sort() };
 }
 
+const INTROSPECTION_QUERY = `
+{
+  __schema {
+    mutationType { fields { name description args { name } } }
+    types {
+      kind name description
+      enumValues { name description }
+      inputFields { name description defaultValue type { ...T } }
+    }
+  }
+}
+fragment T on __Type { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name } } } } }`;
+
+function typeRef(t) {
+  if (t.kind === 'NON_NULL') return `${typeRef(t.ofType)}!`;
+  if (t.kind === 'LIST') return `[${typeRef(t.ofType)}]`;
+  return t.name;
+}
+function namedType(t) {
+  return t.ofType ? namedType(t.ofType) : t;
+}
+
+// What *can* exist in a Project, independent of what currently does:
+// enums (field types, colors, layouts, roles...), input shapes and mutations.
+function buildReference() {
+  const out = execFileSync('gh', ['api', 'graphql', '-f', `query=${INTROSPECTION_QUERY}`], {
+    encoding: 'utf8',
+    maxBuffer: 128 * 1024 * 1024,
+  });
+  const json = JSON.parse(out);
+  if (json.errors) throw new Error(JSON.stringify(json.errors));
+  const schema = json.data.__schema;
+  const types = new Map(schema.types.map((t) => [t.name, t]));
+
+  const MUTATION_RE = /ProjectV2|IssueType|IssueField|SubIssue|BlockedBy/;
+  const mutations = schema.mutationType.fields.filter((m) => MUTATION_RE.test(m.name));
+
+  // Closure: every input object / enum reachable from the selected mutations.
+  const inputNames = new Set();
+  const enumNames = new Set();
+  const queue = [];
+  const visit = (name) => {
+    const t = types.get(name);
+    if (!t) return;
+    if (t.kind === 'INPUT_OBJECT' && !inputNames.has(name)) {
+      inputNames.add(name);
+      queue.push(t);
+    } else if (t.kind === 'ENUM') enumNames.add(name);
+  };
+  const mutationRows = mutations
+    .map((m) => {
+      const input = `${m.name[0].toUpperCase()}${m.name.slice(1)}Input`;
+      visit(input);
+      return { name: m.name, input, description: (m.description || '').trim() || null };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'en'));
+  while (queue.length) {
+    for (const f of queue.pop().inputFields) visit(namedType(f.type).name);
+  }
+
+  // Read-side vocabulary (field types, item types, view layouts, roles, colors...).
+  for (const t of types.values()) {
+    if (t.kind === 'ENUM' && /^(ProjectV2|IssueType|IssueField)/.test(t.name) && !/OrderField$/.test(t.name)) {
+      enumNames.add(t.name);
+    }
+  }
+
+  const sortKeys = (names) => [...names].sort((a, b) => a.localeCompare(b, 'en'));
+  const enums = {};
+  for (const n of sortKeys(enumNames)) {
+    enums[n] = types.get(n).enumValues.map((v) => ({
+      value: v.name,
+      description: (v.description || '').trim() || null,
+    }));
+  }
+  const inputs = {};
+  for (const n of sortKeys(inputNames)) {
+    inputs[n] = types.get(n).inputFields.filter((f) => f.name !== 'clientMutationId').map((f) => ({
+      name: f.name,
+      type: typeRef(f.type),
+      required: f.type.kind === 'NON_NULL' && f.defaultValue == null,
+      description: (f.description || '').trim() || null,
+    }));
+  }
+  return { enums, inputs, mutations: mutationRows };
+}
+
 function fetchSchema() {
   const out = execFileSync(
     'gh',
@@ -117,6 +221,7 @@ function fetchSchema() {
   const org = json.data && json.data.organization;
   if (!org || !org.projectV2) throw new Error(`Project ${ORG}#${NUMBER} not found`);
   org.itemSources = fetchItemSources();
+  org.reference = buildReference();
   return org;
 }
 
@@ -197,19 +302,51 @@ function buildFiles(org) {
       }))
   );
 
+  const names = (conn) => conn.nodes.filter(Boolean).map((n) => n.name);
   files.set(
     'views.json',
     p.views.nodes
       .slice()
       .sort((a, b) => a.number - b.number)
-      .map(({ id, name, number, layout, filter }) => ({
-        number,
-        name,
-        id,
-        layout,
-        filter: filter || null,
+      .map((v) => ({
+        number: v.number,
+        name: v.name,
+        id: v.id,
+        layout: v.layout,
+        filter: v.filter || null,
+        visibleFields: names(v.configuration.visibleFields),
+        groupBy: names(v.groupByFields),
+        verticalGroupBy: names(v.verticalGroupByFields),
+        sortBy: v.sortByFields.nodes.map((s) => ({ field: s.field.name, direction: s.direction })),
       }))
   );
+
+  // Built-in project automations (Settings > Workflows). Useful to spot
+  // overlap with the Actions in this repo.
+  files.set(
+    'workflows.json',
+    p.workflows.nodes
+      .slice()
+      .sort((a, b) => a.number - b.number)
+      .map(({ number, name, id, enabled }) => ({ number, name, id, enabled }))
+  );
+
+  // Org-level issue fields (distinct from project fields). May be empty.
+  files.set(
+    'issue-fields.json',
+    org.issueFields.nodes.filter(Boolean).map(({ __typename, name, dataType, description, visibility }) => ({
+      name,
+      type: __typename,
+      dataType,
+      description: description || null,
+      visibility,
+    }))
+  );
+
+  const ref = org.reference;
+  files.set('reference/enums.json', ref.enums);
+  files.set('reference/inputs.json', ref.inputs);
+  files.set('reference/mutations.json', ref.mutations);
 
   // "linked" = repos attached in project settings (often empty); the real
   // source of items is "withItems", derived from the items themselves.
@@ -239,7 +376,7 @@ function main() {
   }
 
   // Generated sub-folders only: files for fields/iterations that no longer exist.
-  for (const sub of ['options', 'iterations']) {
+  for (const sub of ['options', 'iterations', 'reference']) {
     const dir = path.join(OUT_DIR, sub);
     if (!fs.existsSync(dir)) continue;
     for (const name of fs.readdirSync(dir)) {
