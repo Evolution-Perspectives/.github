@@ -16,6 +16,7 @@ live so a stale file can never break production.
 | `options/<field>.json` | One file per single-select field (Status, Prio, Entity, Projet, Feature, Domaine, Size, Fiabilite): field ID and options with IDs, in display order |
 | `workflows.json` | Built-in project automations (Settings > Workflows) and whether each is enabled. Currently all disabled: this repo's Actions replace them |
 | `issue-fields.json` | Org-level issue fields (distinct from project fields). Currently none |
+| `users.json` | Org members: login, name, node ID, role (ADMIN/MEMBER). The people Assignees and Reviewers can point at. No emails |
 | `labels.json` | Labels (name, color, description) per repo in `repos.json` `withItems` |
 | `milestones.json` | Milestones (title, state, due date) per repo in `withItems` |
 | `iterations/<field>.json` | Iteration fields, if any are ever added |

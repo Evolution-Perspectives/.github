@@ -34,6 +34,10 @@ query($org: String!, $number: Int!) {
       pageInfo { hasNextPage }
       nodes { id name color description isEnabled }
     }
+    membersWithRole(first: 100) {
+      pageInfo { hasNextPage }
+      edges { role node { id login name } }
+    }
     issueFields(first: 50) {
       pageInfo { hasNextPage }
       nodes {
@@ -227,6 +231,7 @@ function assertAllComplete(org) {
   const p = org.projectV2;
   assertComplete('issueTypes', org.issueTypes);
   assertComplete('issueFields', org.issueFields);
+  assertComplete('org members', org.membersWithRole);
   assertComplete('project fields', p.fields);
   assertComplete('project workflows', p.workflows);
   assertComplete('project views', p.views);
@@ -409,6 +414,15 @@ function buildFiles(org) {
 
   files.set('labels.json', org.repoMetadata.labels);
   files.set('milestones.json', org.repoMetadata.milestones);
+
+  // Org members: the people the Assignees / Reviewers fields can point at.
+  // No emails. IDs are the node IDs needed by mutations.
+  files.set(
+    'users.json',
+    org.membersWithRole.edges
+      .map((e) => ({ login: e.node.login, name: e.node.name || null, id: e.node.id, role: e.role }))
+      .sort((a, b) => a.login.localeCompare(b.login, 'en', { sensitivity: 'base' }))
+  );
 
   const ref = org.reference;
   files.set('reference/enums.json', ref.enums);
