@@ -45,7 +45,7 @@
     "name": "Projet",
     "id": "IT_kwDOCIcusc4B64Nz",
     "color": "BLUE",
-    "description": "Ensemble d'issues correspondant à une iteration, un projet, un objectif clair, avec un début et une fin",
+    "description": "Projet à objectif défini, avec un début et une fin, qui regroupe les issues nécessaires pour l'atteindre.",
     "isEnabled": true
   },
   {
