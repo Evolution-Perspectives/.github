@@ -35,7 +35,7 @@
     "isEnabled": true
   },
   {
-    "name": "Métier",
+    "name": "Produit/Métier",
     "id": "IT_kwDOCIcusc4B4kd4",
     "color": "GRAY",
     "description": "Contribution attendue d'un collaborateur de l'entreprise.",

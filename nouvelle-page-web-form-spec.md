@@ -81,8 +81,8 @@ Exemples:
 > La convention de nommage est obligatoire et doit rester stable pour faciliter le tracking, la recherche et l'automatisation.
 >
 > Regle de cadrage des types:
-> Dans ce workflow, ne pas utiliser le type Metier pour les subissues.
-> Le type Metier reste reserve aux sujets metier transverses qui ne sont pas encore transformes en travail de specs ou de production.
+> Dans ce workflow, ne pas utiliser le type Produit/Metier pour les subissues.
+> Le type Produit/Metier reste reserve aux sujets metier transverses qui ne sont pas encore transformes en travail de specs ou de production.
 
 ## Regles de creation des subissues
 
