@@ -18,7 +18,7 @@
     "id": "IT_kwDOCIcusc4B4kdT",
     "color": "PURPLE",
     "description": "Exécution opérationnelle : réalisation des actions planifiées et passage en production/mise en service selon le contexte",
-    "isEnabled": true
+    "isEnabled": false
   },
   {
     "name": "Externe",
