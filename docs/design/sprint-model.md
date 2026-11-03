@@ -14,7 +14,8 @@ Structure and IDs of the project are in `docs/project-schema/`.
 ## What goes in a sprint
 
 - Only leaf issues. Parents never carry a sprint.
-- Blocker stand-ins (types `Externe`, `Métier`, `Management/Direction`) have no estimate and no sprint. `Support` is a normal work type and is planned like any other.
+- Wait trackers (types `Externe`, `Management/Direction`) have no estimate and no sprint.
+- `Support` and `Métier` are normal work types and are planned like any other. `Métier` is work done by company staff without a GitHub account; the assignee is the person who follows it.
 
 ## Review
 
@@ -25,8 +26,9 @@ Structure and IDs of the project are in `docs/project-schema/`.
 ## Issue types
 
 - `Développement/Production` is retired: merged into `Tâche` (52 issues retyped on 2026-11-03). The new-page automation creates `Tâche`.
-- `Externe`, `Métier`, `Management/Direction` mark something blocking whose details live outside the project. Link with "blocked by", no estimate, no sprint.
+- `Externe` (waiting on an outside party) and `Management/Direction` (waiting on a decision) are wait trackers. Link them with "blocked by"; no estimate, no sprint.
 - `Support` is real support work (user assistance, quick fixes), not a blocker.
+- `Métier` is real work done by company staff without a GitHub account. It can also block other work.
 - Keep `Projet` as the only level marker.
 
 ## Planning and deadlines
