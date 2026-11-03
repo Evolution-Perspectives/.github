@@ -31,7 +31,7 @@ could be added without guessing:
 |---|---|
 | `reference/enums.json` | Allowed values: field types (`ProjectV2CustomFieldType`, `ProjectV2FieldType`), view layouts, option colors, item types, roles, status-update states, issue field types... |
 | `reference/inputs.json` | Exact shape of every input object used to create or change project structure (fields, options, views, iterations, issue types, issue fields), with `required` flags |
-| `reference/mutations.json` | Every project, issue-type, issue-field, sub-issue and blocked-by mutation, with its input type |
+| `reference/mutations.json` | Every project, issue-type, issue-field, sub-issue, blocked-by mutation, with its input type |
 
 It only changes when GitHub changes its API, so a diff there is a signal that
 new capabilities (or deprecations) appeared.
@@ -50,3 +50,10 @@ The `Refresh Project Schema` workflow runs weekly and on demand. When the
 project changed, it opens (or updates) a PR on the branch
 `chore/project-schema-refresh`. A schema PR is also an early warning: a
 renamed or removed option may affect automations that reference it.
+
+## Not covered on purpose
+
+- **Labels, milestones and anything written by users in other repos**: this repo is public and the source repos are private, so free text from them must never be committed here.
+- **Items and their field values**: change constantly; query live when needed.
+- **Access (collaborators, teams, roles)**: sensitive and needs admin scope.
+- **Org teams and repo custom properties**: no automation here depends on them.
