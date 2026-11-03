@@ -1,5 +1,19 @@
 [
   {
+    "name": "⚪ Support",
+    "id": "IT_kwDOCIcusc4B4knB",
+    "color": "PINK",
+    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
+    "isEnabled": true
+  },
+  {
+    "name": "⚫ Tâche",
+    "id": "IT_kwDOCIcusc4BNM3f",
+    "color": "GRAY",
+    "description": "Tâche opérationnelle à exécuter",
+    "isEnabled": true
+  },
+  {
     "name": "🔴 Bug",
     "id": "IT_kwDOCIcusc4BNM3j",
     "color": "RED",
@@ -28,6 +42,13 @@
     "isEnabled": true
   },
   {
+    "name": "🟢 Test/Validation",
+    "id": "IT_kwDOCIcusc4B4kkh",
+    "color": "GREEN",
+    "description": "Session de test d'un produit ou d'un ensemble de fonctionnalités : préparation, passage des scénarios, synthèse des anomalies et des écarts.",
+    "isEnabled": true
+  },
+  {
     "name": "🟧 Management/Direction",
     "id": "IT_kwDOCIcusc4B5VS2",
     "color": "ORANGE",
@@ -35,7 +56,7 @@
     "isEnabled": true
   },
   {
-    "name": "Dette technique/Refacto",
+    "name": "🟪 Dette technique/Refacto",
     "id": "IT_kwDOCIcusc4CASvQ",
     "color": "PURPLE",
     "description": "Travail technique prévisible. À traiter avant que son coût ne grandisse et qu'il ne pèse sur la vitesse, l'efficacité et la sécurité des futurs développements.",
@@ -67,27 +88,6 @@
     "id": "IT_kwDOCIcusc4B4lwK",
     "color": "YELLOW",
     "description": "Rédaction/affinage des besoins et cadrage fonctionnel.",
-    "isEnabled": true
-  },
-  {
-    "name": "Support",
-    "id": "IT_kwDOCIcusc4B4knB",
-    "color": "PINK",
-    "description": "Ticket de support, interne ou venant d'un client ou d'un utilisateur : question, incident, accès, aide.",
-    "isEnabled": true
-  },
-  {
-    "name": "Tâche",
-    "id": "IT_kwDOCIcusc4BNM3f",
-    "color": "GRAY",
-    "description": "Tâche opérationnelle à exécuter",
-    "isEnabled": true
-  },
-  {
-    "name": "Test/Validation",
-    "id": "IT_kwDOCIcusc4B4kkh",
-    "color": "GREEN",
-    "description": "Session de test d'un produit ou d'un ensemble de fonctionnalités : préparation, passage des scénarios, synthèse des anomalies et des écarts.",
     "isEnabled": true
   }
 ]
