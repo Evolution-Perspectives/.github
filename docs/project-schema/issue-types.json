@@ -14,13 +14,6 @@
     "isEnabled": true
   },
   {
-    "name": "Développement/Production",
-    "id": "IT_kwDOCIcusc4B4kdT",
-    "color": "PURPLE",
-    "description": "Exécution opérationnelle : réalisation des actions planifiées et passage en production/mise en service selon le contexte",
-    "isEnabled": false
-  },
-  {
     "name": "Externe",
     "id": "IT_kwDOCIcusc4B4knI",
     "color": "GRAY",
