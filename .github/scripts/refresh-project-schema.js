@@ -27,6 +27,23 @@ const NUMBER = Number(process.env.PROJECT_NUMBER || 2);
 const OUT_DIR = path.resolve(process.env.OUT_DIR || 'docs/project-schema');
 const CHECK = process.argv.includes('--check');
 
+// Run `gh` with retries on transient failures (5xx, rate limits, network) and a
+// short error message (gh may print a whole HTML error page).
+function gh(args, maxBuffer = 32 * 1024 * 1024) {
+  const attempts = 4;
+  for (let i = 1; ; i++) {
+    try {
+      return execFileSync('gh', args, { encoding: 'utf8', maxBuffer, stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (e) {
+      const msg = String(e.stderr || e.message).trim().split('\n')[0].slice(0, 200);
+      if (i >= attempts || !/HTTP (5\d\d|429)|timeout|ECONN|EAI_AGAIN|rate limit/i.test(`${msg} ${e.stderr || ''}`.slice(0, 2000))) {
+        throw new Error(`gh ${args.slice(0, 2).join(' ')} failed: ${msg}`);
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 2000 * i);
+    }
+  }
+}
+
 const QUERY = `
 query($org: String!, $number: Int!) {
   organization(login: $org) {
@@ -128,7 +145,7 @@ function fetchItemSources() {
   for (;;) {
     const args = ['api', 'graphql', '-f', `query=${ITEMS_QUERY}`, '-f', `org=${ORG}`, '-F', `number=${NUMBER}`];
     if (cursor) args.push('-f', `cursor=${cursor}`);
-    const json = JSON.parse(execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }));
+    const json = JSON.parse(gh(args));
     if (json.errors) throw new Error(JSON.stringify(json.errors));
     const items = json.data.organization.projectV2.items;
     for (const n of items.nodes) {
@@ -166,10 +183,7 @@ function namedType(t) {
 // What *can* exist in a Project, independent of what currently does:
 // enums (field types, colors, layouts, roles...), input shapes and mutations.
 function buildReference() {
-  const out = execFileSync('gh', ['api', 'graphql', '-f', `query=${INTROSPECTION_QUERY}`], {
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-  });
+  const out = gh(['api', 'graphql', '-f', `query=${INTROSPECTION_QUERY}`], 128 * 1024 * 1024);
   const json = JSON.parse(out);
   if (json.errors) throw new Error(JSON.stringify(json.errors));
   const schema = json.data.__schema;
@@ -265,10 +279,7 @@ function fetchRepoMetadata(repos) {
       milestones(first: 100, states: [OPEN, CLOSED]) { pageInfo { hasNextPage } nodes { title state dueOn description } }
     }`;
   });
-  const out = execFileSync('gh', ['api', 'graphql', '-f', `query={${aliases.join('\n')}}`], {
-    encoding: 'utf8',
-    maxBuffer: 32 * 1024 * 1024,
-  });
+  const out = gh(['api', 'graphql', '-f', `query={${aliases.join('\n')}}`]);
   const json = JSON.parse(out);
   if (json.errors) throw new Error(JSON.stringify(json.errors));
   const labels = {};
@@ -288,11 +299,7 @@ function fetchRepoMetadata(repos) {
 }
 
 function fetchSchema() {
-  const out = execFileSync(
-    'gh',
-    ['api', 'graphql', '-f', `query=${QUERY}`, '-f', `org=${ORG}`, '-F', `number=${NUMBER}`],
-    { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }
-  );
+  const out = gh(['api', 'graphql', '-f', `query=${QUERY}`, '-f', `org=${ORG}`, '-F', `number=${NUMBER}`]);
   const json = JSON.parse(out);
   if (json.errors) throw new Error(JSON.stringify(json.errors));
   const org = json.data && json.data.organization;
