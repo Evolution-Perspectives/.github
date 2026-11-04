@@ -11,13 +11,13 @@
     {
       "name": "HEFC",
       "id": "a087c711",
-      "color": "BLUE",
+      "color": "YELLOW",
       "description": null
     },
     {
       "name": "HEDC",
       "id": "fee2cbea",
-      "color": "GREEN",
+      "color": "ORANGE",
       "description": null
     },
     {
@@ -29,7 +29,7 @@
     {
       "name": "EP",
       "id": "e38fa2c2",
-      "color": "GRAY",
+      "color": "BLUE",
       "description": null
     }
   ]
