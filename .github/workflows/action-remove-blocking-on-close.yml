@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: unknown
+      dry_run:
+        description: If true, list the relationships that would be removed without removing them.
+        required: false
+        type: boolean
+        default: false
       debug:
         description: Enable verbose logs.
         required: false
@@ -30,16 +35,18 @@ jobs:
       contents: read
     steps:
       - name: Remove blocking and blocked-by relationships
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
           SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
           DEBUG: ${{ inputs.debug }}
         with:
           github-token: ${{ secrets.automation_pat }}
           script: |
             const issueNodeId = process.env.ISSUE_NODE_ID || '';
             const sourceRepository = process.env.SOURCE_REPOSITORY || '';
+            const dryRun = process.env.DRY_RUN === 'true';
             const debug = process.env.DEBUG === 'true';
 
             if (!issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
@@ -159,6 +166,7 @@ jobs:
             core.info(`Discovered edges: ${edges.length} (blocks ${blockingResult.nodes.length}, blocked-by ${blockedByResult.nodes.length})`);
 
             let removed = 0;
+            let planned = 0;
             let failed = 0;
             const failedEdges = [];
 
@@ -167,6 +175,12 @@ jobs:
               const label = edge.direction === 'blocks'
                 ? `${closedIssueRef} blocks ${otherRef}`
                 : `${closedIssueRef} blocked by ${otherRef}`;
+
+              if (dryRun) {
+                planned += 1;
+                core.info(`[dry-run] Would remove edge: ${label}`);
+                continue;
+              }
 
               try {
                 await github.graphql(mutation, {
@@ -191,7 +205,7 @@ jobs:
               .addEOL()
               .addRaw(`Discovered edges: ${edges.length} (blocks ${blockingResult.nodes.length}, blocked-by ${blockedByResult.nodes.length})`)
               .addEOL()
-              .addRaw(`Removed edges: ${removed}`)
+              .addRaw(dryRun ? `Dry run: nothing removed, ${planned} edge(s) would be removed` : `Removed edges: ${removed}`)
               .addEOL()
               .addRaw(`Failed edges: ${failed}`)
               .addEOL();

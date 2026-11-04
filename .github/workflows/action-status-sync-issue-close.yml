@@ -11,11 +11,6 @@ on:
         description: Projects v2 item node ID whose Status field changed.
         required: true
         type: string
-      status_field_id:
-        description: Projects v2 Status single-select field node ID.
-        required: false
-        type: string
-        default: PVTSSF_lADOCIcusc4BOGrDzg852S8
       source_repository:
         description: Repository where the source event originated.
         required: false
@@ -44,7 +39,7 @@ jobs:
       contents: read
     steps:
       - name: Sync issue close state from Status
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PROJECT_ID: ${{ inputs.project_id }}
           ITEM_NODE_ID: ${{ inputs.item_node_id }}

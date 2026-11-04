@@ -156,15 +156,26 @@ function closeEnv(stateReason, extra = {}) {
     STATE_REASON: stateReason,
     SOURCE_REPOSITORY: "org/repo",
     PROJECT_ID: PROJECT,
-    STATUS_FIELD_ID: "PVTSSF_status",
     DRY_RUN: "false",
     DEBUG: "false",
     ...extra,
   };
 }
 
-function closeHandler({ status, optionId = "x" }) {
-  return () => ({
+const STATUS_FIELD = {
+  id: "PVTSSF_status",
+  options: [
+    { id: OPTION.done, name: "🏆 Done" },
+    { id: OPTION.canceled, name: "❌ Canceled" },
+    { id: OPTION.pendingRelease, name: "📤 Pending Release" },
+    { id: "aba860b9", name: "🧪 In Review" },
+  ],
+};
+
+function closeHandler({ status, optionId = "x", statusField = STATUS_FIELD }) {
+  return (query) => {
+    if (/field\(name: "Status"\)/.test(query)) return { node: { field: statusField } };
+    return {
     node: {
       __typename: "Issue",
       id: "I_issue1",
@@ -175,7 +186,8 @@ function closeHandler({ status, optionId = "x" }) {
         nodes: [{ id: "PVTI_item1", project: { id: PROJECT }, fieldValueByName: status ? { optionId, name: status } : null }],
       },
     },
-  });
+    };
+  };
 }
 
 async function closeSync(stateReason, opts, env) {
@@ -243,4 +255,28 @@ test("setting Pending Release on an open issue closes it and the close does not 
   assert.match(closeIt.mutations[0].query, /closeIssue/);
   const afterClose = await closeSync("completed", { status: "📤 Pending Release", optionId: OPTION.pendingRelease });
   assert.equal(afterClose.mutations.length, 0);
+});
+
+test("the Status field and option IDs are resolved live by name, not stored in the workflow", async () => {
+  const { mutations } = await closeSync("completed", { status: "🌱 In Progress" });
+  assert.equal(mutations[0].vars.fieldId, "PVTSSF_status");
+  const renumbered = { id: "PVTSSF_other", options: STATUS_FIELD.options.map((o) => ({ ...o, id: o.id + "x" })) };
+  const live = await run(CLOSE_SYNC, closeEnv("completed"), closeHandler({ status: "🌱 In Progress", statusField: renumbered }));
+  assert.equal(live.mutations[0].vars.fieldId, "PVTSSF_other");
+  assert.equal(live.mutations[0].vars.optionId, OPTION.done + "x");
+});
+
+test("a missing Status option fails before any write", async () => {
+  const incomplete = { id: "PVTSSF_status", options: STATUS_FIELD.options.filter((o) => o.name !== "🏆 Done") };
+  const { mutations, logs } = await run(CLOSE_SYNC, closeEnv("completed"), closeHandler({ status: "🌱 In Progress", statusField: incomplete }));
+  assert.equal(mutations.length, 0);
+  assert.equal(logs.failed.length, 1);
+});
+
+test("the reusable workflows contain no hard-coded project option or field IDs", () => {
+  const dir = path.join(__dirname, "..", "workflows");
+  for (const file of fs.readdirSync(dir).filter((n) => n.startsWith("action-"))) {
+    const text = fs.readFileSync(path.join(dir, file), "utf8");
+    assert.doesNotMatch(text, /PVTSSF_|PVT_kw|98236657|69f90333|ba8247ce|f75ad846/, file);
+  }
 });

@@ -97,3 +97,10 @@ test("a malformed node id is rejected before any call", async () => {
   assert.equal(removals.length, 0);
   assert.equal(logs.failed.length, 1);
 });
+
+test("dry-run lists the edges and removes nothing", async () => {
+  const { removals, logs } = await run({ blocking: [ref("app", 2)], blockedBy: [ref("app", 9)], env: { DRY_RUN: "true" } });
+  assert.equal(removals.length, 0);
+  assert.equal(logs.failed.length, 0);
+  assert.ok(logs.summary.some((l) => l.startsWith("Dry run: nothing removed, 2 edge(s)")));
+});

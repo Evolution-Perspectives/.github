@@ -18,14 +18,8 @@ on:
         default: unknown
       project_id:
         description: Projects v2 node ID considered as source of truth.
-        required: false
+        required: true
         type: string
-        default: PVT_kwDOCIcusc4BOGrD
-      status_field_id:
-        description: Projects v2 Status single-select field node ID.
-        required: false
-        type: string
-        default: PVTSSF_lADOCIcusc4BOGrDzg852S8
       dry_run:
         description: If true, validate and summarize without writing the Status field.
         required: false
@@ -49,13 +43,12 @@ jobs:
       contents: read
     steps:
       - name: Sync Project Status from close reason
-        uses: actions/github-script@v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
           STATE_REASON: ${{ inputs.state_reason }}
           SOURCE_REPOSITORY: ${{ inputs.source_repository }}
           PROJECT_ID: ${{ inputs.project_id }}
-          STATUS_FIELD_ID: ${{ inputs.status_field_id }}
           DRY_RUN: ${{ inputs.dry_run }}
           DEBUG: ${{ inputs.debug }}
         with:
@@ -66,7 +59,6 @@ jobs:
             const stateReason = (process.env.STATE_REASON || '').toLowerCase();
             const sourceRepository = process.env.SOURCE_REPOSITORY || '';
             const projectId = process.env.PROJECT_ID || '';
-            const statusFieldId = process.env.STATUS_FIELD_ID || '';
             const dryRun = process.env.DRY_RUN === 'true';
             const debug = process.env.DEBUG === 'true';
 
@@ -78,8 +70,8 @@ jobs:
             const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
             const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
 
-            if (!NODE_ID_PATTERN.test(issueNodeId) || !NODE_ID_PATTERN.test(projectId) || !NODE_ID_PATTERN.test(statusFieldId)) {
-              core.setFailed('Malformed node ID in inputs (issue_node_id, project_id, or status_field_id does not match expected node ID shape).');
+            if (!NODE_ID_PATTERN.test(issueNodeId) || !NODE_ID_PATTERN.test(projectId)) {
+              core.setFailed('Malformed node ID in inputs (issue_node_id or project_id does not match expected node ID shape).');
               return;
             }
             if (sourceRepository && sourceRepository !== 'unknown' && !REPO_PATTERN.test(sourceRepository)) {
@@ -87,13 +79,15 @@ jobs:
               return;
             }
 
-            const TARGET_BY_REASON = {
-              completed: { optionId: '98236657', name: '🏆 Done' },
-              not_planned: { optionId: '69f90333', name: '❌ Canceled' },
-              duplicate: { optionId: '69f90333', name: '❌ Canceled' },
+            const DONE_STATUS = '🏆 Done';
+            const CANCELED_STATUS = '❌ Canceled';
+            const TARGET_NAME_BY_REASON = {
+              completed: DONE_STATUS,
+              not_planned: CANCELED_STATUS,
+              duplicate: CANCELED_STATUS,
             };
 
-            const target = TARGET_BY_REASON[stateReason];
+            const targetName = TARGET_NAME_BY_REASON[stateReason];
 
             // A completed close does not always mean "released":
             // - already Pending Release: team work is finished, only the release is left; keep it.
@@ -101,7 +95,6 @@ jobs:
             // - otherwise: Done, as before.
             const PENDING_RELEASE_STATUS = '📤 Pending Release';
             const IN_REVIEW_STATUS = '🧪 In Review';
-            const PENDING_RELEASE_TARGET = { optionId: 'ba8247ce', name: PENDING_RELEASE_STATUS };
 
             const writeSummary = (issueRef, status, extra = {}) => {
               const summary = core.summary
@@ -120,11 +113,43 @@ jobs:
               return summary.write();
             };
 
-            if (!target) {
+            if (!targetName) {
               core.warning(`Unrecognized close reason "${stateReason}" for issue ${issueNodeId}; no Status change applied.`);
               await writeSummary(null, 'skipped-unrecognized-reason');
               return;
             }
+
+            // Resolve the Status field and its options live, by name: no option IDs are stored here.
+            const statusFieldQuery = `
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            const statusMeta = await github.graphql(statusFieldQuery, { projectId });
+            const statusField = statusMeta?.node?.field;
+            const statusFieldId = statusField?.id || '';
+            const optionIdByName = new Map((statusField?.options || []).map((o) => [o.name, o.id]));
+            const missingStatuses = [DONE_STATUS, CANCELED_STATUS, PENDING_RELEASE_STATUS].filter((n) => !optionIdByName.has(n));
+            if (!statusFieldId || missingStatuses.length > 0) {
+              core.setFailed(`Status field or options not found in project ${projectId}: ${missingStatuses.join(', ') || 'Status field'}.`);
+              return;
+            }
+
+            const target = { name: targetName, optionId: optionIdByName.get(targetName) };
+            const PENDING_RELEASE_TARGET = { name: PENDING_RELEASE_STATUS, optionId: optionIdByName.get(PENDING_RELEASE_STATUS) };
 
             const query = `
               query($id: ID!, $after: String) {

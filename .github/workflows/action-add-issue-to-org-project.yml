@@ -31,13 +31,8 @@ on:
         required: false
         type: boolean
         default: false
-      status_field_id:
-        description: Node ID of the single-select Status field to set on add (skipped if empty).
-        required: false
-        type: string
-        default: ''
-      status_option_id:
-        description: Option ID of the Status value to set on add (e.g. Backlog).
+      status_name:
+        description: Name of the Status option to set when the issue is added (for example "📦 Backlog"). Resolved live from the project; skipped if empty.
         required: false
         type: string
         default: ''
@@ -49,12 +44,12 @@ on:
 jobs:
   add-to-project:
     name: Add issue to org project
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - name: Add issue to project
-        uses: actions/github-script@v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PROJECT_ID: ${{ inputs.project_id }}
           ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
@@ -62,8 +57,7 @@ jobs:
           SOURCE_REPOSITORY: ${{ inputs.source_repository }}
           DRY_RUN: ${{ inputs.dry_run }}
           DEBUG: ${{ inputs.debug }}
-          STATUS_FIELD_ID: ${{ inputs.status_field_id }}
-          STATUS_OPTION_ID: ${{ inputs.status_option_id }}
+          STATUS_NAME: ${{ inputs.status_name }}
         with:
           github-token: ${{ secrets.automation_pat }}
           script: |
@@ -73,8 +67,7 @@ jobs:
             const sourceRepository = process.env.SOURCE_REPOSITORY || '';
             const dryRun = process.env.DRY_RUN === 'true';
             const debug = process.env.DEBUG === 'true';
-            const statusFieldId = process.env.STATUS_FIELD_ID || '';
-            const statusOptionId = process.env.STATUS_OPTION_ID || '';
+            const statusName = process.env.STATUS_NAME || '';
 
             if (!projectId || projectId === 'null' || projectId === 'undefined') {
               core.setFailed('Missing required project_id input.');
@@ -88,10 +81,6 @@ jobs:
             const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
             if (!NODE_ID_PATTERN.test(issueNodeId) || !NODE_ID_PATTERN.test(projectId)) {
               core.setFailed('Malformed node ID in inputs (issue_node_id or project_id does not match expected node ID shape).');
-              return;
-            }
-            if ((statusFieldId && !NODE_ID_PATTERN.test(statusFieldId)) || (statusOptionId && !/^[A-Za-z0-9_-]+$/.test(statusOptionId))) {
-              core.setFailed('Malformed node ID in inputs (status_field_id or status_option_id does not match expected shape).');
               return;
             }
 
@@ -144,6 +133,39 @@ jobs:
                 }
               }
             `;
+
+            const statusFieldQuery = `
+              query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    field(name: "Status") {
+                      ... on ProjectV2SingleSelectField {
+                        id
+                        options {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            // Resolve the Status field and option live, by name: no option IDs are stored here.
+            let statusFieldId = '';
+            let statusOptionId = '';
+            if (statusName) {
+              const meta = await github.graphql(statusFieldQuery, { projectId });
+              const field = meta?.node?.field;
+              const option = (field?.options || []).find((o) => o.name === statusName);
+              if (!field?.id || !option) {
+                core.setFailed(`Status option "${statusName}" not found in project ${projectId}.`);
+                return;
+              }
+              statusFieldId = field.id;
+              statusOptionId = option.id;
+            }
 
             const res = await github.graphql(query, { id: issueNodeId });
             const issue = res?.node;

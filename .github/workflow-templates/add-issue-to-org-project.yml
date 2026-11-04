@@ -28,8 +28,8 @@ on:
         required: false
         default: false
         type: boolean
-      status_option_id:
-        description: Override status option ID for manual run.
+      status_name:
+        description: Status option name to set on add (default "📦 Backlog"); resolved live from the project.
         required: false
         type: string
 
@@ -43,7 +43,6 @@ jobs:
       source_repository: ${{ github.repository }}
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
       debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || false }}
-      status_field_id: PVTSSF_lADOCIcusc4BOGrDzg852S8
-      status_option_id: ${{ github.event_name == 'workflow_dispatch' && inputs.status_option_id || 'f75ad846' }}
+      status_name: ${{ github.event_name == 'workflow_dispatch' && inputs.status_name || '📦 Backlog' }}
     secrets:
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

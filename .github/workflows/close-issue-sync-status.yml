@@ -29,6 +29,7 @@ jobs:
   sync-status:
     uses: Evolution-Perspectives/.github/.github/workflows/action-close-issue-sync-status.yml@main
     with:
+      project_id: PVT_kwDOCIcusc4BOGrD
       issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}
       state_reason: ${{ github.event_name == 'workflow_dispatch' && inputs.state_reason || github.event.issue.state_reason }}
       source_repository: ${{ github.repository }}
