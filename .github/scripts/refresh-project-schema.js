@@ -85,6 +85,9 @@ query($org: String!, $number: Int!) {
           ... on ProjectV2SingleSelectField {
             options { id name color description }
           }
+          ... on ProjectV2MultiSelectField {
+            multiSelectOptions { id name color description }
+          }
           ... on ProjectV2IterationField {
             configuration {
               duration
@@ -340,7 +343,10 @@ function buildFiles(org) {
   });
 
   // Fields: GitHub order is kept (it is the display order in the project).
-  const fields = p.fields.nodes.filter((f) => f && f.id);
+  // Single-select exposes `options`, multi-select `multiSelectOptions`: same shape.
+  const fields = p.fields.nodes
+    .filter((f) => f && f.id)
+    .map((f) => (f.multiSelectOptions ? { ...f, options: f.multiSelectOptions } : f));
   files.set(
     'fields.json',
     fields.map((f) => ({
@@ -352,7 +358,7 @@ function buildFiles(org) {
     }))
   );
 
-  // One file per single-select field; option order is meaningful, so it is kept.
+  // One file per single- or multi-select field; option order is meaningful, so it is kept.
   for (const f of fields.filter((x) => x.options)) {
     files.set(`options/${slug(f.name)}.json`, {
       field: f.name,

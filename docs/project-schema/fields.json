@@ -76,15 +76,10 @@
     "optionsFile": "options/domaine.json"
   },
   {
-    "name": "Size",
+    "name": "Charge",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
     "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/size.json"
-  },
-  {
-    "name": "Estimate Days",
-    "id": "PVTF_lADOCIcusc4BOGrDzg852pE",
-    "dataType": "NUMBER"
+    "optionsFile": "options/charge.json"
   },
   {
     "name": "Fiabilite",
@@ -127,5 +122,11 @@
     "id": "PVTIF_lADOCIcusc4BOGrDzhoY2HU",
     "dataType": "ITERATION",
     "iterationsFile": "iterations/sprint.json"
+  },
+  {
+    "name": "Périmètre",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhoixhk",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/perimetre.json"
   }
 ]

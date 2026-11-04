@@ -1,0 +1,78 @@
+{
+  "field": "Périmètre",
+  "fieldId": "PVTMSF_lADOCIcusc4BOGrDzhoixhk",
+  "options": [
+    {
+      "name": "Backend",
+      "id": "55398242",
+      "color": "GREEN",
+      "description": "API, logique serveur, intégrations"
+    },
+    {
+      "name": "Frontend",
+      "id": "76e5fddf",
+      "color": "BLUE",
+      "description": "Interface, pages, composants"
+    },
+    {
+      "name": "Database",
+      "id": "f3d83661",
+      "color": "PINK",
+      "description": "Schéma, données, migrations"
+    },
+    {
+      "name": "DevOps",
+      "id": "83834bd4",
+      "color": "ORANGE",
+      "description": "Déploiement, CI/CD, infrastructure"
+    },
+    {
+      "name": "SEO",
+      "id": "32d964fb",
+      "color": "YELLOW",
+      "description": "Référencement naturel"
+    },
+    {
+      "name": "CMS",
+      "id": "d3866b96",
+      "color": "RED",
+      "description": "Contenu et gabarits du CMS"
+    },
+    {
+      "name": "RGPD/Legal",
+      "id": "5e52e1a3",
+      "color": "PURPLE",
+      "description": "Conformité, mentions légales, données personnelles"
+    },
+    {
+      "name": "Hubspot",
+      "id": "4c315723",
+      "color": "ORANGE",
+      "description": "Configuration et outils HubSpot"
+    },
+    {
+      "name": "Hostinger",
+      "id": "cf778843",
+      "color": "PURPLE",
+      "description": "Hébergement et domaines Hostinger"
+    },
+    {
+      "name": "Microsoft 365",
+      "id": "d03b6151",
+      "color": "BLUE",
+      "description": "Comptes, licences et services Microsoft 365"
+    },
+    {
+      "name": "Hardware",
+      "id": "217fd786",
+      "color": "YELLOW",
+      "description": "Matériel et équipements"
+    },
+    {
+      "name": "Autre",
+      "id": "9de861d3",
+      "color": "GRAY",
+      "description": "Hors des périmètres ci-dessus"
+    }
+  ]
+}

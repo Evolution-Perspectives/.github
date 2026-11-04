@@ -13,7 +13,7 @@ live so a stale file can never break production.
 |---|---|
 | `project.json` | Project node ID, number, title, URL |
 | `fields.json` | Every field: name, ID, `dataType` (display order kept) |
-| `options/<field>.json` | One file per single-select field (Status, Prio, Entity, Projet, Feature, Domaine, Size, Fiabilite): field ID and options with IDs, in display order |
+| `options/<field>.json` | One file per single- or multi-select field (Status, Prio, Entity, Projet, Feature, Domaine, Charge, Fiabilite, Périmètre): field ID and options with IDs, in display order |
 | `workflows.json` | Built-in project automations (Settings > Workflows) and whether each is enabled. Currently all disabled: this repo's Actions replace them |
 | `issue-fields.json` | Org-level issue fields (distinct from project fields). Currently none |
 | `users.json` | Org members: login, name, node ID, role (ADMIN/MEMBER). The people Assignees and Reviewers can point at. No emails |

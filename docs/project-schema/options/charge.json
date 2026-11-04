@@ -1,0 +1,36 @@
+{
+  "field": "Charge",
+  "fieldId": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
+  "options": [
+    {
+      "name": "😎 Négligeable",
+      "id": "911790be",
+      "color": "GREEN",
+      "description": "Simple coup d'œil, aucune décision à prendre"
+    },
+    {
+      "name": "🙂 Léger",
+      "id": "b277fb01",
+      "color": "BLUE",
+      "description": "Relecture rapide, rien à trancher"
+    },
+    {
+      "name": "🤔 Modéré",
+      "id": "86db8eb3",
+      "color": "YELLOW",
+      "description": "Demande de la réflexion ou une petite décision"
+    },
+    {
+      "name": "🧐 Lourd",
+      "id": "853c8207",
+      "color": "ORANGE",
+      "description": "Demande une vraie concentration humaine, à limiter en parallèle"
+    },
+    {
+      "name": "🤯 Extrême",
+      "id": "2d0801e2",
+      "color": "RED",
+      "description": "Mobilise toute l'attention, à planifier à part ou à découper"
+    }
+  ]
+}
