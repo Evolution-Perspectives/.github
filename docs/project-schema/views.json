@@ -12,8 +12,7 @@
       "Linked pull requests",
       "Sub-issues progress",
       "Prio",
-      "Size",
-      "Estimate Days",
+      "Charge",
       "Entity",
       "Feature",
       "End date",
@@ -121,7 +120,7 @@
       "Assignees",
       "Status",
       "Sub-issues progress",
-      "Size",
+      "Charge",
       "Projet"
     ],
     "groupBy": [],
@@ -199,8 +198,7 @@
       "Linked pull requests",
       "Sub-issues progress",
       "Prio",
-      "Size",
-      "Estimate Days",
+      "Charge",
       "Entity",
       "Feature",
       "End date",
@@ -226,8 +224,7 @@
       "Sub-issues progress",
       "Parent issue",
       "Start date",
-      "End date",
-      "Estimate Days"
+      "End date"
     ],
     "groupBy": [],
     "verticalGroupBy": [
