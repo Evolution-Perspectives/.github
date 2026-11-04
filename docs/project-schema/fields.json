@@ -52,12 +52,6 @@
     "optionsFile": "options/prio.json"
   },
   {
-    "name": "Entity",
-    "id": "PVTSSF_lADOCIcusc4BOGrDzg857gY",
-    "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/entity.json"
-  },
-  {
     "name": "Charge",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
     "dataType": "SINGLE_SELECT",
@@ -116,5 +110,11 @@
     "id": "PVTMSF_lADOCIcusc4BOGrDzhojQlc",
     "dataType": "MULTI_SELECT",
     "optionsFile": "options/metier.json"
+  },
+  {
+    "name": "Entity",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhojbfM",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/entity.json"
   }
 ]
