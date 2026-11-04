@@ -122,5 +122,11 @@
     "id": "PVTIF_lADOCIcusc4BOGrDzhoY2HU",
     "dataType": "ITERATION",
     "iterationsFile": "iterations/sprint.json"
+  },
+  {
+    "name": "Périmètre",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhoixhk",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/perimetre.json"
   }
 ]
