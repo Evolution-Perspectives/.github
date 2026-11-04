@@ -31,15 +31,31 @@ jobs:
     steps:
       - name: Remove outgoing blocking relationships
         uses: actions/github-script@v7
+        env:
+          ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          DEBUG: ${{ inputs.debug }}
         with:
           github-token: ${{ secrets.automation_pat }}
           script: |
-            const issueNodeId = '${{ inputs.issue_node_id }}';
-            const sourceRepository = '${{ inputs.source_repository }}';
-            const debug = '${{ inputs.debug }}' === 'true';
+            const issueNodeId = process.env.ISSUE_NODE_ID || '';
+            const sourceRepository = process.env.SOURCE_REPOSITORY || '';
+            const debug = process.env.DEBUG === 'true';
 
             if (!issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
               core.setFailed('Missing required issue_node_id input.');
+              return;
+            }
+
+            // Validate shapes before the values reach any GraphQL call.
+            const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
+            const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+            if (!NODE_ID_PATTERN.test(issueNodeId)) {
+              core.setFailed('Malformed issue_node_id input (does not match expected node ID shape).');
+              return;
+            }
+            if (sourceRepository && sourceRepository !== 'unknown' && !REPO_PATTERN.test(sourceRepository)) {
+              core.setFailed(`Malformed source_repository input: "${sourceRepository}".`);
               return;
             }
 

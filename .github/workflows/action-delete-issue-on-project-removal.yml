@@ -50,20 +50,41 @@ jobs:
     steps:
       - name: Validate source and delete issue
         uses: actions/github-script@v8
+        env:
+          PROJECT_ID: ${{ inputs.project_id }}
+          ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
+          ITEM_NODE_ID: ${{ inputs.item_node_id }}
+          EVENT_ACTION: ${{ inputs.event_action }}
+          SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          DEBUG: ${{ inputs.debug }}
         with:
           github-token: ${{ secrets.automation_pat }}
           retries: 1
           script: |
-            const projectId = '${{ inputs.project_id }}';
-            const issueNodeId = '${{ inputs.issue_node_id }}';
-            const itemNodeId = '${{ inputs.item_node_id }}';
-            const eventAction = '${{ inputs.event_action }}';
-            const sourceRepository = '${{ inputs.source_repository }}';
-            const dryRun = '${{ inputs.dry_run }}' === 'true';
-            const debug = '${{ inputs.debug }}' === 'true';
+            const projectId = process.env.PROJECT_ID || '';
+            const issueNodeId = process.env.ISSUE_NODE_ID || '';
+            const itemNodeId = process.env.ITEM_NODE_ID || '';
+            const eventAction = process.env.EVENT_ACTION || '';
+            const sourceRepository = process.env.SOURCE_REPOSITORY || '';
+            const dryRun = process.env.DRY_RUN === 'true';
+            const debug = process.env.DEBUG === 'true';
 
             if (!projectId || !issueNodeId || issueNodeId === 'null' || issueNodeId === 'undefined') {
               core.setFailed('Missing required inputs: project_id and issue_node_id are required.');
+              return;
+            }
+
+            // Inputs may come from repository_dispatch payloads or manual runs: validate
+            // their shape before they reach any GraphQL call.
+            const NODE_ID_PATTERN = /^[A-Za-z0-9_+/=-]+$/;
+            const REPO_PATTERN = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
+            if (!NODE_ID_PATTERN.test(projectId) || !NODE_ID_PATTERN.test(issueNodeId) || (itemNodeId && !NODE_ID_PATTERN.test(itemNodeId))) {
+              core.setFailed('Malformed node ID in inputs (project_id, issue_node_id, or item_node_id does not match expected node ID shape).');
+              return;
+            }
+            if (sourceRepository && sourceRepository !== 'unknown' && !REPO_PATTERN.test(sourceRepository)) {
+              core.setFailed(`Malformed source_repository input: "${sourceRepository}".`);
               return;
             }
 
