@@ -64,12 +64,6 @@
     "optionsFile": "options/projet.json"
   },
   {
-    "name": "Feature",
-    "id": "PVTSSF_lADOCIcusc4BOGrDzg86GDw",
-    "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/feature.json"
-  },
-  {
     "name": "Domaine",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg86DNA",
     "dataType": "SINGLE_SELECT",
