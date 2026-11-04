@@ -25,7 +25,7 @@ Structure and IDs of the project are in `docs/project-schema/`.
 
 ## Issue types
 
-- `Développement/Production` is retired: merged into `Tâche` (52 issues retyped on 2026-11-03). The new-page automation creates `Tâche`.
+- `Développement/Production` is retired: merged into `Tâche` (52 issues retyped on 2026-11-03).
 - `Externe` (waiting on an outside party) and `Management/Direction` (waiting on a decision) are wait trackers. Link them with "blocked by"; no estimate, no sprint.
 - `Support` is real support work (user assistance, quick fixes), not a blocker.
 - `Produit/Métier` is real work done by company staff without a GitHub account. It can also block other work.
