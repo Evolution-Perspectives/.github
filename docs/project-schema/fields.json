@@ -52,26 +52,16 @@
     "optionsFile": "options/prio.json"
   },
   {
-    "name": "Charge",
-    "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
-    "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/charge.json"
-  },
-  {
     "name": "Fiabilite",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg86YYg",
     "dataType": "SINGLE_SELECT",
     "optionsFile": "options/fiabilite.json"
   },
   {
-    "name": "Start date",
-    "id": "PVTF_lADOCIcusc4BOGrDzg9L4lg",
-    "dataType": "DATE"
-  },
-  {
-    "name": "End date",
-    "id": "PVTF_lADOCIcusc4BOGrDzg86WOk",
-    "dataType": "DATE"
+    "name": "Charge",
+    "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
+    "dataType": "SINGLE_SELECT",
+    "optionsFile": "options/charge.json"
   },
   {
     "name": "Sub-issues progress",
@@ -116,5 +106,21 @@
     "id": "PVTMSF_lADOCIcusc4BOGrDzhojbfM",
     "dataType": "MULTI_SELECT",
     "optionsFile": "options/produit.json"
+  },
+  {
+    "name": "Start date",
+    "id": "PVTF_lADOCIcusc4BOGrDzg9L4lg",
+    "dataType": "DATE"
+  },
+  {
+    "name": "End date",
+    "id": "PVTF_lADOCIcusc4BOGrDzg86WOk",
+    "dataType": "DATE"
+  },
+  {
+    "name": "Marque",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhoj2S4",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/marque.json"
   }
 ]

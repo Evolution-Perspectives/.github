@@ -1,0 +1,36 @@
+{
+  "field": "Marque",
+  "fieldId": "PVTMSF_lADOCIcusc4BOGrDzhoj2S4",
+  "options": [
+    {
+      "name": "Way2Be",
+      "id": "c14c0f49",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "HEFC",
+      "id": "a087c711",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "HEDC",
+      "id": "fee2cbea",
+      "color": "GREEN",
+      "description": null
+    },
+    {
+      "name": "HECI",
+      "id": "bb5d7bfe",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "EP",
+      "id": "e38fa2c2",
+      "color": "GRAY",
+      "description": null
+    }
+  ]
+}
