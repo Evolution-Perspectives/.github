@@ -24,12 +24,12 @@ on:
 
 jobs:
   cleanup:
-    name: Cleanup outgoing blocking edges
+    name: Cleanup blocking edges (both directions)
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - name: Remove outgoing blocking relationships
+      - name: Remove blocking and blocked-by relationships
         uses: actions/github-script@v7
         env:
           ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
@@ -59,7 +59,8 @@ jobs:
               return;
             }
 
-            const query = `
+            // The relationship field name is one of two fixed constants, never user input.
+            const buildQuery = (field) => `
               query($id: ID!, $after: String) {
                 node(id: $id) {
                   ... on Issue {
@@ -69,7 +70,7 @@ jobs:
                     repository {
                       nameWithOwner
                     }
-                    blocking(first: 100, after: $after) {
+                    ${field}(first: 100, after: $after) {
                       pageInfo {
                         hasNextPage
                         endCursor
@@ -100,79 +101,95 @@ jobs:
               }
             `;
 
-            let closedIssue = null;
-            const blockedIssues = [];
-            let after = null;
+            // Reads every page of one relationship list (`blocking` or `blockedBy`).
+            const fetchEdges = async (field) => {
+              const query = buildQuery(field);
+              const nodes = [];
+              let issue = null;
+              let after = null;
 
-            while (true) {
-              const res = await github.graphql(query, { id: issueNodeId, after });
-              const issue = res?.node;
+              while (true) {
+                const res = await github.graphql(query, { id: issueNodeId, after });
+                issue = res?.node;
 
-              if (!issue) {
-                core.setFailed(`No issue found for node ID ${issueNodeId}.`);
-                return;
+                if (!issue) {
+                  return { issue: null, nodes };
+                }
+
+                nodes.push(...(issue[field]?.nodes || []));
+
+                const pageInfo = issue[field]?.pageInfo;
+                if (!pageInfo?.hasNextPage) {
+                  break;
+                }
+                after = pageInfo.endCursor;
               }
 
-              closedIssue = issue;
-              const pageNodes = issue.blocking?.nodes || [];
-              blockedIssues.push(...pageNodes);
+              return { issue, nodes };
+            };
 
-              const pageInfo = issue.blocking?.pageInfo;
-              if (!pageInfo?.hasNextPage) {
-                break;
-              }
-              after = pageInfo.endCursor;
-            }
-
-            const closedIssueRef = `${closedIssue.repository.nameWithOwner}#${closedIssue.number}`;
-            core.info(`Closed issue: ${closedIssueRef}`);
-            core.info(`Source repository input: ${sourceRepository}`);
-            core.info(`Discovered outgoing blocking edges: ${blockedIssues.length}`);
-
-            if (blockedIssues.length === 0) {
-              await core.summary
-                .addHeading('Issue dependency cleanup')
-                .addRaw(`Closed issue: ${closedIssueRef}`)
-                .addEOL()
-                .addRaw('Discovered edges: 0')
-                .addEOL()
-                .addRaw('Removed edges: 0')
-                .addEOL()
-                .addRaw('Failed edges: 0')
-                .addEOL()
-                .write();
+            const blockingResult = await fetchEdges('blocking');
+            if (!blockingResult.issue) {
+              core.setFailed(`No issue found for node ID ${issueNodeId}.`);
               return;
             }
+            const blockedByResult = await fetchEdges('blockedBy');
+
+            const closedIssue = blockingResult.issue;
+            const closedIssueRef = `${closedIssue.repository.nameWithOwner}#${closedIssue.number}`;
+
+            // Each edge: which issue is blocked (issueId) and which blocks it (blockingIssueId).
+            const edges = [
+              ...blockingResult.nodes.map((other) => ({
+                direction: 'blocks',
+                other,
+                issueId: other.id,
+                blockingIssueId: closedIssue.id,
+              })),
+              ...blockedByResult.nodes.map((other) => ({
+                direction: 'blocked-by',
+                other,
+                issueId: closedIssue.id,
+                blockingIssueId: other.id,
+              })),
+            ];
+
+            core.info(`Closed issue: ${closedIssueRef}`);
+            core.info(`Source repository input: ${sourceRepository}`);
+            core.info(`Discovered edges: ${edges.length} (blocks ${blockingResult.nodes.length}, blocked-by ${blockedByResult.nodes.length})`);
 
             let removed = 0;
             let failed = 0;
             const failedEdges = [];
 
-            for (const target of blockedIssues) {
-              const targetRef = `${target.repository.nameWithOwner}#${target.number}`;
+            for (const edge of edges) {
+              const otherRef = `${edge.other.repository.nameWithOwner}#${edge.other.number}`;
+              const label = edge.direction === 'blocks'
+                ? `${closedIssueRef} blocks ${otherRef}`
+                : `${closedIssueRef} blocked by ${otherRef}`;
 
               try {
                 await github.graphql(mutation, {
-                  issueId: target.id,
-                  blockingIssueId: closedIssue.id,
+                  issueId: edge.issueId,
+                  blockingIssueId: edge.blockingIssueId,
                 });
                 removed += 1;
                 if (debug) {
-                  core.info(`Removed edge: ${closedIssueRef} -> ${targetRef}`);
+                  core.info(`Removed edge: ${label}`);
                 }
               } catch (error) {
                 failed += 1;
                 const message = error?.message || String(error);
-                failedEdges.push({ targetRef, message });
-                core.warning(`Failed to remove edge ${closedIssueRef} -> ${targetRef}: ${message}`);
+                failedEdges.push({ label, message });
+                core.warning(`Failed to remove edge (${label}): ${message}`);
               }
             }
 
-            await core.summary
+            core.summary
               .addHeading('Issue dependency cleanup')
               .addRaw(`Closed issue: ${closedIssueRef}`)
               .addEOL()
-              .addRaw(`Discovered edges: ${blockedIssues.length}`)
+              .addRaw(`Discovered edges: ${edges.length} (blocks ${blockingResult.nodes.length}, blocked-by ${blockedByResult.nodes.length})`)
               .addEOL()
               .addRaw(`Removed edges: ${removed}`)
               .addEOL()
@@ -183,7 +200,7 @@ jobs:
               core.summary.addEOL().addHeading('Failed edge removals', 2);
               for (const entry of failedEdges) {
                 core.summary
-                  .addRaw(`- ${entry.targetRef}: ${entry.message}`)
+                  .addRaw(`- ${entry.label}: ${entry.message}`)
                   .addEOL();
               }
             }

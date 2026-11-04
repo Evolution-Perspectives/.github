@@ -23,7 +23,7 @@ How it works:
    - Status `❌ Canceled` → issue closed as `not_planned`
    - Any other Status, while the linked issue is closed → issue reopened
    - Project items with no linked issue (drafts, PRs) are skipped
-3. `remove-blocking-on-close.yml` still fires independently on `issues: closed` and removes blocking-relationship edges pointing from the closed issue.
+3. `remove-blocking-on-close.yml` still fires independently on `issues: closed` and removes all blocking relationships of the closed issue, in both directions: the issues it was blocking are unblocked, and its own "blocked by" links are dropped.
 
 Project Status field options (single-select):
 
@@ -42,4 +42,4 @@ Notes:
 - Manually setting a closed issue's Status to a non-Done/Canceled option reopens it, even if the original close reason still applies.
 - Manually flipping Status to `🏆 Done`/`❌ Canceled` on an issue that's open, or closed for a different reason, re-closes it to match — the Status → close mapping always applies, not just at close time.
 - Closing an issue that is not in `🧪 In Review` or `📤 Pending Release` still means `🏆 Done`, so for work that has a release step, set `📤 Pending Release` (or close from `🧪 In Review`) instead of closing early.
-- Closing an issue also removes its blocking links (`remove-blocking-on-close.yml`), so dependents are unblocked when an item reaches `📤 Pending Release`, not when it is released.
+- Closing an issue also removes its blocking links in both directions (`remove-blocking-on-close.yml`), so dependents are unblocked when an item reaches `📤 Pending Release`, not when it is released.

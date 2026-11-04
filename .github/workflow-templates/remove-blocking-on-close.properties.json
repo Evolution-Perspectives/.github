@@ -1,6 +1,6 @@
 {
   "name": "Remove Blocking Relationships On Issue Close",
-  "description": "Removes native GitHub issue blocking relationships when a blocking issue is closed.",
+  "description": "Removes native GitHub issue blocking relationships (both directions) when an issue is closed.",
   "iconName": "octicon issue-opened",
   "categories": [
     "Automation",

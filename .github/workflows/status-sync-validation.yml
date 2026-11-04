@@ -6,6 +6,8 @@ on:
       - .github/scripts/status-sync-workflows.test.js
       - .github/workflows/action-status-sync-issue-close.yml
       - .github/workflows/action-close-issue-sync-status.yml
+      - .github/workflows/action-remove-blocking-on-close.yml
+      - .github/scripts/remove-blocking-workflow.test.js
   workflow_dispatch:
 
 jobs:
@@ -15,5 +17,5 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Status <-> issue close sync tests
-        run: node --test .github/scripts/status-sync-workflows.test.js
+      - name: Run Status <-> issue close sync and blocking cleanup tests
+        run: node --test .github/scripts/status-sync-workflows.test.js .github/scripts/remove-blocking-workflow.test.js
