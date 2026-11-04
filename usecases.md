@@ -1,5 +1,7 @@
 # Project Use Cases
 
+Implementation lives in `actions/<name>/` (one folder per automation, each with a README): `close-status-sync`, `close-state-sync`, `blocking-cleanup`, `add-to-project`, `delete-on-removal`.
+
 ## Use Case 1 - What Happens to Project Status When an Issue Is Closed
 
 Goal: Clarify how closing a GitHub issue relates to the Project Status field.

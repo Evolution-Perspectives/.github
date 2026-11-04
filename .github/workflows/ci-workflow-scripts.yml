@@ -1,16 +1,13 @@
-name: CI / Workflow scripts
+name: CI / Actions and workflow scripts
 
 on:
   pull_request:
     paths:
-      - .github/scripts/status-sync-workflows.test.js
-      - .github/workflows/engine-sync-close-state.yml
-      - .github/workflows/engine-sync-status-on-close.yml
-      - .github/workflows/engine-remove-blocking-on-close.yml
-      - actions/blocking-cleanup/**
-      - .github/scripts/add-issue-workflow.test.js
-      - .github/workflows/engine-add-issue-to-project.yml
-      - .github/workflows/engine-delete-issue-on-project-removal.yml
+      - actions/**
+      - lib/**
+      - .github/workflows/engine-*.yml
+      - .github/workflows/ci-workflow-scripts.yml
+      - .github/scripts/check-actions-layout*.js
   workflow_dispatch:
 
 jobs:
@@ -20,5 +17,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run Status <-> issue close sync, add-to-project and blocking cleanup tests
-        run: node --test .github/scripts/status-sync-workflows.test.js actions/blocking-cleanup/cleanup.test.js .github/scripts/add-issue-workflow.test.js
+      - name: Check actions/ and engine-*.yml layout
+        run: node .github/scripts/check-actions-layout.js
+
+      - name: Run action, lib and layout tests
+        run: node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js

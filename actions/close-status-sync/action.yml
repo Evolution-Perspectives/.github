@@ -1,0 +1,46 @@
+name: Close to Status sync
+description: Set the project Status from the way an issue was closed.
+inputs:
+  issue_node_id:
+    description: Node ID of the issue that was just closed.
+    required: true
+  state_reason:
+    description: Close reason reported by the source event (completed, not_planned, duplicate).
+    required: true
+  source_repository:
+    description: Repository where the close event originated.
+    required: false
+    default: unknown
+  project_id:
+    description: Projects v2 node ID considered as source of truth.
+    required: true
+  dry_run:
+    description: If true, validate and summarize without writing the Status field.
+    required: false
+    default: "false"
+  debug:
+    description: Enable verbose logs.
+    required: false
+    default: "false"
+  token:
+    description: PAT used for GitHub API calls.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Close to Status sync
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
+        STATE_REASON: ${{ inputs.state_reason }}
+        SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+        PROJECT_ID: ${{ inputs.project_id }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        DEBUG: ${{ inputs.debug }}
+        ACTION_PATH: ${{ github.action_path }}
+      with:
+        github-token: ${{ inputs.token }}
+        retries: 1
+        script: |
+          const run = require(`${process.env.ACTION_PATH}/sync.js`);
+          await run({ github, core });

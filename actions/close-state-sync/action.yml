@@ -1,0 +1,42 @@
+name: Status to close state sync
+description: Close or reopen an issue from its project Status.
+inputs:
+  project_id:
+    description: Projects v2 node ID considered as source of truth.
+    required: true
+  item_node_id:
+    description: Projects v2 item node ID whose Status field changed.
+    required: true
+  source_repository:
+    description: Repository where the source event originated.
+    required: false
+    default: unknown
+  dry_run:
+    description: If true, validate and summarize without closing/reopening the issue.
+    required: false
+    default: "false"
+  debug:
+    description: Enable verbose logs.
+    required: false
+    default: "false"
+  token:
+    description: PAT used for GitHub API calls.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Status to close state sync
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        PROJECT_ID: ${{ inputs.project_id }}
+        ITEM_NODE_ID: ${{ inputs.item_node_id }}
+        SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        DEBUG: ${{ inputs.debug }}
+        ACTION_PATH: ${{ github.action_path }}
+      with:
+        github-token: ${{ inputs.token }}
+        retries: 1
+        script: |
+          const run = require(`${process.env.ACTION_PATH}/sync.js`);
+          await run({ github, core });

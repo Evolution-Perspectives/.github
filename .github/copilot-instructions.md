@@ -13,7 +13,7 @@ Field IDs, single-select option IDs, issue types and views of the org Project "P
 
 A workflow change is complete only when all artifacts below are present and aligned:
 
-1. Reusable workflow engine in `.github/workflows/`
+1. Reusable workflow engine in `.github/workflows/` plus its action in `actions/<name>/`
 2. Thin trigger workflow in `.github/workflows/`
 3. Organization workflow template YAML in `.github/workflow-templates/`
 4. Organization workflow template metadata JSON in `.github/workflow-templates/`
@@ -22,9 +22,17 @@ No exception: template artifacts are required for every workflow.
 
 ## Architecture Rules
 
+0. Layout (checked by `node .github/scripts/check-actions-layout.js`):
+   - `.github/workflows/` stays flat (GitHub requirement); file name prefixes carry the grouping: `engine-`, `org-`, `hook-`, `ops-`, `ci-`.
+   - Each `engine-*.yml` calls exactly one `Evolution-Perspectives/.github/actions/<name>@<ref>` and each action is called by exactly one engine.
+   - The ref is `main`, a `v<number>` tag or a full SHA, never a feature branch (the engine passes a secret to the action).
+   - Actions import no project field/option ID: resolve them live by name.
+   - Tests import the action source directly: `node --test actions/*/*.test.js lib/*.test.js`.
+
 1. Use a strict split of responsibilities:
    - Trigger workflow handles only event wiring and parameter forwarding.
-   - Reusable workflow handles all business logic.
+   - Reusable workflow (`engine-*.yml`) owns the job: runner, permissions, typed inputs, secrets. It calls one action and holds no logic itself.
+   - The business logic lives in `actions/<name>/` (composite action: `action.yml`, source `.js`, `*.test.js`, `README.md`). Code shared by 2+ actions goes in `lib/`.
    - Template reflects the trigger usage pattern for downstream repositories.
 2. Keep trigger workflows thin:
    - Declare event trigger.

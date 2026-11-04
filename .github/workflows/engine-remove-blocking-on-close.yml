@@ -34,7 +34,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: Evolution-Perspectives/.github/actions/blocking-cleanup@feat/actions-spike
+      - uses: Evolution-Perspectives/.github/actions/blocking-cleanup@main
         with:
           issue_node_id: ${{ inputs.issue_node_id }}
           source_repository: ${{ inputs.source_repository }}

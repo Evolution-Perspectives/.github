@@ -10,6 +10,10 @@ The structure of the org Project "Projets Digitaux" (fields, option IDs, issue t
 - Do not edit by hand. Refresh with `node .github/scripts/refresh-project-schema.js` (`--check` reports drift).
 - A weekly workflow opens a PR when the project structure changes.
 
+## Layout
+
+One folder per automation in `actions/<name>/` (composite action, source, tests, README); shared code in `lib/`; flat `.github/workflows/` with role prefixes (`engine-` reusable wrapper, `org-` issue-event caller, `hook-` dispatch-fed, `ops-` maintenance, `ci-` validation). Each `engine-*.yml` calls exactly one action by full path and ref. Check with `node .github/scripts/check-actions-layout.js`; run tests with `node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js`.
+
 ## OpenSpec
 
 Active changes under `openspec/changes/*` are gitignored; only `openspec/changes/archive/` is tracked.
