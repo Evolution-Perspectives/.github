@@ -13,7 +13,6 @@
       "Sub-issues progress",
       "Prio",
       "Charge",
-      "Entity",
       "End date",
       "Fiabilite",
       "Sprint"
@@ -195,7 +194,6 @@
       "Sub-issues progress",
       "Prio",
       "Charge",
-      "Entity",
       "End date",
       "Fiabilite"
     ],
