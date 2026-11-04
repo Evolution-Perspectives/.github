@@ -87,11 +87,6 @@
     "dataType": "NUMBER"
   },
   {
-    "name": "Estimate Hours",
-    "id": "PVTF_lADOCIcusc4BOGrDzhRQc9k",
-    "dataType": "NUMBER"
-  },
-  {
     "name": "Fiabilite",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg86YYg",
     "dataType": "SINGLE_SELECT",
