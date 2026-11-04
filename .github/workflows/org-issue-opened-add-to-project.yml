@@ -1,4 +1,4 @@
-name: Add Issue To Org Project
+name: Org / Issue opened → add to project
 
 on:
   issues:
@@ -35,7 +35,7 @@ on:
 
 jobs:
   add-issue-to-project:
-    uses: Evolution-Perspectives/.github/.github/workflows/action-add-issue-to-org-project.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-add-issue-to-project.yml@main
     with:
       project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || 'PVT_kwDOCIcusc4BOGrD' }}
       issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}

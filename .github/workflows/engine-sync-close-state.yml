@@ -1,4 +1,4 @@
-name: Status Sync Issue Close (Reusable)
+name: Engine / Sync close state from Status
 
 on:
   workflow_call:

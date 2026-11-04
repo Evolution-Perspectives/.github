@@ -1,4 +1,4 @@
-name: Refresh Project Schema
+name: Ops / Refresh project schema
 
 on:
   schedule:

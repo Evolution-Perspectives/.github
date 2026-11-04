@@ -1,4 +1,4 @@
-name: Delete Issue On Project Removal (Reusable)
+name: Engine / Delete issue on project removal
 
 on:
   workflow_call:

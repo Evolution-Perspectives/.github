@@ -1,4 +1,4 @@
-name: Remove Blocking Relationships On Issue Close
+name: Org / Issue closed → remove blocking links
 
 on:
   issues:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   cleanup-blocking-relationships:
-    uses: Evolution-Perspectives/.github/.github/workflows/action-remove-blocking-on-close.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-remove-blocking-on-close.yml@main
     with:
       issue_node_id: ${{ github.event.issue.node_id }}
       source_repository: ${{ github.repository }}

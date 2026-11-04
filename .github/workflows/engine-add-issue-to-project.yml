@@ -1,4 +1,4 @@
-name: Add Issue To Org Project (Reusable)
+name: Engine / Add issue to project
 
 on:
   workflow_call:

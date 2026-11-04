@@ -1,4 +1,4 @@
-name: Close Issue Sync Status
+name: Org / Issue closed → sync Status
 
 on:
   issues:
@@ -27,7 +27,7 @@ on:
 
 jobs:
   sync-status:
-    uses: Evolution-Perspectives/.github/.github/workflows/action-close-issue-sync-status.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-sync-status-on-close.yml@main
     with:
       project_id: PVT_kwDOCIcusc4BOGrD
       issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.issue.node_id }}

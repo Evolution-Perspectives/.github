@@ -60,9 +60,9 @@ async function run(file, env, handler) {
   return { mutations, logs };
 }
 
-// ---------- Status -> issue close/reopen (action-status-sync-issue-close.yml) ----------
+// ---------- Status -> issue close/reopen (engine-sync-close-state.yml) ----------
 
-const STATUS_SYNC = "action-status-sync-issue-close.yml";
+const STATUS_SYNC = "engine-sync-close-state.yml";
 const PROJECT = "PVT_kwDOtestproject";
 
 function statusEnv(extra = {}) {
@@ -144,9 +144,9 @@ test("Other statuses reopen a closed issue and leave an open one alone", async (
   }
 });
 
-// ---------- Issue close -> Status (action-close-issue-sync-status.yml) ----------
+// ---------- Issue close -> Status (engine-sync-status-on-close.yml) ----------
 
-const CLOSE_SYNC = "action-close-issue-sync-status.yml";
+const CLOSE_SYNC = "engine-sync-status-on-close.yml";
 
 const OPTION = { done: "98236657", canceled: "69f90333", pendingRelease: "ba8247ce" };
 
@@ -275,7 +275,9 @@ test("a missing Status option fails before any write", async () => {
 
 test("the reusable workflows contain no hard-coded project option or field IDs", () => {
   const dir = path.join(__dirname, "..", "workflows");
-  for (const file of fs.readdirSync(dir).filter((n) => n.startsWith("action-"))) {
+  const engines = fs.readdirSync(dir).filter((n) => n.startsWith("engine-"));
+  assert.ok(engines.length >= 5, "expected the engine-* reusable workflows");
+  for (const file of engines) {
     const text = fs.readFileSync(path.join(dir, file), "utf8");
     assert.doesNotMatch(text, /PVTSSF_|PVT_kw|98236657|69f90333|ba8247ce|f75ad846/, file);
   }

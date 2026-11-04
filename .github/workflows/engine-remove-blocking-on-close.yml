@@ -1,4 +1,4 @@
-name: Remove Blocking Relationships (Reusable)
+name: Engine / Remove blocking links on close
 
 on:
   workflow_call:

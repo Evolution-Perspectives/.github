@@ -1,4 +1,4 @@
-// Tests for action-remove-blocking-on-close.yml.
+// Tests for engine-remove-blocking-on-close.yml.
 //
 // The script lives inline in an `actions/github-script` block; it is extracted from the
 // workflow file (so the tested code is what is deployed) and run against mocked
@@ -8,7 +8,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "workflows", "action-remove-blocking-on-close.yml");
+const FILE = path.join(__dirname, "..", "workflows", "engine-remove-blocking-on-close.yml");
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 function extractScript() {

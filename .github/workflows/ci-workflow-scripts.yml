@@ -1,16 +1,16 @@
-name: Status Sync Validation
+name: CI / Workflow scripts
 
 on:
   pull_request:
     paths:
       - .github/scripts/status-sync-workflows.test.js
-      - .github/workflows/action-status-sync-issue-close.yml
-      - .github/workflows/action-close-issue-sync-status.yml
-      - .github/workflows/action-remove-blocking-on-close.yml
+      - .github/workflows/engine-sync-close-state.yml
+      - .github/workflows/engine-sync-status-on-close.yml
+      - .github/workflows/engine-remove-blocking-on-close.yml
       - .github/scripts/remove-blocking-workflow.test.js
       - .github/scripts/add-issue-workflow.test.js
-      - .github/workflows/action-add-issue-to-org-project.yml
-      - .github/workflows/action-delete-issue-on-project-removal.yml
+      - .github/workflows/engine-add-issue-to-project.yml
+      - .github/workflows/engine-delete-issue-on-project-removal.yml
   workflow_dispatch:
 
 jobs:

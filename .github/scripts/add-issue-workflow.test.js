@@ -1,11 +1,11 @@
-// Tests for action-add-issue-to-org-project.yml: the script is extracted from the workflow
+// Tests for engine-add-issue-to-project.yml: the script is extracted from the workflow
 // file and run against mocked `github` and `core` objects.
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "workflows", "action-add-issue-to-org-project.yml");
+const FILE = path.join(__dirname, "..", "workflows", "engine-add-issue-to-project.yml");
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
 function extractScript() {
