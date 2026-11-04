@@ -60,9 +60,9 @@ async function run(file, env, handler) {
   return { mutations, logs };
 }
 
-// ---------- Status -> issue close/reopen (status-sync-issue-close-action.yml) ----------
+// ---------- Status -> issue close/reopen (action-status-sync-issue-close.yml) ----------
 
-const STATUS_SYNC = "status-sync-issue-close-action.yml";
+const STATUS_SYNC = "action-status-sync-issue-close.yml";
 const PROJECT = "PVT_kwDOtestproject";
 
 function statusEnv(extra = {}) {
@@ -144,9 +144,9 @@ test("Other statuses reopen a closed issue and leave an open one alone", async (
   }
 });
 
-// ---------- Issue close -> Status (close-issue-sync-status-action.yml) ----------
+// ---------- Issue close -> Status (action-close-issue-sync-status.yml) ----------
 
-const CLOSE_SYNC = "close-issue-sync-status-action.yml";
+const CLOSE_SYNC = "action-close-issue-sync-status.yml";
 
 const OPTION = { done: "98236657", canceled: "69f90333", pendingRelease: "ba8247ce" };
 

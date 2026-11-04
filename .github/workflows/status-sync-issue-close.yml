@@ -27,7 +27,7 @@ on:
 
 jobs:
   sync-close-state:
-    uses: ./.github/workflows/status-sync-issue-close-action.yml
+    uses: ./.github/workflows/action-status-sync-issue-close.yml
     with:
       project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || vars['EP_PROJECT_V2_ID'] || 'PVT_kwDOCIcusc4BOGrD' }}
       item_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.item_node_id || github.event.client_payload.item_node_id || github.event.client_payload.projects_v2_item_node_id || '' }}

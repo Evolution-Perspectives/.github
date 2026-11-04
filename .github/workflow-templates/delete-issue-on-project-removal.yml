@@ -34,7 +34,7 @@ on:
 
 jobs:
   delete-issue:
-    uses: Evolution-Perspectives/.github/.github/workflows/delete-issue-on-project-removal-action.yml@main
+    uses: Evolution-Perspectives/.github/.github/workflows/action-delete-issue-on-project-removal.yml@main
     with:
       project_id: ${{ github.event_name == 'workflow_dispatch' && inputs.project_id || github.event.client_payload.project_id || 'PVT_kwDOCIcusc4BOGrD' }}
       issue_node_id: ${{ github.event_name == 'workflow_dispatch' && inputs.issue_node_id || github.event.client_payload.issue_node_id || github.event.client_payload.content_node_id || '' }}

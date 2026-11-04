@@ -4,8 +4,8 @@ on:
   pull_request:
     paths:
       - .github/scripts/status-sync-workflows.test.js
-      - .github/workflows/status-sync-issue-close-action.yml
-      - .github/workflows/close-issue-sync-status-action.yml
+      - .github/workflows/action-status-sync-issue-close.yml
+      - .github/workflows/action-close-issue-sync-status.yml
   workflow_dispatch:
 
 jobs:
