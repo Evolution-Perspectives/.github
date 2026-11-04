@@ -112,9 +112,9 @@
     "optionsFile": "options/metier.json"
   },
   {
-    "name": "Entity",
+    "name": "Produit",
     "id": "PVTMSF_lADOCIcusc4BOGrDzhojbfM",
     "dataType": "MULTI_SELECT",
-    "optionsFile": "options/entity.json"
+    "optionsFile": "options/produit.json"
   }
 ]
