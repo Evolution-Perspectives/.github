@@ -2,8 +2,22 @@
 
 ## Repository Focus
 
-This repository defines reusable organization workflows and matching templates.
+This repository holds the Evolution-Perspectives organization automation for the GitHub Project "Projets Digitaux": reusable workflows, the actions that implement them, and the maintenance and deployment tooling around them.
 Workflow changes may have destructive side effects (for example deleting issues), so validation must be staged and evidence-driven.
+
+## Layout
+
+- `actions/<name>/`: one composite action per automation (`action.yml`, source `.js`, `*.test.js`, `README.md`). Shared code lives in `lib/`.
+- `.github/workflows/`: flat (GitHub requirement), grouped by file name prefix: `engine-` reusable wrapper (one per action), `org-` issue-event caller, `hook-` fed by `repository_dispatch` (no sender exists today), `ops-` maintenance and schedules, `ci-` validation.
+- An `engine-*.yml` calls exactly one action by full path at `main`, a `v<number>` tag or a full SHA, never a feature branch. `node .github/scripts/check-actions-layout.js` enforces this in CI.
+- Workflows resolve project field and option IDs live by name; `docs/project-schema/` is a cached snapshot, never read at runtime.
+- Board events (Status change, item removed) have no live trigger: there is no org webhook or relay and none is hosted. The scheduled sweep (`add-project-sweep`) is the safety net, and per-repo callers (`add-managed-workflows`) cover issue events.
+
+## OpenSpec state
+
+- Main specs in `openspec/specs/` describe the shipped automations (add to project, Status and close sync, blocking cleanup, delete on removal).
+- Active changes: `restructure-to-actions` (layout, lands first), `add-project-sweep`, `add-managed-workflows`.
+- Abandoned changes (estimation rollup, capacity scheduling, new page web flow) are archived with an Outcome note and without spec sync.
 
 ## Safe Validation Playbook
 

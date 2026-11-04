@@ -1,0 +1,60 @@
+name: Engine / Add issue to project
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Node ID of the target GitHub Projects v2 project.
+        required: true
+        type: string
+      issue_node_id:
+        description: Node ID of the issue to add to the project.
+        required: true
+        type: string
+      issue_number:
+        description: Number of the issue, for reporting.
+        required: false
+        type: string
+        default: unknown
+      source_repository:
+        description: Repository where the issue was opened.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: Validate and report without calling the mutation.
+        required: false
+        type: boolean
+        default: false
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+      status_name:
+        description: Name of the Status option to set when the issue is added (for example "📦 Backlog"). Resolved live from the project; skipped if empty.
+        required: false
+        type: string
+        default: ''
+    secrets:
+      automation_pat:
+        description: PAT with project scope.
+        required: true
+
+jobs:
+  add-to-project:
+    name: Add issue to org project
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: Evolution-Perspectives/.github/actions/add-to-project@main
+        with:
+          project_id: ${{ inputs.project_id }}
+          issue_node_id: ${{ inputs.issue_node_id }}
+          issue_number: ${{ inputs.issue_number }}
+          source_repository: ${{ inputs.source_repository }}
+          dry_run: ${{ inputs.dry_run }}
+          debug: ${{ inputs.debug }}
+          status_name: ${{ inputs.status_name }}
+          token: ${{ secrets.automation_pat }}

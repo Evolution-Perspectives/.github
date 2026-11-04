@@ -1,0 +1,48 @@
+name: Engine / Sync close state from Status
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Projects v2 node ID considered as source of truth.
+        required: true
+        type: string
+      item_node_id:
+        description: Projects v2 item node ID whose Status field changed.
+        required: true
+        type: string
+      source_repository:
+        description: Repository where the source event originated.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: If true, validate and summarize without closing/reopening the issue.
+        required: false
+        type: string
+        default: "false"
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: string
+        default: "false"
+    secrets:
+      automation_pat:
+        description: PAT with repo and project write scope.
+        required: true
+
+jobs:
+  sync-close-state:
+    name: Close or reopen issue from Project Status
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: Evolution-Perspectives/.github/actions/close-state-sync@main
+        with:
+          project_id: ${{ inputs.project_id }}
+          item_node_id: ${{ inputs.item_node_id }}
+          source_repository: ${{ inputs.source_repository }}
+          dry_run: ${{ inputs.dry_run }}
+          debug: ${{ inputs.debug }}
+          token: ${{ secrets.automation_pat }}

@@ -1,0 +1,51 @@
+name: Add issue to project
+description: Add an issue to the org project and optionally set its Status.
+inputs:
+  project_id:
+    description: Node ID of the target GitHub Projects v2 project.
+    required: true
+  issue_node_id:
+    description: Node ID of the issue to add to the project.
+    required: true
+  issue_number:
+    description: Number of the issue, for reporting.
+    required: false
+    default: unknown
+  source_repository:
+    description: Repository where the issue was opened.
+    required: false
+    default: unknown
+  dry_run:
+    description: Validate and report without calling the mutation.
+    required: false
+    default: "false"
+  debug:
+    description: Enable verbose logs.
+    required: false
+    default: "false"
+  status_name:
+    description: Name of the Status option to set when the issue is added (for example "📦 Backlog"). Resolved live from the project; skipped if empty.
+    required: false
+    default: ""
+  token:
+    description: PAT used for GitHub API calls.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Add issue to project
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        PROJECT_ID: ${{ inputs.project_id }}
+        ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
+        ISSUE_NUMBER: ${{ inputs.issue_number }}
+        SOURCE_REPOSITORY: ${{ inputs.source_repository }}
+        DRY_RUN: ${{ inputs.dry_run }}
+        DEBUG: ${{ inputs.debug }}
+        STATUS_NAME: ${{ inputs.status_name }}
+        ACTION_PATH: ${{ github.action_path }}
+      with:
+        github-token: ${{ inputs.token }}
+        script: |
+          const run = require(`${process.env.ACTION_PATH}/add.js`);
+          await run({ github, core });

@@ -1,0 +1,16 @@
+name: Org / Issue closed → remove blocking links
+
+on:
+  issues:
+    types:
+      - closed
+
+jobs:
+  cleanup-blocking-relationships:
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-remove-blocking-on-close.yml@main
+    with:
+      issue_node_id: ${{ github.event.issue.node_id }}
+      source_repository: ${{ github.repository }}
+      debug: false
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

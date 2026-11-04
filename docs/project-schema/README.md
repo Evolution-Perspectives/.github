@@ -50,7 +50,7 @@ node .github/scripts/refresh-project-schema.js --check   # exit 1 on drift
 Needs `gh` authenticated with `read:project` and `read:org` (locally, your
 `gh auth login`; in CI, `EP_AUTOMATION_PAT`).
 
-The `Refresh Project Schema` workflow runs weekly and on demand. When the
+The `Ops / Refresh project schema` workflow runs weekly and on demand. When the
 project changed, it opens (or updates) a PR on the branch
 `chore/project-schema-refresh`. A schema PR is also an early warning: a
 renamed or removed option may affect automations that reference it.

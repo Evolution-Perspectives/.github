@@ -1,0 +1,53 @@
+name: Engine / Sync Status on close
+
+on:
+  workflow_call:
+    inputs:
+      issue_node_id:
+        description: Node ID of the issue that was just closed.
+        required: true
+        type: string
+      state_reason:
+        description: Close reason reported by the source event (completed, not_planned, duplicate).
+        required: true
+        type: string
+      source_repository:
+        description: Repository where the close event originated.
+        required: false
+        type: string
+        default: unknown
+      project_id:
+        description: Projects v2 node ID considered as source of truth.
+        required: true
+        type: string
+      dry_run:
+        description: If true, validate and summarize without writing the Status field.
+        required: false
+        type: string
+        default: "false"
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: string
+        default: "false"
+    secrets:
+      automation_pat:
+        description: PAT with repo and project write scope.
+        required: true
+
+jobs:
+  sync-status:
+    name: Set Project Status from issue close reason
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: Evolution-Perspectives/.github/actions/close-status-sync@main
+        with:
+          issue_node_id: ${{ inputs.issue_node_id }}
+          state_reason: ${{ inputs.state_reason }}
+          source_repository: ${{ inputs.source_repository }}
+          project_id: ${{ inputs.project_id }}
+          dry_run: ${{ inputs.dry_run }}
+          debug: ${{ inputs.debug }}
+          token: ${{ secrets.automation_pat }}

@@ -1,0 +1,43 @@
+name: Engine / Remove blocking links on close
+
+on:
+  workflow_call:
+    inputs:
+      issue_node_id:
+        description: Node ID of the issue that was just closed.
+        required: true
+        type: string
+      source_repository:
+        description: Repository where the close event originated.
+        required: false
+        type: string
+        default: unknown
+      dry_run:
+        description: If true, list the relationships that would be removed without removing them.
+        required: false
+        type: boolean
+        default: false
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      automation_pat:
+        description: PAT with repo scope (and project if project automation is also used).
+        required: true
+
+jobs:
+  cleanup:
+    name: Cleanup blocking edges (both directions)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: Evolution-Perspectives/.github/actions/blocking-cleanup@main
+        with:
+          issue_node_id: ${{ inputs.issue_node_id }}
+          source_repository: ${{ inputs.source_repository }}
+          dry_run: ${{ inputs.dry_run }}
+          debug: ${{ inputs.debug }}
+          token: ${{ secrets.automation_pat }}

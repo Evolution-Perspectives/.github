@@ -1,0 +1,24 @@
+name: CI / Actions and workflow scripts
+
+on:
+  pull_request:
+    paths:
+      - actions/**
+      - lib/**
+      - .github/workflows/engine-*.yml
+      - .github/workflows/ci-workflow-scripts.yml
+      - .github/scripts/check-actions-layout*.js
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check actions/ and engine-*.yml layout
+        run: node .github/scripts/check-actions-layout.js
+
+      - name: Run action, lib and layout tests
+        run: node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js
