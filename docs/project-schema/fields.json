@@ -64,12 +64,6 @@
     "optionsFile": "options/projet.json"
   },
   {
-    "name": "Domaine",
-    "id": "PVTSSF_lADOCIcusc4BOGrDzg86DNA",
-    "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/domaine.json"
-  },
-  {
     "name": "Charge",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
     "dataType": "SINGLE_SELECT",
@@ -122,5 +116,11 @@
     "id": "PVTMSF_lADOCIcusc4BOGrDzhoixhk",
     "dataType": "MULTI_SELECT",
     "optionsFile": "options/perimetre.json"
+  },
+  {
+    "name": "Métier",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhojQlc",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/metier.json"
   }
 ]

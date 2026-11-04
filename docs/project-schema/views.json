@@ -40,9 +40,7 @@
       "Start date",
       "End date"
     ],
-    "groupBy": [
-      "Domaine"
-    ],
+    "groupBy": [],
     "verticalGroupBy": [],
     "sortBy": [
       {
