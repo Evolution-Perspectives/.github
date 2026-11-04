@@ -58,12 +58,6 @@
     "optionsFile": "options/entity.json"
   },
   {
-    "name": "Projet",
-    "id": "PVTSSF_lADOCIcusc4BOGrDzg9L3-o",
-    "dataType": "SINGLE_SELECT",
-    "optionsFile": "options/projet.json"
-  },
-  {
     "name": "Charge",
     "id": "PVTSSF_lADOCIcusc4BOGrDzg852pA",
     "dataType": "SINGLE_SELECT",
