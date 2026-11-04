@@ -1,31 +1,9 @@
-// Tests for engine-remove-blocking-on-close.yml.
-//
-// The script lives inline in an `actions/github-script` block; it is extracted from the
-// workflow file (so the tested code is what is deployed) and run against mocked
-// `github` and `core` objects.
+// Tests for actions/blocking-cleanup/cleanup.js: the source file is imported directly and run
+// against mocked `github` and `core` objects.
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const fs = require("node:fs");
-const path = require("node:path");
 
-const FILE = path.join(__dirname, "..", "workflows", "engine-remove-blocking-on-close.yml");
-const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-
-function extractScript() {
-  const lines = fs.readFileSync(FILE, "utf8").split("\n");
-  const start = lines.findIndex((l) => /^\s*script:\s*\|\s*$/.test(l));
-  assert.ok(start >= 0, "no script block");
-  const keyIndent = lines[start].match(/^\s*/)[0].length;
-  const body = [];
-  for (let i = start + 1; i < lines.length; i++) {
-    const l = lines[i];
-    if (l.trim() !== "" && l.match(/^\s*/)[0].length <= keyIndent) break;
-    body.push(l);
-  }
-  const first = body.find((l) => l.trim() !== "");
-  const indent = first.match(/^\s*/)[0].length;
-  return body.map((l) => l.slice(indent)).join("\n");
-}
+const blockingCleanup = require("./cleanup.js");
 
 const ref = (repo, number) => ({ id: `ID_${repo}_${number}`, number, title: `t${number}`, state: "OPEN", repository: { nameWithOwner: `org/${repo}` } });
 
@@ -53,8 +31,7 @@ async function run({ blocking = [], blockedBy = [], failOn = [], env = {} }) {
       return { node: { ...closed, [field]: { pageInfo: { hasNextPage: false, endCursor: null }, nodes } } };
     },
   };
-  const fn = new AsyncFunction("github", "core", "process", extractScript());
-  await fn(github, core, { env: { ISSUE_NODE_ID: "ID_closed", SOURCE_REPOSITORY: "org/app", DEBUG: "false", ...env } });
+  await blockingCleanup({ github, core, env: { ISSUE_NODE_ID: "ID_closed", SOURCE_REPOSITORY: "org/app", DEBUG: "false", ...env } });
   return { removals, logs };
 }
 

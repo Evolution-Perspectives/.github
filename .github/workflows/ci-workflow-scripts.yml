@@ -7,7 +7,7 @@ on:
       - .github/workflows/engine-sync-close-state.yml
       - .github/workflows/engine-sync-status-on-close.yml
       - .github/workflows/engine-remove-blocking-on-close.yml
-      - .github/scripts/remove-blocking-workflow.test.js
+      - actions/blocking-cleanup/**
       - .github/scripts/add-issue-workflow.test.js
       - .github/workflows/engine-add-issue-to-project.yml
       - .github/workflows/engine-delete-issue-on-project-removal.yml
@@ -21,4 +21,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Status <-> issue close sync, add-to-project and blocking cleanup tests
-        run: node --test .github/scripts/status-sync-workflows.test.js .github/scripts/remove-blocking-workflow.test.js .github/scripts/add-issue-workflow.test.js
+        run: node --test .github/scripts/status-sync-workflows.test.js actions/blocking-cleanup/cleanup.test.js .github/scripts/add-issue-workflow.test.js
