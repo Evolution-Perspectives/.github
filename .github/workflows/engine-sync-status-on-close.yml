@@ -30,6 +30,11 @@ on:
         required: false
         type: string
         default: "false"
+      runner:
+        description: Runner label for the job. Empty or omitted means the GitHub-hosted ubuntu-latest; the managed callers in private repositories pass the label of the self-hosted pool.
+        required: false
+        type: string
+        default: ubuntu-latest
     secrets:
       automation_pat:
         description: PAT with repo and project write scope.
@@ -38,7 +43,7 @@ on:
 jobs:
   sync-status:
     name: Set Project Status from issue close reason
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     permissions:
       contents: read
     steps:
