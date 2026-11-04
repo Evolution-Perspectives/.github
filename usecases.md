@@ -45,3 +45,16 @@ Notes:
 - Manually flipping Status to `🏆 Done`/`❌ Canceled` on an issue that's open, or closed for a different reason, re-closes it to match — the Status → close mapping always applies, not just at close time.
 - Closing an issue that is not in `🧪 In Review` or `📤 Pending Release` still means `🏆 Done`, so for work that has a release step, set `📤 Pending Release` (or close from `🧪 In Review`) instead of closing early.
 - Closing an issue also removes its blocking links in both directions (`org-issue-closed-remove-blocking.yml`), so dependents are unblocked when an item reaches `📤 Pending Release`, not when it is released.
+
+## Use Case - Where the Issue Automations Run
+
+Goal: Keep the org's GitHub-hosted minutes for heavy CI by running the tiny issue and project-planning jobs on the org's own runners.
+
+Plain rule:
+
+- The `engine-*` workflows take a `runner` input. By default they run on GitHub-hosted `ubuntu-latest`.
+- The managed callers in private repositories ask for the self-hosted pool by its label `ep-github-runner`, hardcoded in the caller (no variable).
+- The public `.github` repository, the weekly sweep, and every repository's own CI and deploy workflows always stay on GitHub-hosted runners.
+- If the pool is down, jobs queue for up to 24 hours; the Friday sweep corrects the board afterwards.
+
+Details and operations: `docs/runner-pool.md`.

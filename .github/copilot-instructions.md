@@ -27,6 +27,7 @@ No exception: template artifacts are required for every workflow.
    - Each `engine-*.yml` calls exactly one `Evolution-Perspectives/.github/actions/<name>@<ref>` and each action is called by exactly one engine.
    - The ref is `main`, a `v<number>` tag or a full SHA, never a feature branch (the engine passes a secret to the action).
    - Actions import no project field/option ID: resolve them live by name.
+   - Engines choose their runner with `runs-on: ${{ inputs.runner || 'ubuntu-latest' }}` and a `runner` input; the self-hosted label `ep-github-runner` appears only in managed caller templates, never under `.github/workflows/` and never through a `vars.` expression.
    - Tests import the action source directly: `node --test actions/*/*.test.js lib/*.test.js`.
 
 1. Use a strict split of responsibilities:

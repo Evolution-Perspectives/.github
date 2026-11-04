@@ -14,7 +14,9 @@ function tree(files) {
   return root;
 }
 const action = (n) => ({ [`actions/${n}/action.yml`]: "", [`actions/${n}/${n}.js`]: "", [`actions/${n}/${n}.test.js`]: "", [`actions/${n}/README.md`]: "" });
-const engine = (file, n, ref = "main") => ({ [`.github/workflows/${file}`]: `steps:\n  - uses: Evolution-Perspectives/.github/actions/${n}@${ref}\n` });
+const RUNNER_INPUT = "on:\n  workflow_call:\n    inputs:\n      runner:\n        description: x\n        required: false\n        type: string\n        default: ubuntu-latest\n";
+const RUNS_ON = "    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}\n";
+const engine = (file, n, ref = "main", extra = "") => ({ [`.github/workflows/${file}`]: `${RUNNER_INPUT}jobs:\n  j:\n${RUNS_ON}${extra}    steps:\n      - uses: Evolution-Perspectives/.github/actions/${n}@${ref}\n` });
 
 test("the real repository layout is valid", () => {
   assert.deepEqual(check(path.join(__dirname, "..", "..")), []);
@@ -40,4 +42,25 @@ test("a feature-branch ref is rejected, tags and SHAs are accepted", () => {
   for (const ref of ["main", "v1", "v1.2.3", "a".repeat(40)]) {
     assert.deepEqual(check(tree({ ...action("a"), ...engine("engine-a.yml", "a", ref) })), [], ref);
   }
+});
+
+test("an engine must select its runner through the runner input", () => {
+  const hard = tree({ ...action("a"), [".github/workflows/engine-a.yml"]: `${RUNNER_INPUT}jobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: Evolution-Perspectives/.github/actions/a@main\n` });
+  assert.match(check(hard).join("\n"), /engine-a\.yml: "runs-on: ubuntu-latest" must be/);
+  const noInput = tree({ ...action("a"), [".github/workflows/engine-a.yml"]: `jobs:\n  j:\n${RUNS_ON}    steps:\n      - uses: Evolution-Perspectives/.github/actions/a@main\n` });
+  assert.match(check(noInput).join("\n"), /missing the "runner" input with default ubuntu-latest/);
+});
+
+test("the self-hosted label may not appear under .github/workflows", () => {
+  const root = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/workflows/org-x.yml": "jobs:\n  j:\n    uses: x\n    with:\n      runner: ep-github-runner\n" });
+  assert.match(check(root).join("\n"), /org-x\.yml: contains "ep-github-runner"/);
+});
+
+test("the label is allowed in managed caller templates but not through a variable", () => {
+  const ok = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/managed-workflows/org-x.yml": "runner: ep-github-runner\n" });
+  assert.deepEqual(check(ok), []);
+  const viaVar = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/managed-workflows/org-x.yml": "runner: ${{ vars.EP_RUNNER }}\n" });
+  assert.match(check(viaVar).join("\n"), /managed-workflows\/org-x\.yml: runner selected through a variable/);
+  const callerVar = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/workflows/org-y.yml": "with:\n  runner: ${{ vars.CI_RUNNER }}\n" });
+  assert.match(check(callerVar).join("\n"), /org-y\.yml: runner selected through a variable/);
 });
