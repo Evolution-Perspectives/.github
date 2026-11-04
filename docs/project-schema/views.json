@@ -14,7 +14,6 @@
       "Prio",
       "Charge",
       "Entity",
-      "Feature",
       "End date",
       "Fiabilite",
       "Sprint"
@@ -41,9 +40,7 @@
       "Start date",
       "End date"
     ],
-    "groupBy": [
-      "Domaine"
-    ],
+    "groupBy": [],
     "verticalGroupBy": [],
     "sortBy": [
       {
@@ -120,8 +117,7 @@
       "Assignees",
       "Status",
       "Sub-issues progress",
-      "Charge",
-      "Projet"
+      "Charge"
     ],
     "groupBy": [],
     "verticalGroupBy": [
@@ -200,7 +196,6 @@
       "Prio",
       "Charge",
       "Entity",
-      "Feature",
       "End date",
       "Fiabilite"
     ],
