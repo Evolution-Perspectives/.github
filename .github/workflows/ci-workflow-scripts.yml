@@ -5,6 +5,11 @@ on:
     paths:
       - actions/**
       - lib/**
+      - package.json
+      - package-lock.json
+      - tsconfig.json
+      - rollup.config.mjs
+      - .node-version
       - .github/workflows/engine-*.yml
       - .github/workflows/ci-workflow-scripts.yml
       - .github/scripts/check-actions-layout*.js
@@ -15,10 +20,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
 
       - name: Check actions/ and engine-*.yml layout
         run: node .github/scripts/check-actions-layout.js
 
-      - name: Run action, lib and layout tests
+      - name: Run TypeScript tests
+        run: npm test
+
+      - name: Run legacy JavaScript tests (actions not yet migrated)
         run: node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js

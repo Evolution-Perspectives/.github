@@ -20,18 +20,5 @@ inputs:
     description: PAT with repo scope.
     required: true
 runs:
-  using: composite
-  steps:
-    - name: Remove blocking and blocked-by relationships
-      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-      env:
-        ISSUE_NODE_ID: ${{ inputs.issue_node_id }}
-        SOURCE_REPOSITORY: ${{ inputs.source_repository }}
-        DRY_RUN: ${{ inputs.dry_run }}
-        DEBUG: ${{ inputs.debug }}
-        ACTION_PATH: ${{ github.action_path }}
-      with:
-        github-token: ${{ inputs.token }}
-        script: |
-          const run = require(`${process.env.ACTION_PATH}/cleanup.js`);
-          await run({ github, core });
+  using: node24
+  main: dist/index.js

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Validates the actions/ + engine-*.yml layout (see openspec change restructure-to-actions).
-//   - every actions/<name>/ has action.yml, a source .js, a *.test.js and README.md
+//   - every actions/<name>/ has action.yml, README.md and either the TypeScript shape (node24,
+//     src/index.ts, src/*.test.ts, committed dist/index.js) or the legacy shape (.js + *.test.js)
 //   - every actions/<name>/ is called by exactly one engine-*.yml, and every engine-*.yml calls
 //     exactly one existing action
 //   - the action ref is `main`, a `v<number>` tag or a full commit SHA (never a feature branch:
@@ -27,11 +28,24 @@ function check(root) {
     : [];
 
   for (const name of actions) {
-    const files = fs.readdirSync(path.join(actionsDir, name));
+    const dir = path.join(actionsDir, name);
+    const files = fs.readdirSync(dir);
     if (!files.includes("action.yml")) errors.push(`actions/${name}: missing action.yml`);
     if (!files.includes("README.md")) errors.push(`actions/${name}: missing README.md`);
-    if (!files.some((f) => f.endsWith(".js") && !f.endsWith(".test.js"))) errors.push(`actions/${name}: missing source .js file`);
-    if (!files.some((f) => f.endsWith(".test.js"))) errors.push(`actions/${name}: missing *.test.js file`);
+    const actionYml = files.includes("action.yml") ? fs.readFileSync(path.join(dir, "action.yml"), "utf8") : "";
+    if (/^\s*using:\s*['"]?node24['"]?\s*$/m.test(actionYml)) {
+      // TypeScript shape: src/ + committed dist/ (see change migrate-actions-to-typescript).
+      if (!/^\s*main:\s*dist\/index\.js\s*$/m.test(actionYml)) errors.push(`actions/${name}: action.yml must declare main: dist/index.js`);
+      const src = fs.existsSync(path.join(dir, "src")) ? fs.readdirSync(path.join(dir, "src")) : [];
+      if (!src.includes("index.ts")) errors.push(`actions/${name}: missing src/index.ts`);
+      if (!src.some((f) => f.endsWith(".test.ts"))) errors.push(`actions/${name}: missing src/*.test.ts file`);
+      if (!fs.existsSync(path.join(dir, "dist", "index.js"))) errors.push(`actions/${name}: missing committed dist/index.js (run npm run build)`);
+      if (files.some((f) => f.endsWith(".js"))) errors.push(`actions/${name}: stray .js source next to a TypeScript action`);
+    } else {
+      // Legacy shape: composite action + .js source + *.test.js (being migrated).
+      if (!files.some((f) => f.endsWith(".js") && !f.endsWith(".test.js"))) errors.push(`actions/${name}: missing source .js file`);
+      if (!files.some((f) => f.endsWith(".test.js"))) errors.push(`actions/${name}: missing *.test.js file`);
+    }
   }
 
   const callers = Object.fromEntries(actions.map((a) => [a, []]));

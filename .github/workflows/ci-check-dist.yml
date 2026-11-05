@@ -1,0 +1,45 @@
+name: CI / Check dist
+
+# Rebuilds every action bundle from a clean install and fails when a committed
+# actions/*/dist differs from what the sources produce.
+on:
+  pull_request:
+    paths:
+      - actions/**
+      - lib/**
+      - package.json
+      - package-lock.json
+      - tsconfig.json
+      - rollup.config.mjs
+      - .node-version
+      - .github/workflows/ci-check-dist.yml
+  workflow_dispatch:
+
+jobs:
+  check-dist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rebuild the bundles
+        run: npm run build
+
+      - name: Fail if a committed bundle is out of date
+        run: |
+          if [ -n "$(git status --porcelain -- 'actions/*/dist')" ]; then
+            echo "::error::A committed dist/ differs from its source. Run 'npm run build' and commit the result."
+            git status --short -- 'actions/*/dist'
+            git diff --stat -- 'actions/*/dist'
+            exit 1
+          fi
+          echo "All bundles match their sources."

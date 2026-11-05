@@ -64,3 +64,31 @@ test("the label is allowed in managed caller templates but not through a variabl
   const callerVar = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/workflows/org-y.yml": "with:\n  runner: ${{ vars.CI_RUNNER }}\n" });
   assert.match(check(callerVar).join("\n"), /org-y\.yml: runner selected through a variable/);
 });
+
+const tsAction = (n, extra = {}) => ({
+  [`actions/${n}/action.yml`]: "runs:\n  using: node24\n  main: dist/index.js\n",
+  [`actions/${n}/README.md`]: "",
+  [`actions/${n}/src/index.ts`]: "",
+  [`actions/${n}/src/${n}.test.ts`]: "",
+  [`actions/${n}/dist/index.js`]: "",
+  ...extra,
+});
+
+test("a complete TypeScript action with its engine is valid", () => {
+  assert.deepEqual(check(tree({ ...tsAction("t"), ...engine("engine-t.yml", "t") })), []);
+});
+
+test("a TypeScript action must have its source, test, committed dist and main entry", () => {
+  const root = tree({
+    "actions/t/action.yml": "runs:\n  using: node24\n  main: index.js\n",
+    "actions/t/README.md": "",
+    "actions/t/cleanup.js": "",
+    ...engine("engine-t.yml", "t"),
+  });
+  const errors = check(root).join("\n");
+  assert.match(errors, /must declare main: dist\/index\.js/);
+  assert.match(errors, /missing src\/index\.ts/);
+  assert.match(errors, /missing src\/\*\.test\.ts/);
+  assert.match(errors, /missing committed dist\/index\.js/);
+  assert.match(errors, /stray \.js source/);
+});
