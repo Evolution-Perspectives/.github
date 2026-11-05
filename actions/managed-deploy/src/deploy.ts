@@ -13,7 +13,11 @@ export interface DeployOptions {
   secretValue: string
 }
 
-const MESSAGE = 'chore: sync the org managed workflows'
+// The marker keeps the repositories' own push and pull_request workflows (CI, and above all the deploys
+// that run on every push to the default branch) from running because of this change. It is in the commit
+// messages and in the pull request title, so it also reaches the merge commit whatever the merge strategy.
+export const SKIP_MARKER = '[skip ci]'
+const MESSAGE = `chore: sync the org managed workflows ${SKIP_MARKER}`
 
 const prBody = (names: { add: string[]; update: string[]; remove: string[] }): string =>
   [

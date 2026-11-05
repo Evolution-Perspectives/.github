@@ -12,12 +12,14 @@ export interface FakeRepo {
 export interface FakeClient extends Client {
   repos: Map<string, FakeRepo & { branchFiles: Map<string, string>; branchExists: boolean; pr?: string; prUpdates: number }>
   calls: string[]
+  messages: string[] // commit messages and pull request titles sent
   failOn: Set<string> // "<method>:<repo>"
 }
 
 export function makeClient(repos: FakeRepo[]): FakeClient {
   const state: FakeClient['repos'] = new Map(repos.map((r) => [r.info.name, { ...r, branchFiles: new Map(), branchExists: false, prUpdates: 0 }] as const))
   const calls: string[] = []
+  const messages: string[] = []
   const failOn = new Set<string>()
   const get = (repo: string) => state.get(repo)!
   const record = (method: string, repo: string, extra = ''): void => {
@@ -28,6 +30,7 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
   return {
     repos: state,
     calls,
+    messages,
     failOn,
     async listRepos() { return [...state.values()].map((r) => r.info) },
     async isEmpty(repo) { return Boolean(get(repo).empty) },
@@ -47,8 +50,9 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
       r.branchExists = true
       r.branchFiles = new Map()
     },
-    async writeFile(repo, branch, name, content) {
+    async writeFile(repo, branch, name, content, message) {
       record('writeFile', repo, `${branch}:${name}`)
+      messages.push(message)
       const r = get(repo)
       if (r.empty) {
         r.files = { ...(r.files ?? {}), [name]: content }
@@ -57,12 +61,14 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
         r.branchFiles.set(name, content)
       }
     },
-    async deleteFile(repo, branch, name) {
+    async deleteFile(repo, branch, name, message) {
       record('deleteFile', repo, `${branch}:${name}`)
+      messages.push(message)
       get(repo).branchFiles.set(name, '<deleted>')
     },
-    async openOrUpdatePullRequest(repo, branch) {
+    async openOrUpdatePullRequest(repo, branch, _base, title) {
       record('openOrUpdatePullRequest', repo, branch)
+      messages.push(title)
       const r = get(repo)
       if (r.pr) r.prUpdates++
       r.pr = r.pr ?? `https://github.com/org/${repo}/pull/1`

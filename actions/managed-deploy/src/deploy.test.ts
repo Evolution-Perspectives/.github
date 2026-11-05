@@ -118,3 +118,9 @@ test('without manageSecret the secret is never written, even when missing', asyn
   assert.equal(results[0]!.secret, 'missing')
   assert.equal(results[0]!.secretSet, false)
 })
+
+test('every commit message and the pull request title carry the skip marker, so merging cannot trigger the repo own workflows', async () => {
+  const { client } = await run([repo('r1', { secret: 'present', files: { 'org-old.yml': `${H}retired\n` } }), repo('IT', { empty: true })])
+  assert.ok(client.messages.length >= 4) // write, delete, pull request title, first commit
+  for (const m of client.messages) assert.ok(m.includes('[skip ci]'), m)
+})

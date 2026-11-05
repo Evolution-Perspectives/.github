@@ -20,6 +20,8 @@ The org's issue automations (add to project, close → Status, blocking cleanup)
 - The callers are **event-driven only**: no `workflow_dispatch` and no inputs, because these files run with the org token in every repository and anyone who can run workflows there must not be able to point the token at another issue or project. A test guards the templates.
 - The automation token is stored as a **repo-level secret** `EP_AUTOMATION_PAT` (organization secrets do not reach private repositories on the Free plan), but **only where the manifest enables it**: `manageSecret` is `false` by default (top level) and can be switched on per repository. Public repositories and forks are skipped unless the manifest lists them explicitly.
 
+- **The deploy never triggers a repository's own workflows.** Merging the sync pull request into a default branch is a push, and several repositories deploy to production on every push to `main`. Every commit message and the pull request title therefore carry `[skip ci]`; an experiment in this repository showed that the marker in the PR title reaches the default merge commit and that no push-triggered workflow runs for it. It also skips the pull_request checks of the sync pull request.
+
 ## Tokens
 
 - `EP_DEPLOY_PAT` (secret of this repository): `repo` and `workflow` scope and permission to write repo secrets. Required to write; a real run never falls back to another token. A dry run may read with `EP_AUTOMATION_PAT`.
