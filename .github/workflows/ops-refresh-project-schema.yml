@@ -21,7 +21,7 @@ jobs:
       BRANCH: chore/project-schema-refresh
       BASE: ${{ github.event.repository.default_branch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           token: ${{ secrets.EP_AUTOMATION_PAT }}
 
