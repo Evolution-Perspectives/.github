@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      rollup:
+        patterns:
+          - "rollup"
+          - "@rollup/*"
+      actions-toolkit:
+        patterns:
+          - "@actions/*"
+    ignore:
+      # typescript 7 breaks @rollup/plugin-typescript; upgrade deliberately, not through a bot
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

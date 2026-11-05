@@ -3,14 +3,15 @@
 When an issue closes, removes every link where it blocks other issues and every link where other issues block it, so nothing stays blocked by a closed issue and a closed issue carries no stale dependency.
 
 - **Called by:** `.github/workflows/engine-remove-blocking-on-close.yml` (reusable engine). Trigger: `.github/workflows/org-issue-closed-remove-blocking.yml`.
-- **Source:** `cleanup.js`, loaded by `action.yml` through `github.action_path`.
-- **Tests:** `cleanup.test.js` imports the source directly: `node --test actions/blocking-cleanup/cleanup.test.js`.
-- **Dry run:** Lists the links that would be removed, removes nothing.
+- **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `cleanup.ts` holds the logic), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
+- **Tests:** `src/cleanup.test.ts` imports the source directly: `npm test`.
+- **Dry run:** lists the links that would be removed, removes nothing.
 
 ## Behavior
 
 - Reads both relationship lists with pagination.
 - A failed removal is reported and does not stop the others.
+- `issue_node_id` and `source_repository` are validated before any API call.
 
 ## Inputs
 

@@ -1,2 +1,3 @@
 openspec/changes/*
 !openspec/changes/archive/
+node_modules/
