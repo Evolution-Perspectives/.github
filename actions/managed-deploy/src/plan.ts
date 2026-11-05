@@ -5,7 +5,8 @@ import { isManaged, renderCaller } from './render.ts'
 
 /**
  * Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter.
- * Public repositories and forks are skipped unless the manifest lists them explicitly in `repos`.
+ * Public repositories and forks are skipped unless the manifest sets `allowPublic: true` for them: a listed
+ * entry alone is not enough, so a listing made for another reason (a pilot ref, a secret) cannot pull one in.
  */
 export function selectRepos(orgRepos: RepoInfo[], manifest: Manifest, filter: string[] = [], sourceRepo = '.github'): RepoConfig[] {
   const selected: RepoConfig[] = []
@@ -13,7 +14,7 @@ export function selectRepos(orgRepos: RepoInfo[], manifest: Manifest, filter: st
     if (repo.archived || repo.name === sourceRepo || manifest.exclude.includes(repo.name)) continue
     if (filter.length > 0 && !filter.includes(repo.name)) continue
     const o = manifest.repos[repo.name]
-    if ((!repo.private || repo.fork) && !o) continue
+    if ((!repo.private || repo.fork) && o?.allowPublic !== true) continue
     selected.push({
       name: repo.name,
       ref: o?.ref ?? DEFAULT_REF,

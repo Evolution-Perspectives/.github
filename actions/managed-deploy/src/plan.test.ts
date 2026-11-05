@@ -19,10 +19,13 @@ test('archived repos, the source repo and excluded repos are skipped; a new repo
   assert.deepEqual(selected.map((r) => r.name), ['b', 'new'])
 })
 
-test('public repositories and forks are skipped unless the manifest lists them', () => {
+test('public repositories and forks are skipped unless the manifest sets allowPublic for them', () => {
   const orgRepos = [repo('priv'), repo('pub', false, { private: false }), repo('fork', false, { fork: true })]
   assert.deepEqual(selectRepos(orgRepos, manifest()).map((r) => r.name), ['priv'])
-  assert.deepEqual(selectRepos(orgRepos, manifest({ repos: { pub: {}, fork: {} } })).map((r) => r.name), ['fork', 'priv', 'pub'])
+  // listing a public repo or a fork for another reason is not enough...
+  assert.deepEqual(selectRepos(orgRepos, manifest({ repos: { pub: { manageSecret: true, runner: '' }, fork: { ref: 'main' } } })).map((r) => r.name), ['priv'])
+  // ...it takes an explicit allowPublic
+  assert.deepEqual(selectRepos(orgRepos, manifest({ repos: { pub: { allowPublic: true }, fork: { allowPublic: true } } })).map((r) => r.name), ['fork', 'priv', 'pub'])
 })
 
 test('storing the secret is opt-in: off by default, on through the manifest default or a repo override', () => {

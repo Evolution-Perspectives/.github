@@ -11,6 +11,8 @@ export interface RepoOverride {
   runner?: string
   /** Store the repo secret in this repository (overrides the manifest default). */
   manageSecret?: boolean
+  /** Required to deploy to a public repository or a fork (they are skipped otherwise, even when listed). */
+  allowPublic?: boolean
 }
 
 export interface Manifest {

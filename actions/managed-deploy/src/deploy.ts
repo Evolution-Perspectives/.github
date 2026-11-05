@@ -65,9 +65,8 @@ export async function deploy(core: CoreLike, client: Client, templates: Map<stri
           for (const name of [...plan.add, ...plan.update]) await client.writeFile(config.name, defaultBranch, name, desired.get(name)!, MESSAGE)
           result.mode = 'first-commit'
         } else {
-          await client.resetBranch(config.name, BRANCH, defaultBranch)
-          for (const name of [...plan.add, ...plan.update]) await client.writeFile(config.name, BRANCH, name, desired.get(name)!, MESSAGE)
-          for (const name of plan.remove) await client.deleteFile(config.name, BRANCH, name, MESSAGE)
+          const write = new Map([...plan.add, ...plan.update].map((name) => [name, desired.get(name)!] as const))
+          await client.commitToBranch(config.name, BRANCH, defaultBranch, { write, remove: plan.remove }, MESSAGE)
           result.pr = await client.openOrUpdatePullRequest(config.name, BRANCH, defaultBranch, MESSAGE, prBody(plan))
           result.mode = 'pull-request'
         }

@@ -2,6 +2,7 @@
 // injected as a function so this module stays free of child processes.
 import type { getOctokit } from '@actions/github'
 import { WORKFLOWS_DIR, type Client } from './client.ts'
+import { withRetry } from '../../../lib/retry.ts'
 import type { SecretStatus } from './model.ts'
 
 type Octokit = ReturnType<typeof getOctokit>
@@ -78,15 +79,27 @@ export function createGithubClient(octokit: Octokit, org: string, setSecret: Sec
       await setSecret(repo, name, value)
     },
 
-    async resetBranch(repo, branch, baseBranch) {
+    async commitToBranch(repo, branch, baseBranch, changes, message) {
       const baseRef = await rest.git.getRef({ ...base(repo), ref: `heads/${baseBranch}` })
-      const sha = baseRef.data.object.sha
-      try {
-        await rest.git.updateRef({ ...base(repo), ref: `heads/${branch}`, sha, force: true })
-      } catch (error) {
-        if (statusOf(error) !== 422 && statusOf(error) !== 404) throw error
-        await rest.git.createRef({ ...base(repo), ref: `refs/heads/${branch}`, sha })
-      }
+      const baseSha = baseRef.data.object.sha
+      const baseCommit = await rest.git.getCommit({ ...base(repo), commit_sha: baseSha })
+      const entries = [
+        ...[...changes.write].map(([name, content]) => ({ path: path(name), mode: '100644' as const, type: 'blob' as const, content })),
+        ...changes.remove.map((name) => ({ path: path(name), mode: '100644' as const, type: 'blob' as const, sha: null }))
+      ]
+      const tree = await rest.git.createTree({ ...base(repo), base_tree: baseCommit.data.tree.sha, tree: entries })
+      const commit = await rest.git.createCommit({ ...base(repo), message, tree: tree.data.sha, parents: [baseSha] })
+      const sha = commit.data.sha
+      // GitHub intermittently answers 422 "Reference update failed" for a ref that is fine a moment later
+      // (seen once on a large repository), so the whole create-or-reset is retried a few times.
+      await withRetry(async () => {
+        try {
+          await rest.git.updateRef({ ...base(repo), ref: `heads/${branch}`, sha, force: true })
+        } catch (error) {
+          if (statusOf(error) !== 422 && statusOf(error) !== 404) throw error
+          await rest.git.createRef({ ...base(repo), ref: `refs/heads/${branch}`, sha })
+        }
+      }, { attempts: 4, delayMs: 2000, retryOn: /Reference update failed/ })
     },
 
     async writeFile(repo, branch, name, content, message) {
@@ -99,12 +112,6 @@ export function createGithubClient(octokit: Octokit, org: string, setSecret: Sec
         branch,
         ...(sha ? { sha } : {})
       })
-    },
-
-    async deleteFile(repo, branch, name, message) {
-      const sha = await fileSha(repo, branch, name)
-      if (!sha) return
-      await rest.repos.deleteFile({ ...base(repo), path: path(name), message, sha, branch })
     },
 
     async openOrUpdatePullRequest(repo, branch, baseBranch, title, body) {
