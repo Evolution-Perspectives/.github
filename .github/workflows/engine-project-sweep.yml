@@ -16,7 +16,7 @@ on:
         description: Maximum number of writes per run; a larger plan writes nothing and fails. A string, because a number input cannot receive a conditional expression reliably.
         required: false
         type: string
-        default: "50"
+        default: "1000"
       debug:
         description: Enable verbose logs.
         required: false
@@ -36,7 +36,7 @@ jobs:
   sweep:
     name: Reconcile close state, Status and blocking links
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
-    timeout-minutes: 30
+    timeout-minutes: 120
     permissions:
       contents: read
     steps:

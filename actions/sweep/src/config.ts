@@ -16,7 +16,7 @@ const toNumber = (value: string, fallback: number): number => (value === '' ? fa
 
 export function parseConfig(raw: RawInputs): Config {
   if (!raw.projectId || !isNodeId(raw.projectId)) throw new Error('Missing or malformed project_id input.')
-  const maxWrites = toNumber(raw.maxWrites, 50)
+  const maxWrites = toNumber(raw.maxWrites, 1000)
   if (!Number.isInteger(maxWrites) || maxWrites < 0) throw new Error(`Invalid max_writes input: "${raw.maxWrites}".`)
   const recentMinutes = toNumber(raw.recentMinutes, 10)
   if (!Number.isFinite(recentMinutes) || recentMinutes < 0) throw new Error(`Invalid recent_minutes input: "${raw.recentMinutes}".`)

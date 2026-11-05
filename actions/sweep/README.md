@@ -15,7 +15,7 @@ Weekly reconciliation of the org project. It reads the whole project once into m
 
 ## Safety
 
-- A write cap (default 50): a larger plan writes nothing and fails the run (a dry run only warns).
+- A write cap (default 1000): a larger plan writes nothing and fails the run (a dry run only warns).
 - Items edited in the last 10 minutes are skipped and listed.
 - One failing write does not stop the others and does not cascade into work that depends on it; the run ends failed.
 - Status options are resolved live by name; a missing option fails the run before any write.
@@ -29,7 +29,7 @@ Weekly reconciliation of the org project. It reads the whole project once into m
 |---|---|---|
 | `project_id` | yes | Node ID of the GitHub Projects v2 project to reconcile. |
 | `dry_run` | no (default "true") | Plan and report without writing. Anything but "false" is a dry run. |
-| `max_writes` | no (default "50") | Maximum number of writes per run. |
+| `max_writes` | no (default "1000") | Maximum number of writes per run. |
 | `recent_minutes` | no (default "10") | Skip items edited in the last N minutes. |
 | `pause_ms` | no (default "250") | Pause between writes. |
 | `close_pause_ms` | no (default "4000") | Pause after each issue close, so the `issues: closed` workflows it fires in the issue's repository arrive at a rate the runner pool absorbs. |
