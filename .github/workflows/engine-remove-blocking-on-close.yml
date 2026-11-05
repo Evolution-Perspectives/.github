@@ -36,6 +36,7 @@ jobs:
   cleanup:
     name: Cleanup blocking edges (both directions)
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:

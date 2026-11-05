@@ -9,6 +9,7 @@ export interface RawInputs {
   maxWrites: string
   recentMinutes: string
   pauseMs: string
+  closePauseMs?: string
 }
 
 const toNumber = (value: string, fallback: number): number => (value === '' ? fallback : Number(value))
@@ -21,6 +22,8 @@ export function parseConfig(raw: RawInputs): Config {
   if (!Number.isFinite(recentMinutes) || recentMinutes < 0) throw new Error(`Invalid recent_minutes input: "${raw.recentMinutes}".`)
   const pauseMs = toNumber(raw.pauseMs, 250)
   if (!Number.isFinite(pauseMs) || pauseMs < 0) throw new Error(`Invalid pause_ms input: "${raw.pauseMs}".`)
+  const closePauseMs = toNumber(raw.closePauseMs ?? '', 4000)
+  if (!Number.isFinite(closePauseMs) || closePauseMs < 0) throw new Error(`Invalid close_pause_ms input: "${raw.closePauseMs}".`)
   return {
     projectId: raw.projectId,
     // Safe by default: anything but an explicit "false" is a dry run.
@@ -28,6 +31,7 @@ export function parseConfig(raw: RawInputs): Config {
     debug: raw.debug === 'true',
     maxWrites,
     recentMs: recentMinutes * 60 * 1000,
-    pauseMs
+    pauseMs,
+    closePauseMs
   }
 }

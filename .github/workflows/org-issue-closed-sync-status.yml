@@ -7,6 +7,13 @@ on:
     types:
       - closed
 
+# One issue is handled by one run at a time and in order (opened, then closed). `queue: max` keeps every
+# event instead of replacing the pending one, so nothing is lost when many things happen at once.
+concurrency:
+  group: org-issue-${{ github.repository }}-${{ github.event.issue.number }}
+  cancel-in-progress: false
+  queue: max
+
 jobs:
   sync-status:
     uses: Evolution-Perspectives/.github/.github/workflows/engine-sync-status-on-close.yml@main

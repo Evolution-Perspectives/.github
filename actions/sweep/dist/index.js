@@ -36463,6 +36463,9 @@ function parseConfig(raw) {
     const pauseMs = toNumber(raw.pauseMs, 250);
     if (!Number.isFinite(pauseMs) || pauseMs < 0)
         throw new Error(`Invalid pause_ms input: "${raw.pauseMs}".`);
+    const closePauseMs = toNumber(raw.closePauseMs ?? '', 4000);
+    if (!Number.isFinite(closePauseMs) || closePauseMs < 0)
+        throw new Error(`Invalid close_pause_ms input: "${raw.closePauseMs}".`);
     return {
         projectId: raw.projectId,
         // Safe by default: anything but an explicit "false" is a dry run.
@@ -36470,7 +36473,8 @@ function parseConfig(raw) {
         debug: raw.debug === 'true',
         maxWrites,
         recentMs: recentMinutes * 60 * 1000,
-        pauseMs
+        pauseMs,
+        closePauseMs
     };
 }
 
@@ -36685,13 +36689,14 @@ async function runStages(graphql, snapshot, config, clock, log, warn) {
     const applied = { close: 0, status: 0, blocking: 0 };
     const failed = [];
     const stages = [];
-    let first = true;
+    let lastPause = 0;
     for (const { name, plan } of STAGES) {
         const result = plan(snapshot, ctx);
         for (const write of result.writes) {
-            if (!first)
-                await clock.sleep(config.pauseMs);
-            first = false;
+            if (lastPause > 0)
+                await clock.sleep(lastPause);
+            // A close fires `issues: closed` workflows (the managed callers) in the issue's repository: space those out.
+            lastPause = write.type === 'close' ? config.closePauseMs : config.pauseMs;
             try {
                 await executeWrite(graphql, snapshot, write);
                 applyWrite(snapshot, write);
@@ -36890,7 +36895,8 @@ void main(async () => {
             debug: input('debug'),
             maxWrites: input('max_writes'),
             recentMinutes: input('recent_minutes'),
-            pauseMs: input('pause_ms')
+            pauseMs: input('pause_ms'),
+            closePauseMs: input('close_pause_ms')
         });
     }
     catch (error) {

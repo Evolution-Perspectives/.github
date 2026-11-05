@@ -12,7 +12,8 @@ void main(async () => {
       debug: input('debug'),
       maxWrites: input('max_writes'),
       recentMinutes: input('recent_minutes'),
-      pauseMs: input('pause_ms')
+      pauseMs: input('pause_ms'),
+      closePauseMs: input('close_pause_ms')
     })
   } catch (error) {
     deps.core.setFailed(error instanceof Error ? error.message : String(error))

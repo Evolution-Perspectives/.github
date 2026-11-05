@@ -20,6 +20,7 @@ Weekly reconciliation of the org project. It reads the whole project once into m
 - One failing write does not stop the others and does not cascade into work that depends on it; the run ends failed.
 - Status options are resolved live by name; a missing option fails the run before any write.
 - Running it twice in a row plans zero writes the second time.
+- The sweep writes with the automation token, so its closes do fire the managed callers in the product repositories (a Status or link change fires nothing). Those runs are redundant but harmless (the Status is already set, there is nothing left to unblock); to avoid a storm, closes are paced (`close_pause_ms`, 4 s by default: at most about 0.5 pool jobs per second against a capacity of about 0.6) and capped by `max_writes`.
 - Concurrency groups are per repository, so the sweep only protects itself from overlapping (its own group); races with live events rely on the recent-edit skip and on writes that are safe to repeat.
 
 ## Inputs
@@ -31,5 +32,6 @@ Weekly reconciliation of the org project. It reads the whole project once into m
 | `max_writes` | no (default "50") | Maximum number of writes per run. |
 | `recent_minutes` | no (default "10") | Skip items edited in the last N minutes. |
 | `pause_ms` | no (default "250") | Pause between writes. |
+| `close_pause_ms` | no (default "4000") | Pause after each issue close, so the `issues: closed` workflows it fires in the issue's repository arrive at a rate the runner pool absorbs. |
 | `debug` | no (default "false") | Enable verbose logs. |
 | `token` | yes | PAT with repo and project write scope. |
