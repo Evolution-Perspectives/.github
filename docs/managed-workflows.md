@@ -38,3 +38,15 @@ The org's issue automations (add to project, close → Status, blocking cleanup)
 5. Rollback per repository: remove it from the callers (or add it to `exclude`) and deploy: the managed files are deleted through the pull request. Globally: move `v1` back.
 
 Phase 1 (everything above built and proven inside this repository, with a fake org in the tests) is done; writing to the other repositories starts only on the owner's go.
+
+## Rollout record (2026-11-05)
+
+All ten repositories now hold the three callers on their default branch and the repo secret `EP_AUTOMATION_PAT`; a full dry run reports every repository `in-sync`. Order and checks: `it-lab`, `coach-mobile-app`, `coach-app-backend`, `IT` (empty, first commit), `maquette-demo-sites-web`, `mylea`, `intercobot`, `template-formations`, `hubspot-theme`, `way2be`, one at a time. Per repository the rollout script verified that the sync pull request touches only `.github/workflows/org-*.yml`, that every commit message and the title carry `[skip ci]`, that the PR head and the merge commit triggered **zero** workflow runs and that the repository's run count did not move, then ran a disposable issue through open and close (callers ran on the self-hosted pool, Status became Done) and deleted it.
+
+Two things the rollout taught:
+
+- **The branch creation is a push too.** Pointing the new sync branch at the tip of the default branch fired `way2be`'s `CI Dev` (a `push` workflow on every non-main branch), because that push's head commit is an old, unmarked commit. The run was cancelled before reaching anything important, and the deploy now creates or moves the branch with one new, marked commit.
+- **Ref updates can fail once.** One `Reference update failed` (422) on a large repository passed on retry; the deploy now retries it.
+
+Deploys to the production-deploying repositories (`way2be`, `hubspot-theme`, `template-formations`, `intercobot`, `maquette-demo-sites-web`, `mylea`) triggered no deploy: their latest deploy runs predate the rollout.
+
