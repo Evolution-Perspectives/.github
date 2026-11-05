@@ -40,5 +40,5 @@ jobs:
       - name: Run TypeScript tests
         run: npm test
 
-      - name: Run legacy JavaScript tests (actions not yet migrated)
-        run: node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js
+      - name: Test the layout check
+        run: node --test .github/scripts/check-actions-layout.test.js

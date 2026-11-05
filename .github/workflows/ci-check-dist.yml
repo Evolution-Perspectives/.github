@@ -36,10 +36,11 @@ jobs:
 
       - name: Fail if a committed bundle is out of date
         run: |
-          if [ -n "$(git status --porcelain -- 'actions/*/dist')" ]; then
+          # The build writes only actions/*/dist; any change or new file in the tree means a stale bundle.
+          if [ -n "$(git status --porcelain)" ]; then
             echo "::error::A committed dist/ differs from its source. Run 'npm run build' and commit the result."
-            git status --short -- 'actions/*/dist'
-            git diff --stat -- 'actions/*/dist'
+            git status --short
+            git diff --stat
             exit 1
           fi
           echo "All bundles match their sources."

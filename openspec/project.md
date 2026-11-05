@@ -16,7 +16,7 @@ Workflow changes may have destructive side effects (for example deleting issues)
 ## OpenSpec state
 
 - Main specs in `openspec/specs/` describe the shipped automations (add to project, Status and close sync, blocking cleanup, delete on removal).
-- Active changes: `add-project-sweep`, `add-ep-github-runner` (self-hosted runner pool on the VPS, label `ep-github-runner`), `add-managed-workflows`. `restructure-to-actions` (layout) has landed.
+- Active changes: `add-project-sweep`, `add-ep-github-runner` (self-hosted runner pool on the VPS, label `ep-github-runner`), `add-managed-workflows`. `restructure-to-actions` (layout) has landed; `migrate-actions-to-typescript` plans the move of every action to bundled TypeScript.
 - Abandoned changes (estimation rollup, capacity scheduling, new page web flow) are archived with an Outcome note and without spec sync.
 
 ## Safe Validation Playbook

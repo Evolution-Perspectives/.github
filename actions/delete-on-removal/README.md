@@ -3,8 +3,8 @@
 Permanently deletes an issue that was removed from the project. Destructive: it only deletes when the issue is confirmed out of the project.
 
 - **Called by:** `.github/workflows/engine-delete-issue-on-project-removal.yml` (reusable engine). Trigger: `.github/workflows/hook-project-item-removed-delete-issue.yml`.
-- **Source:** `delete.js`, loaded by `action.yml` through `github.action_path`.
-- **Tests:** `delete.test.js` imports the source directly: `node --test actions/delete-on-removal/delete.test.js`.
+- **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `delete.ts` holds the logic), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
+- **Tests:** `src/delete.test.ts` imports the source directly: `npm test`.
 - **Dry run:** Reports the issue it would delete, deletes nothing.
 
 ## Behavior
