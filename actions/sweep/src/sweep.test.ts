@@ -131,7 +131,7 @@ test('drafts and pull requests are ignored', async () => {
 test('the configuration is validated and safe by default', () => {
   const raw = { projectId: 'PVT_x', dryRun: '', debug: '', maxWrites: '', recentMinutes: '', pauseMs: '' }
   const c = parseConfig(raw)
-  assert.deepEqual([c.dryRun, c.maxWrites, c.recentMs, c.pauseMs, c.closePauseMs], [true, 50, 600000, 250, 4000])
+  assert.deepEqual([c.dryRun, c.maxWrites, c.recentMs, c.pauseMs, c.closePauseMs], [true, 1000, 600000, 250, 4000])
   assert.equal(parseConfig({ ...raw, dryRun: 'false' }).dryRun, false)
   assert.equal(parseConfig({ ...raw, dryRun: 'true' }).dryRun, true)
   for (const bad of [{ projectId: '' }, { projectId: 'a b' }, { maxWrites: '-1' }, { maxWrites: 'x' }, { maxWrites: '1.5' }, { recentMinutes: '-2' }, { pauseMs: 'x' }, { closePauseMs: '-1' }]) {

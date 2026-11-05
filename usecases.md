@@ -68,7 +68,7 @@ Plain rule:
 - Early every Friday (02:07 UTC, before the sprint starts) the sweep reads the whole project once and runs three stages over that snapshot: **close** (an open issue whose Status is Done, Pending Release or Canceled is closed; a closed issue is never reopened), **Status** (a closed issue with an empty or non-closing Status gets the Status matching its close reason) and **blocking** (every "blocked by" link whose blocker is closed is removed).
 - A closing Status that disagrees with the close reason (Done on an issue closed as not planned, Canceled on a completed one) is never changed: it is listed in the run summary for a human.
 - Manual runs are dry runs by default and plan without writing. Scheduled runs write only when the repository variable `SWEEP_WRITE` is `true`; until then they are dry runs too.
-- A plan above 50 writes writes nothing and fails the run (a dry run only warns). Items edited in the last 10 minutes are skipped. A second run right after a real one plans zero writes.
+- A plan above 1000 writes writes nothing and fails the run (a dry run only warns). Items edited in the last 10 minutes are skipped. A second run right after a real one plans zero writes.
 - The sweep's closes fire the managed callers of the issue's repository (a Status or link change fires nothing), so closes are paced (4 s apart) and capped by the write cap; the resulting runs find nothing left to do.
 - The sweep has its own concurrency group; it does not share one with the event workflows because groups are per repository and the event workflows run in the product repositories. Races with live events rely on the recent-edit skip and on writes that are safe to repeat.
 

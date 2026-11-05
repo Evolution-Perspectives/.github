@@ -11,7 +11,7 @@ inputs:
   max_writes:
     description: Maximum number of writes per run; a larger plan writes nothing and fails.
     required: false
-    default: "50"
+    default: "1000"
   recent_minutes:
     description: Skip items whose issue or project item was edited in the last N minutes.
     required: false
