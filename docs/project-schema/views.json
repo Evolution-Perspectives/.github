@@ -9,13 +9,13 @@
       "Title",
       "Assignees",
       "Status",
-      "Linked pull requests",
       "Sub-issues progress",
       "Prio",
       "Charge",
       "End date",
-      "Fiabilite",
-      "Sprint"
+      "Start date",
+      "Produit",
+      "Marque"
     ],
     "groupBy": [],
     "verticalGroupBy": [
@@ -164,23 +164,6 @@
     "sortBy": []
   },
   {
-    "number": 14,
-    "name": "Max",
-    "id": "PVTV_lADOCIcusc4BOGrDzgJYhtA",
-    "layout": "TABLE_LAYOUT",
-    "filter": "assignee:max-imiliennn",
-    "visibleFields": [
-      "Title",
-      "Assignees",
-      "Status",
-      "Linked pull requests",
-      "Sub-issues progress"
-    ],
-    "groupBy": [],
-    "verticalGroupBy": [],
-    "sortBy": []
-  },
-  {
     "number": 15,
     "name": "Com",
     "id": "PVTV_lADOCIcusc4BOGrDzgJmsMM",
@@ -308,6 +291,40 @@
     ],
     "groupBy": [],
     "verticalGroupBy": [],
+    "sortBy": []
+  },
+  {
+    "number": 24,
+    "name": "Coralie",
+    "id": "PVTV_lADOCIcusc4BOGrDzgMZtX8",
+    "layout": "TABLE_LAYOUT",
+    "filter": "assignee:CoraliePB",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Linked pull requests",
+      "Sub-issues progress"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [],
+    "sortBy": []
+  },
+  {
+    "number": 25,
+    "name": "En Cours",
+    "id": "PVTV_lADOCIcusc4BOGrDzgMZtns",
+    "layout": "BOARD_LAYOUT",
+    "filter": "sprint:@previous sprint:@current, sprint:@next",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status"
+    ],
+    "groupBy": [],
+    "verticalGroupBy": [
+      "Sprint"
+    ],
     "sortBy": []
   }
 ]

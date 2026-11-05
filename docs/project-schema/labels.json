@@ -1,5 +1,21 @@
 {
-  "Evolution-Perspectives/.github": [],
+  "Evolution-Perspectives/.github": [
+    {
+      "name": "dependencies",
+      "color": "0366d6",
+      "description": "Pull requests that update a dependency file"
+    },
+    {
+      "name": "github_actions",
+      "color": "000000",
+      "description": "Pull requests that update GitHub Actions code"
+    },
+    {
+      "name": "javascript",
+      "color": "168700",
+      "description": "Pull requests that update javascript code"
+    }
+  ],
   "Evolution-Perspectives/hubspot-theme": [],
   "Evolution-Perspectives/intercobot": [],
   "Evolution-Perspectives/IT": [],
