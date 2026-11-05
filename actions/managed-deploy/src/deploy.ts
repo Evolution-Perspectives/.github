@@ -44,7 +44,7 @@ export async function deploy(core: CoreLike, client: Client, templates: Map<stri
       const secret = await client.secretStatus(config.name, SECRET_NAME)
       result = { ...result, plan, secret }
 
-      const needsSecret = Boolean(options.secretValue) && (secret === 'missing' || (options.rotateSecret && secret !== 'unknown'))
+      const needsSecret = config.manageSecret && Boolean(options.secretValue) && (secret === 'missing' || (options.rotateSecret && secret !== 'unknown'))
       const needsFiles = !isEmptyPlan(plan)
 
       if (options.dryRun) {

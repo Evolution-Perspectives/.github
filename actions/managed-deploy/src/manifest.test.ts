@@ -6,7 +6,7 @@ const TEMPLATES = ['org-a.yml', 'org-b.yml']
 
 test('a valid manifest is accepted and defaults are filled', () => {
   const m = parseManifest({ callers: ['org-a.yml', 'org-b.yml'] }, TEMPLATES)
-  assert.deepEqual(m, { callers: ['org-a.yml', 'org-b.yml'], exclude: [], repos: {} })
+  assert.deepEqual(m, { callers: ['org-a.yml', 'org-b.yml'], exclude: [], manageSecret: false, repos: {} })
 })
 
 test('per-repo overrides are accepted', () => {
@@ -24,6 +24,8 @@ test('unknown keys, unknown templates and bad refs are rejected', () => {
     { callers: ['org-a.yml'], repos: { r: { callers: ['org-b.yml'] } } },
     { callers: ['org-a.yml'], repos: { r: { runner: 'a b' } } },
     { callers: ['org-a.yml'], repos: { r: { unknown: true } } },
+    { callers: ['org-a.yml'], manageSecret: 'yes' },
+    { callers: ['org-a.yml'], repos: { r: { manageSecret: 1 } } },
     { callers: 'org-a.yml' },
     [],
     null

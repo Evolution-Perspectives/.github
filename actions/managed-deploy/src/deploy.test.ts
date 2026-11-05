@@ -9,10 +9,10 @@ import { MANAGED_PREFIX } from './render.ts'
 
 const H = `${MANAGED_PREFIX} (x).\n`
 const TEMPLATES = new Map([['org-a.yml', `${H}uses: x@__REF__\n  runner: __RUNNER__\n`]])
-const MANIFEST: Manifest = { callers: ['org-a.yml'], exclude: [], repos: {} }
+const MANIFEST: Manifest = { callers: ['org-a.yml'], exclude: [], manageSecret: true, repos: {} }
 const SECRET = 'ghp_SUPERSECRETVALUE'
 const options = (over: Partial<DeployOptions> = {}): DeployOptions => ({ dryRun: false, repoFilter: [], rotateSecret: false, secretValue: SECRET, ...over })
-const repo = (name: string, extra: Partial<FakeRepo> = {}): FakeRepo => ({ info: { name, archived: false, defaultBranch: 'main' }, secret: 'missing', ...extra })
+const repo = (name: string, extra: Partial<FakeRepo> = {}): FakeRepo => ({ info: { name, archived: false, private: true, fork: false, defaultBranch: 'main' }, secret: 'missing', ...extra })
 const rendered = `${H}uses: x@v1\n  runner: ep-github-runner\n`
 
 async function run(repos: FakeRepo[], opts: Partial<DeployOptions> = {}, manifest = MANIFEST) {
@@ -108,6 +108,13 @@ test('one failing repo does not stop the others and fails the run', async () => 
 })
 
 test('excluded and archived repos and the filter are honored', async () => {
-  const { results } = await run([repo('a'), repo('b'), repo('skip'), { ...repo('old'), info: { name: 'old', archived: true, defaultBranch: 'main' } }], { repoFilter: ['a', 'skip', 'old'] }, { ...MANIFEST, exclude: ['skip'] })
+  const { results } = await run([repo('a'), repo('b'), repo('skip'), { ...repo('old'), info: { name: 'old', archived: true, private: true, fork: false, defaultBranch: 'main' } }], { repoFilter: ['a', 'skip', 'old'] }, { ...MANIFEST, exclude: ['skip'] })
   assert.deepEqual(results.map((r) => r.repo), ['a'])
+})
+
+test('without manageSecret the secret is never written, even when missing', async () => {
+  const { client, results } = await run([repo('r1', { secret: 'missing', files: { 'org-a.yml': rendered } })], {}, { ...MANIFEST, manageSecret: false })
+  assert.ok(!client.calls.includes('setSecret:r1'))
+  assert.equal(results[0]!.secret, 'missing')
+  assert.equal(results[0]!.secretSet, false)
 })

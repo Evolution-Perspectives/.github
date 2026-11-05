@@ -36447,7 +36447,10 @@ function isManaged(name, content) {
     return name.startsWith('org-') && name.endsWith('.yml') && content.trimStart().startsWith(MANAGED_PREFIX);
 }
 
-/** Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter. */
+/**
+ * Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter.
+ * Public repositories and forks are skipped unless the manifest lists them explicitly in `repos`.
+ */
 function selectRepos(orgRepos, manifest, filter = [], sourceRepo = '.github') {
     const selected = [];
     for (const repo of orgRepos) {
@@ -36455,8 +36458,16 @@ function selectRepos(orgRepos, manifest, filter = [], sourceRepo = '.github') {
             continue;
         if (filter.length > 0 && !filter.includes(repo.name))
             continue;
-        const o = manifest.repos[repo.name] ?? {};
-        selected.push({ name: repo.name, ref: o.ref ?? DEFAULT_REF, runner: o.runner ?? DEFAULT_RUNNER, callers: o.callers ?? manifest.callers });
+        const o = manifest.repos[repo.name];
+        if ((!repo.private || repo.fork) && !o)
+            continue;
+        selected.push({
+            name: repo.name,
+            ref: o?.ref ?? DEFAULT_REF,
+            runner: o?.runner ?? DEFAULT_RUNNER,
+            callers: o?.callers ?? manifest.callers,
+            manageSecret: o?.manageSecret ?? manifest.manageSecret
+        });
     }
     return selected.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -36524,7 +36535,7 @@ async function deploy(core, client, templates, manifest, options) {
             const plan = planRepo(desired, existing);
             const secret = await client.secretStatus(config.name, SECRET_NAME);
             result = { ...result, plan, secret };
-            const needsSecret = Boolean(options.secretValue) && (secret === 'missing' || (options.rotateSecret && secret !== 'unknown'));
+            const needsSecret = config.manageSecret && Boolean(options.secretValue) && (secret === 'missing' || (options.rotateSecret && secret !== 'unknown'));
             const needsFiles = !isEmptyPlan(plan);
             if (options.dryRun) {
                 result.mode = 'dry-run';
@@ -36611,7 +36622,7 @@ function createGithubClient(octokit, org, setSecret) {
     return {
         async listRepos() {
             const repos = await octokit.paginate(rest.repos.listForOrg, { org, per_page: 100, type: 'all' });
-            return repos.map((r) => ({ name: r.name, archived: Boolean(r.archived), defaultBranch: r.default_branch ?? 'main' }));
+            return repos.map((r) => ({ name: r.name, archived: Boolean(r.archived), private: Boolean(r.private), fork: Boolean(r.fork), defaultBranch: r.default_branch ?? 'main' }));
         },
         async isEmpty(repo) {
             try {
@@ -36725,7 +36736,7 @@ function parseManifest(json, templates) {
     if (typeof json !== 'object' || json === null || Array.isArray(json))
         fail('the manifest must be an object');
     const raw = json;
-    onlyKeys(raw, ['callers', 'exclude', 'repos'], 'the manifest');
+    onlyKeys(raw, ['callers', 'exclude', 'manageSecret', 'repos'], 'the manifest');
     const callers = stringList(raw.callers, 'callers');
     for (const c of callers) {
         if (!CALLER_NAME.test(c))
@@ -36736,6 +36747,9 @@ function parseManifest(json, templates) {
     if (new Set(callers).size !== callers.length)
         fail('callers contains duplicates');
     const exclude = raw.exclude === undefined ? [] : stringList(raw.exclude, 'exclude');
+    if (raw.manageSecret !== undefined && typeof raw.manageSecret !== 'boolean')
+        fail('manageSecret must be true or false');
+    const manageSecret = raw.manageSecret === true;
     const repos = {};
     const rawRepos = raw.repos ?? {};
     if (typeof rawRepos !== 'object' || rawRepos === null || Array.isArray(rawRepos))
@@ -36744,7 +36758,7 @@ function parseManifest(json, templates) {
         if (typeof value !== 'object' || value === null || Array.isArray(value))
             fail(`repos.${name} must be an object`);
         const o = value;
-        onlyKeys(o, ['ref', 'callers', 'runner'], `repos.${name}`);
+        onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret'], `repos.${name}`);
         const override = {};
         if (o.ref !== undefined) {
             if (typeof o.ref !== 'string' || !ALLOWED_REF.test(o.ref))
@@ -36762,9 +36776,14 @@ function parseManifest(json, templates) {
                 fail(`repos.${name}.runner must be a runner label or an empty string`);
             override.runner = o.runner;
         }
+        if (o.manageSecret !== undefined) {
+            if (typeof o.manageSecret !== 'boolean')
+                fail(`repos.${name}.manageSecret must be true or false`);
+            override.manageSecret = o.manageSecret;
+        }
         repos[name] = override;
     }
-    return { callers, exclude, repos };
+    return { callers, exclude, manageSecret, repos };
 }
 
 /** Stores a repo secret through the gh CLI (encryption included); the value goes through stdin only. */
@@ -36778,6 +36797,10 @@ const setSecretWithGh = (token) => (repo, name, value) => new Promise((resolve, 
 });
 void main(async () => {
     const token = input('token');
+    if (!token) {
+        setFailed('No token: a real deploy needs the deploy token (EP_DEPLOY_PAT); only a dry run may use the read-only fallback.');
+        return;
+    }
     const secretValue = input('secret_value');
     const dryRun = input('dry_run') !== 'false'; // safe by default
     const org = input('org') || context.repo.owner;

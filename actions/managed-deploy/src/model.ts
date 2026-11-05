@@ -9,17 +9,23 @@ export interface RepoOverride {
   ref?: string
   callers?: string[]
   runner?: string
+  /** Store the repo secret in this repository (overrides the manifest default). */
+  manageSecret?: boolean
 }
 
 export interface Manifest {
   callers: string[]
   exclude: string[]
+  /** Whether the deploy stores the repo secret by default. Opt-in: false unless set. */
+  manageSecret: boolean
   repos: Record<string, RepoOverride>
 }
 
 export interface RepoInfo {
   name: string
   archived: boolean
+  private: boolean
+  fork: boolean
   defaultBranch: string
 }
 
@@ -29,6 +35,7 @@ export interface RepoConfig {
   ref: string
   runner: string // '' means a GitHub-hosted runner
   callers: string[]
+  manageSecret: boolean
 }
 
 export interface RepoPlan {

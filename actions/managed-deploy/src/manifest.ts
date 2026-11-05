@@ -22,7 +22,7 @@ function onlyKeys(object: Record<string, unknown>, allowed: string[], where: str
 export function parseManifest(json: unknown, templates: string[]): Manifest {
   if (typeof json !== 'object' || json === null || Array.isArray(json)) fail('the manifest must be an object')
   const raw = json as Record<string, unknown>
-  onlyKeys(raw, ['callers', 'exclude', 'repos'], 'the manifest')
+  onlyKeys(raw, ['callers', 'exclude', 'manageSecret', 'repos'], 'the manifest')
 
   const callers = stringList(raw.callers, 'callers')
   for (const c of callers) {
@@ -32,6 +32,8 @@ export function parseManifest(json: unknown, templates: string[]): Manifest {
   if (new Set(callers).size !== callers.length) fail('callers contains duplicates')
 
   const exclude = raw.exclude === undefined ? [] : stringList(raw.exclude, 'exclude')
+  if (raw.manageSecret !== undefined && typeof raw.manageSecret !== 'boolean') fail('manageSecret must be true or false')
+  const manageSecret = raw.manageSecret === true
 
   const repos: Record<string, RepoOverride> = {}
   const rawRepos = raw.repos ?? {}
@@ -39,7 +41,7 @@ export function parseManifest(json: unknown, templates: string[]): Manifest {
   for (const [name, value] of Object.entries(rawRepos)) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) fail(`repos.${name} must be an object`)
     const o = value as Record<string, unknown>
-    onlyKeys(o, ['ref', 'callers', 'runner'], `repos.${name}`)
+    onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret'], `repos.${name}`)
     const override: RepoOverride = {}
     if (o.ref !== undefined) {
       if (typeof o.ref !== 'string' || !ALLOWED_REF.test(o.ref)) fail(`repos.${name}.ref must be main, a v<number> tag or a full commit SHA`)
@@ -53,7 +55,11 @@ export function parseManifest(json: unknown, templates: string[]): Manifest {
       if (typeof o.runner !== 'string' || !RUNNER_LABEL.test(o.runner)) fail(`repos.${name}.runner must be a runner label or an empty string`)
       override.runner = o.runner
     }
+    if (o.manageSecret !== undefined) {
+      if (typeof o.manageSecret !== 'boolean') fail(`repos.${name}.manageSecret must be true or false`)
+      override.manageSecret = o.manageSecret
+    }
     repos[name] = override
   }
-  return { callers, exclude, repos }
+  return { callers, exclude, manageSecret, repos }
 }

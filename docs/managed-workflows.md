@@ -17,11 +17,12 @@ The org's issue automations (add to project, close → Status, blocking cleanup)
 - A file is managed only if its name starts with `org-` and it begins with the managed header; the deploy ignores everything else. A look-alike `org-*.yml` without the header is reported as a conflict and never overwritten.
 - Callers pin the engines to the moving tag **`v1`** (a repository can follow another ref through the manifest, to act as a pilot). Engines call their action at `main`, a `v<number>` tag or a SHA; the layout check enforces it for every engine call.
 - Callers pass the label of the self-hosted pool (`ep-github-runner`, see `runner-pool.md`) as a literal; the manifest can override it per repository (empty means a hosted runner). `.github`'s own callers use hosted runners.
-- The automation token is stored as a **repo-level secret** `EP_AUTOMATION_PAT` in each repository (organization secrets do not reach private repositories on the Free plan).
+- The callers are **event-driven only**: no `workflow_dispatch` and no inputs, because these files run with the org token in every repository and anyone who can run workflows there must not be able to point the token at another issue or project. A test guards the templates.
+- The automation token is stored as a **repo-level secret** `EP_AUTOMATION_PAT` (organization secrets do not reach private repositories on the Free plan), but **only where the manifest enables it**: `manageSecret` is `false` by default (top level) and can be switched on per repository. Public repositories and forks are skipped unless the manifest lists them explicitly.
 
 ## Tokens
 
-- `EP_DEPLOY_PAT` (secret of this repository): `repo` and `workflow` scope and permission to write repo secrets. Needed only to write; without it the run falls back to `EP_AUTOMATION_PAT`, which is enough for a dry run (it only reads).
+- `EP_DEPLOY_PAT` (secret of this repository): `repo` and `workflow` scope and permission to write repo secrets. Required to write; a real run never falls back to another token. A dry run may read with `EP_AUTOMATION_PAT`.
 - `EP_AUTOMATION_PAT`: the token the callers use at run time; prefer a fine-grained token limited to issues and projects for the stored copies.
 - If a scope is missing, the repository fails with the API error, the others continue, and the run ends failed.
 

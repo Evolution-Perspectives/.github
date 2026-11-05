@@ -21,6 +21,10 @@ const setSecretWithGh = (token: string) => (repo: string, name: string, value: s
 
 void main(async () => {
   const token = input('token')
+  if (!token) {
+    core.setFailed('No token: a real deploy needs the deploy token (EP_DEPLOY_PAT); only a dry run may use the read-only fallback.')
+    return
+  }
   const secretValue = input('secret_value')
   const dryRun = input('dry_run') !== 'false' // safe by default
   const org = input('org') || github.context.repo.owner
