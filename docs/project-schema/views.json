@@ -110,13 +110,14 @@
     "name": "Logan",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhqo",
     "layout": "BOARD_LAYOUT",
-    "filter": "assignee:Logan-EP ",
+    "filter": "assignee:Logan-EP is:open parent-issue:Evolution-Perspectives/hubspot-theme#415",
     "visibleFields": [
       "Title",
       "Assignees",
       "Status",
       "Sub-issues progress",
-      "Charge"
+      "Charge",
+      "Sprint"
     ],
     "groupBy": [],
     "verticalGroupBy": [
