@@ -9,6 +9,9 @@
   "repos": {
     "it-lab": {
       "manageSecret": true
+    },
+    "maquette-demo-sites-web": {
+      "manageSecret": true
     }
   }
 }
