@@ -1,0 +1,45 @@
+name: Ops / Project sweep
+
+# Weekly reconciliation of the org project (close state, Status, blocking links), early Friday
+# before the sprint starts. Scheduled runs only write when the repository variable SWEEP_WRITE is
+# "true"; until then they are dry runs. Manual runs default to a dry run.
+on:
+  schedule:
+    - cron: "7 2 * * 5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Plan and report without writing.
+        required: false
+        type: boolean
+        default: true
+      max_writes:
+        description: Maximum number of writes per run.
+        required: false
+        type: number
+        default: 50
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Concurrency groups are per repository: this only keeps two sweeps from overlapping.
+concurrency:
+  group: project-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-project-sweep.yml@main
+    with:
+      project_id: PVT_kwDOCIcusc4BOGrD
+      # A manual run uses its input (true or false); a scheduled run writes only when SWEEP_WRITE is "true".
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || (github.event_name != 'workflow_dispatch' && vars.SWEEP_WRITE != 'true') }}
+      max_writes: ${{ github.event_name == 'workflow_dispatch' && inputs.max_writes || 50 }}
+      debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || false }}
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

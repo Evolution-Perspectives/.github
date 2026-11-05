@@ -1,0 +1,48 @@
+name: Engine / Project sweep
+
+on:
+  workflow_call:
+    inputs:
+      project_id:
+        description: Node ID of the GitHub Projects v2 project to reconcile.
+        required: true
+        type: string
+      dry_run:
+        description: Plan and report without writing. Safe by default.
+        required: false
+        type: boolean
+        default: true
+      max_writes:
+        description: Maximum number of writes per run; a larger plan writes nothing and fails.
+        required: false
+        type: number
+        default: 50
+      debug:
+        description: Enable verbose logs.
+        required: false
+        type: boolean
+        default: false
+      runner:
+        description: Runner label for the job. Empty or omitted means the GitHub-hosted ubuntu-latest; the managed callers in private repositories pass the label of the self-hosted pool.
+        required: false
+        type: string
+        default: ubuntu-latest
+    secrets:
+      automation_pat:
+        description: PAT with repo and project write scope.
+        required: true
+
+jobs:
+  sweep:
+    name: Reconcile close state, Status and blocking links
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: Evolution-Perspectives/.github/actions/sweep@main
+        with:
+          project_id: ${{ inputs.project_id }}
+          dry_run: ${{ inputs.dry_run }}
+          max_writes: ${{ inputs.max_writes }}
+          debug: ${{ inputs.debug }}
+          token: ${{ secrets.automation_pat }}
