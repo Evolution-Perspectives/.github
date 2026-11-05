@@ -50,3 +50,12 @@ Two things the rollout taught:
 
 Deploys to the production-deploying repositories (`way2be`, `hubspot-theme`, `template-formations`, `intercobot`, `maquette-demo-sites-web`, `mylea`) triggered no deploy: their latest deploy runs predate the rollout.
 
+
+## Repository rulesets (this repository)
+
+Two active rulesets protect the refs the callers depend on (they apply to a public repository on the Free plan):
+
+- `protect-main` (branch, default branch): blocks deletion and force-push. Direct pushes and pull requests still work; no required checks, because path-filtered CI does not run on docs-only changes and a required check would block them.
+- `protect-v1-tag` (tag `v1`): blocks deletion only. `ops-promote-v1` still moves the tag, because it fast-forwards or force-moves with the workflow token and an update restriction would need a bypass actor.
+
+Both have no bypass actors. To change them: Settings, Rules, Rulesets.
