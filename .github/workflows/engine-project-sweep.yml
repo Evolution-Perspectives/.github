@@ -13,10 +13,10 @@ on:
         type: boolean
         default: true
       max_writes:
-        description: Maximum number of writes per run; a larger plan writes nothing and fails.
+        description: Maximum number of writes per run; a larger plan writes nothing and fails. A string, because a number input cannot receive a conditional expression reliably.
         required: false
-        type: number
-        default: 50
+        type: string
+        default: "50"
       debug:
         description: Enable verbose logs.
         required: false

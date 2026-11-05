@@ -16,8 +16,8 @@ on:
       max_writes:
         description: Maximum number of writes per run.
         required: false
-        type: number
-        default: 50
+        type: string
+        default: "50"
       debug:
         description: Enable verbose logs.
         required: false
@@ -39,7 +39,7 @@ jobs:
       project_id: PVT_kwDOCIcusc4BOGrD
       # A manual run uses its input (true or false); a scheduled run writes only when SWEEP_WRITE is "true".
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || (github.event_name != 'workflow_dispatch' && vars.SWEEP_WRITE != 'true') }}
-      max_writes: ${{ github.event_name == 'workflow_dispatch' && inputs.max_writes || 50 }}
+      max_writes: ${{ github.event_name == 'workflow_dispatch' && inputs.max_writes || '50' }}
       debug: ${{ github.event_name == 'workflow_dispatch' && inputs.debug || false }}
     secrets:
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
