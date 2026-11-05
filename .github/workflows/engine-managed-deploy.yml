@@ -43,7 +43,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout the templates and the manifest
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - uses: Evolution-Perspectives/.github/actions/managed-deploy@main
         with:
