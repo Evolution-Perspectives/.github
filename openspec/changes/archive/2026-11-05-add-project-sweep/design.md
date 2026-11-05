@@ -40,7 +40,7 @@ See proposal.md for motivation. Current state:
 
 **Status options resolved live.** The runner queries the Status field's options and maps by name (`🏆 Done`, `❌ Canceled`, `📤 Pending Release`, `🧪 In Review`). If a name is missing the run fails before any write. This avoids the hard-coded IDs that already exist in the event workflows.
 
-**Cap before write.** Planning is pure and completes for all stages first against a copy; the total is compared to `max_writes` (default 50). Over the cap fails with the plan in the summary and writes nothing. In dry-run the same plan is printed.
+**Cap before write.** Planning is pure and completes for all stages first against a copy; the total is compared to `max_writes` (default 1000). Over the cap fails with the plan in the summary and writes nothing. In dry-run the same plan is printed.
 
 **Own concurrency group `project-sweep`, `cancel-in-progress: false`; no group shared with the event workflows.** Concurrency groups are scoped to one repository, and the event workflows run in the product repos, so a shared group is impossible there. Inside `.github` a shared group would also drop pending runs by default (`queue: single` keeps one pending run), losing events in a burst. The sweep therefore only protects itself from overlapping; races with live events rely on the recent-edit skip and on writes that are safe to repeat (closing a closed issue, setting the same Status, removing an absent link).
 
