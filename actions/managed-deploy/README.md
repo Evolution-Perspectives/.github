@@ -12,7 +12,8 @@ Deploys the managed `org-*.yml` caller workflows (and the repo secret they need)
 - A file is managed only if its name starts with `org-` **and** it starts with the managed header. The deploy only reads, writes or deletes such files. Everything else in `.github/workflows` (CI, deploy, build) is never read or touched.
 - An `org-*.yml` file without the header (a look-alike) is a **conflict**: reported, never overwritten or deleted.
 - One pull request per repository on the fixed branch `org/managed-workflows`, force-reset to the default branch each run; no push to default branches. An empty repository (no commit yet, so no pull request is possible) receives the files as its first commit.
-- The repo secret `EP_AUTOMATION_PAT` is set before the files, only when it is missing or on `rotate_secret`; its value is masked and passed to `gh secret set` through stdin only. When the secret cannot be read (no permission) it is reported as `unknown` and never overwritten blindly.
+- Public repositories and forks are skipped unless the manifest lists them. The callers have no manual trigger and no inputs.
+- The repo secret `EP_AUTOMATION_PAT` is stored only where the manifest enables `manageSecret` (off by default), before the files, and only when it is missing or on `rotate_secret`; its value is masked and passed to `gh secret set` through stdin only. When the secret cannot be read (no permission) it is reported as `unknown` and never overwritten blindly.
 - A failure on one repository does not stop the others; the run ends failed.
 
 ## Manifest (`.github/managed-workflows/manifest.json`)
@@ -21,11 +22,12 @@ Deploys the managed `org-*.yml` caller workflows (and the repo secret they need)
 {
   "callers": ["org-issue-closed-remove-blocking.yml", "org-issue-closed-sync-status.yml", "org-issue-opened-add-to-project.yml"],
   "exclude": ["repo-to-skip"],
-  "repos": { "it-lab": { "ref": "main", "callers": ["org-issue-opened-add-to-project.yml"], "runner": "" } }
+  "manageSecret": false,
+  "repos": { "it-lab": { "ref": "main", "callers": ["org-issue-opened-add-to-project.yml"], "runner": "", "manageSecret": true } }
 }
 ```
 
-- `callers`: templates deployed everywhere by default. `exclude`: repositories never touched (archived repositories and `.github` itself are always skipped).
+- `callers`: templates deployed everywhere by default. `exclude`: repositories never touched (archived repositories, public repositories, forks and `.github` itself are skipped unless listed in `repos`). `manageSecret`: store the repo secret by default (off unless set); overridable per repository.
 - `repos.<name>`: `ref` (`main`, a `v<number>` tag or a full SHA; default `v1`), `callers` (a subset) and `runner` (a label; empty means a hosted runner; default `ep-github-runner`). Unknown keys are rejected.
 
 ## Inputs

@@ -10,13 +10,24 @@ const TEMPLATES = new Map([
   ['org-a.yml', `${H}uses: x@__REF__\n  runner: __RUNNER__\n`],
   ['org-b.yml', `${H}uses: y@__REF__\n`]
 ])
-const manifest = (over: Partial<Manifest> = {}): Manifest => ({ callers: ['org-a.yml', 'org-b.yml'], exclude: [], repos: {}, ...over })
-const repo = (name: string, archived = false): RepoInfo => ({ name, archived, defaultBranch: 'main' })
-const cfg = (over = {}) => ({ name: 'r', ref: 'v1', runner: 'ep-github-runner', callers: ['org-a.yml', 'org-b.yml'], ...over })
+const manifest = (over: Partial<Manifest> = {}): Manifest => ({ callers: ['org-a.yml', 'org-b.yml'], exclude: [], manageSecret: false, repos: {}, ...over })
+const repo = (name: string, archived = false, over: Partial<RepoInfo> = {}): RepoInfo => ({ name, archived, private: true, fork: false, defaultBranch: 'main', ...over })
+const cfg = (over = {}) => ({ name: 'r', ref: 'v1', runner: 'ep-github-runner', callers: ['org-a.yml', 'org-b.yml'], manageSecret: false, ...over })
 
 test('archived repos, the source repo and excluded repos are skipped; a new repo is picked up', () => {
   const selected = selectRepos([repo('b'), repo('.github'), repo('old', true), repo('skip'), repo('new')], manifest({ exclude: ['skip'] }))
   assert.deepEqual(selected.map((r) => r.name), ['b', 'new'])
+})
+
+test('public repositories and forks are skipped unless the manifest lists them', () => {
+  const orgRepos = [repo('priv'), repo('pub', false, { private: false }), repo('fork', false, { fork: true })]
+  assert.deepEqual(selectRepos(orgRepos, manifest()).map((r) => r.name), ['priv'])
+  assert.deepEqual(selectRepos(orgRepos, manifest({ repos: { pub: {}, fork: {} } })).map((r) => r.name), ['fork', 'priv', 'pub'])
+})
+
+test('storing the secret is opt-in: off by default, on through the manifest default or a repo override', () => {
+  assert.deepEqual(selectRepos([repo('a'), repo('b')], manifest()).map((r) => r.manageSecret), [false, false])
+  assert.deepEqual(selectRepos([repo('a'), repo('b')], manifest({ manageSecret: true, repos: { b: { manageSecret: false } } })).map((r) => r.manageSecret), [true, false])
 })
 
 test('defaults come from the manifest and can be overridden per repo', () => {

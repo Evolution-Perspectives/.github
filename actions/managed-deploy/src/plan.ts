@@ -3,14 +3,24 @@ import type { Manifest, RepoConfig, RepoInfo, RepoPlan } from './model.ts'
 import { DEFAULT_REF, DEFAULT_RUNNER } from './model.ts'
 import { isManaged, renderCaller } from './render.ts'
 
-/** Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter. */
+/**
+ * Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter.
+ * Public repositories and forks are skipped unless the manifest lists them explicitly in `repos`.
+ */
 export function selectRepos(orgRepos: RepoInfo[], manifest: Manifest, filter: string[] = [], sourceRepo = '.github'): RepoConfig[] {
   const selected: RepoConfig[] = []
   for (const repo of orgRepos) {
     if (repo.archived || repo.name === sourceRepo || manifest.exclude.includes(repo.name)) continue
     if (filter.length > 0 && !filter.includes(repo.name)) continue
-    const o = manifest.repos[repo.name] ?? {}
-    selected.push({ name: repo.name, ref: o.ref ?? DEFAULT_REF, runner: o.runner ?? DEFAULT_RUNNER, callers: o.callers ?? manifest.callers })
+    const o = manifest.repos[repo.name]
+    if ((!repo.private || repo.fork) && !o) continue
+    selected.push({
+      name: repo.name,
+      ref: o?.ref ?? DEFAULT_REF,
+      runner: o?.runner ?? DEFAULT_RUNNER,
+      callers: o?.callers ?? manifest.callers,
+      manageSecret: o?.manageSecret ?? manifest.manageSecret
+    })
   }
   return selected.sort((a, b) => a.name.localeCompare(b.name))
 }

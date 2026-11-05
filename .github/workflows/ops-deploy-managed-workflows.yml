@@ -46,6 +46,7 @@ jobs:
       repos: ${{ github.event_name == 'workflow_dispatch' && inputs.repos || '' }}
       rotate_secret: ${{ github.event_name == 'workflow_dispatch' && inputs.rotate_secret || false }}
     secrets:
-      # EP_DEPLOY_PAT (repo + workflow scope, secrets write) is needed to write; the automation PAT is enough to read.
-      deploy_pat: ${{ secrets.EP_DEPLOY_PAT || secrets.EP_AUTOMATION_PAT }}
+      # EP_DEPLOY_PAT (repo + workflow scope, secrets write) is required to write; dry runs can read with the automation PAT.
+      deploy_pat: ${{ secrets.EP_DEPLOY_PAT }}
+      read_pat: ${{ secrets.EP_AUTOMATION_PAT }}
       automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

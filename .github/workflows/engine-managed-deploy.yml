@@ -25,10 +25,13 @@ on:
         default: ubuntu-latest
     secrets:
       deploy_pat:
-        description: Token with repo and workflow scope, able to write repo secrets (writes on the other repositories).
-        required: true
+        description: Token with repo and workflow scope, able to write repo secrets. Required to write on the other repositories; never replaced by another token for a real run.
+        required: false
+      read_pat:
+        description: Read-only use, for a dry run when no deploy_pat is available.
+        required: false
       automation_pat:
-        description: Value stored as the repo secret EP_AUTOMATION_PAT in each repository.
+        description: Value stored as the repo secret EP_AUTOMATION_PAT, only in repositories whose manifest entry enables manageSecret.
         required: false
 
 jobs:
@@ -43,7 +46,8 @@ jobs:
 
       - uses: Evolution-Perspectives/.github/actions/managed-deploy@main
         with:
-          token: ${{ secrets.deploy_pat }}
+          # A real run uses the deploy token only; a dry run may fall back to the read token.
+          token: ${{ secrets.deploy_pat || (inputs.dry_run && secrets.read_pat) || '' }}
           secret_value: ${{ secrets.automation_pat }}
           dry_run: ${{ inputs.dry_run }}
           repos: ${{ inputs.repos }}

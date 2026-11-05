@@ -28,7 +28,7 @@ export function createGithubClient(octokit: Octokit, org: string, setSecret: Sec
   return {
     async listRepos() {
       const repos = await octokit.paginate(rest.repos.listForOrg, { org, per_page: 100, type: 'all' })
-      return repos.map((r) => ({ name: r.name, archived: Boolean(r.archived), defaultBranch: r.default_branch ?? 'main' }))
+      return repos.map((r) => ({ name: r.name, archived: Boolean(r.archived), private: Boolean(r.private), fork: Boolean(r.fork), defaultBranch: r.default_branch ?? 'main' }))
     },
 
     async isEmpty(repo) {

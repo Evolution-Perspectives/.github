@@ -23,6 +23,8 @@ test('every template carries the managed header, the ref and runner placeholders
     assert.match(text, /^\s+runner: __RUNNER__$/m, name)
     assert.doesNotMatch(text, /ep-github-runner|@main\b|vars\./, name)
     assert.match(text, /secrets\.EP_AUTOMATION_PAT/, name)
+    // These files run with the org token in every repository: event-driven only, no manual inputs.
+    assert.doesNotMatch(text, /workflow_dispatch|\binputs\./, name)
   }
 })
 
