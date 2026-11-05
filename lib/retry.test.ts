@@ -42,3 +42,11 @@ test('retrying() wraps a GraphQL function', async () => {
   assert.deepEqual(await wrapped('query { x }'), { data: 1 })
   assert.equal(calls, 2)
 })
+
+test('retryOn widens what counts as transient', async () => {
+  let calls = 0
+  const result = await withRetry(async () => { if (++calls < 3) throw new Error('Reference update failed'); return 'ok' }, { sleep: noSleep, retryOn: /Reference update failed/ })
+  assert.equal(result, 'ok')
+  assert.equal(calls, 3)
+  await assert.rejects(withRetry(async () => { throw new Error('Reference update failed') }, { sleep: noSleep }), /Reference update failed/) // not retried by default
+})

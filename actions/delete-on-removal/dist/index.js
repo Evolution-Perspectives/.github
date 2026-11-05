@@ -36408,14 +36408,14 @@ const TRANSIENT = /rate limit|secondary|timeout|timed out|502|503|504|ECONNRESET
 const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /** Runs fn, retrying only transient failures (rate limits, gateway errors, resets) with a growing delay. */
 async function withRetry(fn, options = {}) {
-    const { attempts = 3, delayMs = 1000, sleep = realSleep } = options;
+    const { attempts = 3, delayMs = 1000, sleep = realSleep, retryOn = TRANSIENT } = options;
     for (let attempt = 1;; attempt++) {
         try {
             return await fn();
         }
         catch (error) {
             const message = error instanceof Error ? error.message : String(error);
-            if (attempt >= attempts || !TRANSIENT.test(message))
+            if (attempt >= attempts || !retryOn.test(message))
                 throw error;
             await sleep(delayMs * attempt);
         }

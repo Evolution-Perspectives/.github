@@ -26,6 +26,7 @@ test('unknown keys, unknown templates and bad refs are rejected', () => {
     { callers: ['org-a.yml'], repos: { r: { unknown: true } } },
     { callers: ['org-a.yml'], manageSecret: 'yes' },
     { callers: ['org-a.yml'], repos: { r: { manageSecret: 1 } } },
+    { callers: ['org-a.yml'], repos: { r: { allowPublic: 'yes' } } },
     { callers: 'org-a.yml' },
     [],
     null

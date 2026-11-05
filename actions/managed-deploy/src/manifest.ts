@@ -41,7 +41,7 @@ export function parseManifest(json: unknown, templates: string[]): Manifest {
   for (const [name, value] of Object.entries(rawRepos)) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) fail(`repos.${name} must be an object`)
     const o = value as Record<string, unknown>
-    onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret'], `repos.${name}`)
+    onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret', 'allowPublic'], `repos.${name}`)
     const override: RepoOverride = {}
     if (o.ref !== undefined) {
       if (typeof o.ref !== 'string' || !ALLOWED_REF.test(o.ref)) fail(`repos.${name}.ref must be main, a v<number> tag or a full commit SHA`)
@@ -54,6 +54,10 @@ export function parseManifest(json: unknown, templates: string[]): Manifest {
     if (o.runner !== undefined) {
       if (typeof o.runner !== 'string' || !RUNNER_LABEL.test(o.runner)) fail(`repos.${name}.runner must be a runner label or an empty string`)
       override.runner = o.runner
+    }
+    if (o.allowPublic !== undefined) {
+      if (typeof o.allowPublic !== 'boolean') fail(`repos.${name}.allowPublic must be true or false`)
+      override.allowPublic = o.allowPublic
     }
     if (o.manageSecret !== undefined) {
       if (typeof o.manageSecret !== 'boolean') fail(`repos.${name}.manageSecret must be true or false`)

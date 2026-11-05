@@ -34,7 +34,7 @@ test('dry-run reports the plan and writes nothing', async () => {
 test('a new repo gets the secret first, then a branch, the file and a pull request', async () => {
   const { client, results } = await run([repo('r1')])
   const order = client.calls.filter((c) => !c.startsWith('readCallers') && !c.startsWith('secret-length'))
-  assert.deepEqual(order, ['setSecret:r1', 'resetBranch:r1:org/managed-workflows', 'writeFile:r1:org/managed-workflows:org-a.yml', 'openOrUpdatePullRequest:r1:org/managed-workflows'])
+  assert.deepEqual(order, ['setSecret:r1', 'commitToBranch:r1:org/managed-workflows', 'openOrUpdatePullRequest:r1:org/managed-workflows'])
   assert.equal(client.repos.get('r1')!.branchFiles.get('org-a.yml'), rendered)
   assert.equal(results[0]!.mode, 'pull-request')
   assert.equal(results[0]!.secretSet, true)
@@ -66,15 +66,16 @@ test('an empty repo gets the files as its first commit, with no pull request', a
   const { client, results } = await run([repo('IT', { empty: true })])
   assert.equal(results[0]!.mode, 'first-commit')
   assert.ok(client.calls.includes('writeFile:IT:main:org-a.yml'))
-  assert.ok(!client.calls.some((c) => c.startsWith('resetBranch') || c.startsWith('openOrUpdatePullRequest')))
+  assert.ok(!client.calls.some((c) => c.startsWith('commitToBranch') || c.startsWith('openOrUpdatePullRequest')))
 })
 
 test('a retired managed caller is deleted on the branch and a look-alike is reported but not touched', async () => {
   const { client, results } = await run([repo('r1', { secret: 'present', files: { 'org-old.yml': `${H}retired\n`, 'org-a.yml': 'name: mine\n' } })])
   assert.deepEqual(results[0]!.plan.remove, ['org-old.yml'])
   assert.deepEqual(results[0]!.plan.conflicts, ['org-a.yml'])
-  assert.ok(client.calls.includes('deleteFile:r1:org/managed-workflows:org-old.yml'))
-  assert.ok(!client.calls.some((c) => c.includes('writeFile:r1') && c.endsWith('org-a.yml')))
+  assert.deepEqual(client.commits, ['r1:0w1d']) // one commit: nothing written (the look-alike is untouched), the retired caller deleted
+  assert.equal(client.repos.get('r1')!.branchFiles.get('org-old.yml'), '<deleted>')
+  assert.ok(!client.repos.get('r1')!.branchFiles.has('org-a.yml'))
 })
 
 test('only conflicts means nothing is written', async () => {
@@ -98,13 +99,13 @@ test('the secret is set only when missing, or on rotate, and its value is masked
 
 test('one failing repo does not stop the others and fails the run', async () => {
   const client = makeClient([repo('a'), repo('b'), repo('c')])
-  client.failOn.add('resetBranch:b')
+  client.failOn.add('commitToBranch:b')
   const f = fakes(() => ({}))
   const results = await deploy(f.core, client, TEMPLATES, MANIFEST, options())
   await reportResults(f.core, results, false)
   assert.deepEqual(results.map((r) => r.mode), ['pull-request', 'failed', 'pull-request'])
   assert.deepEqual(f.logs.failed, ['1 repository failed: b.'])
-  assert.match(describeResult(results[1]!), /ERROR resetBranch failed for b/)
+  assert.match(describeResult(results[1]!), /ERROR commitToBranch failed for b/)
 })
 
 test('excluded and archived repos and the filter are honored', async () => {
@@ -121,6 +122,13 @@ test('without manageSecret the secret is never written, even when missing', asyn
 
 test('every commit message and the pull request title carry the skip marker, so merging cannot trigger the repo own workflows', async () => {
   const { client } = await run([repo('r1', { secret: 'present', files: { 'org-old.yml': `${H}retired\n` } }), repo('IT', { empty: true })])
-  assert.ok(client.messages.length >= 4) // write, delete, pull request title, first commit
+  assert.ok(client.messages.length >= 3) // branch commit, pull request title, first commit of the empty repo
   for (const m of client.messages) assert.ok(m.includes('[skip ci]'), m)
+})
+
+test('the sync branch is created by exactly one commit, never at an existing unmarked commit', async () => {
+  const { client } = await run([repo('r1', { secret: 'present' })])
+  assert.deepEqual(client.commits, ['r1:1w0d'])
+  assert.ok(client.messages.every((m) => m.includes('[skip ci]')))
+  assert.ok(!client.calls.some((c) => c.startsWith('resetBranch')))
 })

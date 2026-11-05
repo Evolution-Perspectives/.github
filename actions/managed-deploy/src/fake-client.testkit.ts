@@ -13,6 +13,7 @@ export interface FakeClient extends Client {
   repos: Map<string, FakeRepo & { branchFiles: Map<string, string>; branchExists: boolean; pr?: string; prUpdates: number }>
   calls: string[]
   messages: string[] // commit messages and pull request titles sent
+  commits: string[] // one entry per commit made on a sync branch
   failOn: Set<string> // "<method>:<repo>"
 }
 
@@ -20,6 +21,7 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
   const state: FakeClient['repos'] = new Map(repos.map((r) => [r.info.name, { ...r, branchFiles: new Map(), branchExists: false, prUpdates: 0 }] as const))
   const calls: string[] = []
   const messages: string[] = []
+  const commits: string[] = []
   const failOn = new Set<string>()
   const get = (repo: string) => state.get(repo)!
   const record = (method: string, repo: string, extra = ''): void => {
@@ -31,6 +33,7 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
     repos: state,
     calls,
     messages,
+    commits,
     failOn,
     async listRepos() { return [...state.values()].map((r) => r.info) },
     async isEmpty(repo) { return Boolean(get(repo).empty) },
@@ -44,27 +47,21 @@ export function makeClient(repos: FakeRepo[]): FakeClient {
       get(repo).secret = 'present'
       calls.push(`secret-length:${value.length}`)
     },
-    async resetBranch(repo, branch) {
-      record('resetBranch', repo, branch)
+    async commitToBranch(repo, branch, _base, changes, message) {
+      record('commitToBranch', repo, branch)
+      messages.push(message)
       const r = get(repo)
       r.branchExists = true
-      r.branchFiles = new Map()
+      r.branchFiles = new Map(changes.write)
+      for (const name of changes.remove) r.branchFiles.set(name, '<deleted>')
+      commits.push(`${repo}:${changes.write.size}w${changes.remove.length}d`)
     },
     async writeFile(repo, branch, name, content, message) {
       record('writeFile', repo, `${branch}:${name}`)
       messages.push(message)
       const r = get(repo)
-      if (r.empty) {
-        r.files = { ...(r.files ?? {}), [name]: content }
-        r.empty = false
-      } else {
-        r.branchFiles.set(name, content)
-      }
-    },
-    async deleteFile(repo, branch, name, message) {
-      record('deleteFile', repo, `${branch}:${name}`)
-      messages.push(message)
-      get(repo).branchFiles.set(name, '<deleted>')
+      r.files = { ...(r.files ?? {}), [name]: content }
+      r.empty = false
     },
     async openOrUpdatePullRequest(repo, branch, _base, title) {
       record('openOrUpdatePullRequest', repo, branch)

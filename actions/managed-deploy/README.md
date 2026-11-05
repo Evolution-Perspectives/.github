@@ -27,7 +27,7 @@ Deploys the managed `org-*.yml` caller workflows (and the repo secret they need)
 }
 ```
 
-- `callers`: templates deployed everywhere by default. `exclude`: repositories never touched (archived repositories, public repositories, forks and `.github` itself are skipped unless listed in `repos`). `manageSecret`: store the repo secret by default (off unless set); overridable per repository.
+- `callers`: templates deployed everywhere by default. `exclude`: repositories never touched (archived repositories and `.github` itself are always skipped; public repositories and forks are skipped unless their `repos` entry sets `allowPublic: true`). `manageSecret`: store the repo secret by default (off unless set); overridable per repository.
 - `repos.<name>`: `ref` (`main`, a `v<number>` tag or a full SHA; default `v1`), `callers` (a subset) and `runner` (a label; empty means a hosted runner; default `ep-github-runner`). Unknown keys are rejected.
 
 ## Inputs

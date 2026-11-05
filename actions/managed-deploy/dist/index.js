@@ -36407,6 +36407,24 @@ function getOctokit(token, options, ...additionalPlugins) {
     return new GitHubWithPlugins(getOctokitOptions(token));
 }
 
+const TRANSIENT = /rate limit|secondary|timeout|timed out|502|503|504|ECONNRESET|ETIMEDOUT/i;
+const realSleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+/** Runs fn, retrying only transient failures (rate limits, gateway errors, resets) with a growing delay. */
+async function withRetry(fn, options = {}) {
+    const { attempts = 3, delayMs = 1000, sleep = realSleep, retryOn = TRANSIENT } = options;
+    for (let attempt = 1;; attempt++) {
+        try {
+            return await fn();
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (attempt >= attempts || !retryOn.test(message))
+                throw error;
+            await sleep(delayMs * attempt);
+        }
+    }
+}
+
 // The only module that touches @actions/core and @actions/github at run time. Imported by each
 // action's index.ts, never by the logic modules, so tests do not need the network libraries.
 /** Reads a string input, trimmed, empty when absent. */
@@ -36449,7 +36467,8 @@ function isManaged(name, content) {
 
 /**
  * Repositories to deploy to: not archived, not the source repo, not excluded, matching the optional filter.
- * Public repositories and forks are skipped unless the manifest lists them explicitly in `repos`.
+ * Public repositories and forks are skipped unless the manifest sets `allowPublic: true` for them: a listed
+ * entry alone is not enough, so a listing made for another reason (a pilot ref, a secret) cannot pull one in.
  */
 function selectRepos(orgRepos, manifest, filter = [], sourceRepo = '.github') {
     const selected = [];
@@ -36459,7 +36478,7 @@ function selectRepos(orgRepos, manifest, filter = [], sourceRepo = '.github') {
         if (filter.length > 0 && !filter.includes(repo.name))
             continue;
         const o = manifest.repos[repo.name];
-        if ((!repo.private || repo.fork) && !o)
+        if ((!repo.private || repo.fork) && o?.allowPublic !== true)
             continue;
         selected.push({
             name: repo.name,
@@ -36559,11 +36578,8 @@ async function deploy(core, client, templates, manifest, options) {
                     result.mode = 'first-commit';
                 }
                 else {
-                    await client.resetBranch(config.name, BRANCH, defaultBranch);
-                    for (const name of [...plan.add, ...plan.update])
-                        await client.writeFile(config.name, BRANCH, name, desired.get(name), MESSAGE);
-                    for (const name of plan.remove)
-                        await client.deleteFile(config.name, BRANCH, name, MESSAGE);
+                    const write = new Map([...plan.add, ...plan.update].map((name) => [name, desired.get(name)]));
+                    await client.commitToBranch(config.name, BRANCH, defaultBranch, { write, remove: plan.remove }, MESSAGE);
                     result.pr = await client.openOrUpdatePullRequest(config.name, BRANCH, defaultBranch, MESSAGE, prBody(plan));
                     result.mode = 'pull-request';
                 }
@@ -36679,17 +36695,29 @@ function createGithubClient(octokit, org, setSecret) {
         async setSecret(repo, name, value) {
             await setSecret(repo, name, value);
         },
-        async resetBranch(repo, branch, baseBranch) {
+        async commitToBranch(repo, branch, baseBranch, changes, message) {
             const baseRef = await rest.git.getRef({ ...base(repo), ref: `heads/${baseBranch}` });
-            const sha = baseRef.data.object.sha;
-            try {
-                await rest.git.updateRef({ ...base(repo), ref: `heads/${branch}`, sha, force: true });
-            }
-            catch (error) {
-                if (statusOf(error) !== 422 && statusOf(error) !== 404)
-                    throw error;
-                await rest.git.createRef({ ...base(repo), ref: `refs/heads/${branch}`, sha });
-            }
+            const baseSha = baseRef.data.object.sha;
+            const baseCommit = await rest.git.getCommit({ ...base(repo), commit_sha: baseSha });
+            const entries = [
+                ...[...changes.write].map(([name, content]) => ({ path: path(name), mode: '100644', type: 'blob', content })),
+                ...changes.remove.map((name) => ({ path: path(name), mode: '100644', type: 'blob', sha: null }))
+            ];
+            const tree = await rest.git.createTree({ ...base(repo), base_tree: baseCommit.data.tree.sha, tree: entries });
+            const commit = await rest.git.createCommit({ ...base(repo), message, tree: tree.data.sha, parents: [baseSha] });
+            const sha = commit.data.sha;
+            // GitHub intermittently answers 422 "Reference update failed" for a ref that is fine a moment later
+            // (seen once on a large repository), so the whole create-or-reset is retried a few times.
+            await withRetry(async () => {
+                try {
+                    await rest.git.updateRef({ ...base(repo), ref: `heads/${branch}`, sha, force: true });
+                }
+                catch (error) {
+                    if (statusOf(error) !== 422 && statusOf(error) !== 404)
+                        throw error;
+                    await rest.git.createRef({ ...base(repo), ref: `refs/heads/${branch}`, sha });
+                }
+            }, { attempts: 4, delayMs: 2000, retryOn: /Reference update failed/ });
         },
         async writeFile(repo, branch, name, content, message) {
             const sha = await fileSha(repo, branch, name);
@@ -36701,12 +36729,6 @@ function createGithubClient(octokit, org, setSecret) {
                 branch,
                 ...(sha ? { sha } : {})
             });
-        },
-        async deleteFile(repo, branch, name, message) {
-            const sha = await fileSha(repo, branch, name);
-            if (!sha)
-                return;
-            await rest.repos.deleteFile({ ...base(repo), path: path(name), message, sha, branch });
         },
         async openOrUpdatePullRequest(repo, branch, baseBranch, title, body) {
             const open = await rest.pulls.list({ ...base(repo), head: `${org}:${branch}`, state: 'open', per_page: 1 });
@@ -36764,7 +36786,7 @@ function parseManifest(json, templates) {
         if (typeof value !== 'object' || value === null || Array.isArray(value))
             fail(`repos.${name} must be an object`);
         const o = value;
-        onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret'], `repos.${name}`);
+        onlyKeys(o, ['ref', 'callers', 'runner', 'manageSecret', 'allowPublic'], `repos.${name}`);
         const override = {};
         if (o.ref !== undefined) {
             if (typeof o.ref !== 'string' || !ALLOWED_REF.test(o.ref))
@@ -36781,6 +36803,11 @@ function parseManifest(json, templates) {
             if (typeof o.runner !== 'string' || !RUNNER_LABEL.test(o.runner))
                 fail(`repos.${name}.runner must be a runner label or an empty string`);
             override.runner = o.runner;
+        }
+        if (o.allowPublic !== undefined) {
+            if (typeof o.allowPublic !== 'boolean')
+                fail(`repos.${name}.allowPublic must be true or false`);
+            override.allowPublic = o.allowPublic;
         }
         if (o.manageSecret !== undefined) {
             if (typeof o.manageSecret !== 'boolean')
