@@ -18,6 +18,7 @@ const path = require("node:path");
 const CALL = /uses:\s*Evolution-Perspectives\/\.github\/actions\/([\w-]+)@(\S+)/g;
 const RUNS_ON = "runs-on: ${{ inputs.runner || 'ubuntu-latest' }}";
 const SELF_HOSTED_LABEL = "ep-github-runner";
+const ENGINE_CALL = /uses:\s*Evolution-Perspectives\/\.github\/\.github\/workflows\/(engine-[\w-]+\.yml)@(\S+)/g;
 const ALLOWED_REF = /^(main|v\d+(\.\d+){0,2}|[0-9a-f]{40})$/;
 
 function check(root) {
@@ -89,6 +90,20 @@ function check(root) {
     const text = fs.readFileSync(path.join(managedDir, file), "utf8");
     for (const m of text.matchAll(/^\s*(?:runs-on|runner):.*\bvars\./gm)) {
       errors.push(`.github/managed-workflows/${file}: runner selected through a variable (${m[0].trim()}); hardcode the label`);
+    }
+  }
+  // Callers pass secrets to the engines: the engine ref must be main, a v<number> tag, a full SHA,
+  // or the __REF__ placeholder of a managed caller template (never a branch).
+  const callerFiles = [
+    ...workflowFiles.map((f) => path.join(wfDir, f)),
+    ...managedFiles.map((f) => path.join(managedDir, f)),
+  ];
+  for (const file of callerFiles) {
+    const text = fs.readFileSync(file, "utf8");
+    for (const m of text.matchAll(ENGINE_CALL)) {
+      if (m[2] !== "__REF__" && !ALLOWED_REF.test(m[2])) {
+        errors.push(`${path.relative(root, file)}: engine call ${m[1]} at ref "${m[2]}" must be main, a v<number> tag, a full commit SHA or __REF__`);
+      }
     }
   }
   for (const [name, files] of Object.entries(callers)) {
