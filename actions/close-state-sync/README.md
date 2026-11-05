@@ -3,8 +3,8 @@
 Closes or reopens the issue from its project Status (Done and Canceled close it, Pending Release closes it as completed, other statuses reopen it).
 
 - **Called by:** `.github/workflows/engine-sync-close-state.yml` (reusable engine). Trigger: `.github/workflows/hook-project-item-updated-sync-close-state.yml`.
-- **Source:** `sync.js`, loaded by `action.yml` through `github.action_path`.
-- **Tests:** `sync.test.js` imports the source directly: `node --test actions/close-state-sync/sync.test.js`.
+- **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `sync.ts` holds the logic), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
+- **Tests:** `src/sync.test.ts` imports the source directly: `npm test`.
 - **Dry run:** Validates and summarizes, closes or reopens nothing.
 
 ## Behavior

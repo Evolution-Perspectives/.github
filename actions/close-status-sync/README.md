@@ -3,8 +3,8 @@
 Sets the project Status from the way an issue was closed: completed goes to Done (or Pending Release when it was In Review), not planned and duplicate go to Canceled.
 
 - **Called by:** `.github/workflows/engine-sync-status-on-close.yml` (reusable engine). Trigger: `.github/workflows/org-issue-closed-sync-status.yml`.
-- **Source:** `sync.js`, loaded by `action.yml` through `github.action_path`.
-- **Tests:** `sync.test.js` imports the source directly: `node --test actions/close-status-sync/sync.test.js`.
+- **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `sync.ts` holds the logic), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
+- **Tests:** `src/sync.test.ts` imports the source directly: `npm test`.
 - **Dry run:** Validates and summarizes, writes no Status.
 
 ## Behavior

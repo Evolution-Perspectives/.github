@@ -3,8 +3,8 @@
 Adds an opened issue to the org project and, when `status_name` is given, sets that Status (resolved live by name; the run fails before adding if the name does not exist).
 
 - **Called by:** `.github/workflows/engine-add-issue-to-project.yml` (reusable engine). Trigger: `.github/workflows/org-issue-opened-add-to-project.yml`.
-- **Source:** `add.js`, loaded by `action.yml` through `github.action_path`.
-- **Tests:** `add.test.js` imports the source directly: `node --test actions/add-to-project/add.test.js`.
+- **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `add.ts` holds the logic), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
+- **Tests:** `src/add.test.ts` imports the source directly: `npm test`.
 - **Dry run:** Resolves and reports, calls no mutation (`dry-run`).
 
 ## Behavior

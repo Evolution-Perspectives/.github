@@ -12,7 +12,7 @@ The structure of the org Project "Projets Digitaux" (fields, option IDs, issue t
 
 ## Layout
 
-One folder per automation in `actions/<name>/` (composite action, source, tests, README); shared code in `lib/`; flat `.github/workflows/` with role prefixes (`engine-` reusable wrapper, `org-` issue-event caller, `hook-` dispatch-fed, `ops-` maintenance, `ci-` validation). Each `engine-*.yml` calls exactly one action by full path and ref. Each engine selects its runner with a `runner` input (default `ubuntu-latest`); the self-hosted label `ep-github-runner` lives only in managed caller templates (see `docs/runner-pool.md`). Check with `node .github/scripts/check-actions-layout.js`; run tests with `node --test actions/*/*.test.js lib/*.test.js .github/scripts/check-actions-layout.test.js`.
+One TypeScript action per automation in `actions/<name>/` (`action.yml` with `runs: using: node24`, `src/` with tests, a committed bundle `dist/index.js`, README); shared typed code in `lib/`; flat `.github/workflows/` with role prefixes (`engine-` reusable wrapper, `org-` issue-event caller, `hook-` dispatch-fed, `ops-` maintenance, `ci-` validation). Each `engine-*.yml` calls exactly one action by full path and ref and selects its runner with a `runner` input (default `ubuntu-latest`); the self-hosted label `ep-github-runner` lives only in managed caller templates (see `docs/runner-pool.md`). Commands: `npm ci`, `npm run check` (types, tests, build), `node .github/scripts/check-actions-layout.js`; rebuild and commit `dist/` with every source change (CI enforces it). Contributor guide: `docs/typescript-actions.md`.
 
 ## OpenSpec
 

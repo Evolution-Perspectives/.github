@@ -28,12 +28,12 @@ No exception: template artifacts are required for every workflow.
    - The ref is `main`, a `v<number>` tag or a full SHA, never a feature branch (the engine passes a secret to the action).
    - Actions import no project field/option ID: resolve them live by name.
    - Engines choose their runner with `runs-on: ${{ inputs.runner || 'ubuntu-latest' }}` and a `runner` input; the self-hosted label `ep-github-runner` appears only in managed caller templates, never under `.github/workflows/` and never through a `vars.` expression.
-   - Tests import the action source directly: `node --test actions/*/*.test.js lib/*.test.js`.
+   - Tests import the action source directly: `npm test`; `npm run typecheck` and `npm run build` must pass, and the committed `dist/` must match the sources (CI `Check dist`).
 
 1. Use a strict split of responsibilities:
    - Trigger workflow handles only event wiring and parameter forwarding.
    - Reusable workflow (`engine-*.yml`) owns the job: runner, permissions, typed inputs, secrets. It calls one action and holds no logic itself.
-   - The business logic lives in `actions/<name>/` (composite action: `action.yml`, source `.js`, `*.test.js`, `README.md`). Code shared by 2+ actions goes in `lib/`.
+   - The business logic lives in `actions/<name>/` (TypeScript action: `action.yml` with `runs: using: node24`, `src/*.ts`, `src/*.test.ts`, committed `dist/index.js`, `README.md`). Code shared by 2+ actions goes in `lib/`.
    - Template reflects the trigger usage pattern for downstream repositories.
 2. Keep trigger workflows thin:
    - Declare event trigger.
