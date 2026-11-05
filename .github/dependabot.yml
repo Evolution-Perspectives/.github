@@ -17,6 +17,10 @@ updates:
       - dependency-name: typescript
         update-types:
           - version-update:semver-major
+      # the Node typings must match the node24 runtime of the actions, not the latest Node major
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     open-pull-requests-limit: 5
   - package-ecosystem: github-actions
     directory: /
