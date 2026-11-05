@@ -1,6 +1,6 @@
 # Project Use Cases
 
-Implementation lives in `actions/<name>/` (one TypeScript action per automation, each with a README): `close-status-sync`, `close-state-sync`, `blocking-cleanup`, `add-to-project`, `delete-on-removal`, `sweep`.
+Implementation lives in `actions/<name>/` (one TypeScript action per automation, each with a README): `close-status-sync`, `close-state-sync`, `blocking-cleanup`, `add-to-project`, `delete-on-removal`, `sweep`, `managed-deploy`.
 
 ## Use Case 1 - What Happens to Project Status When an Issue Is Closed
 
@@ -72,4 +72,16 @@ Plain rule:
 - The sweep has its own concurrency group; it does not share one with the event workflows because groups are per repository and the event workflows run in the product repositories. Races with live events rely on the recent-edit skip and on writes that are safe to repeat.
 
 Details: `actions/sweep/README.md`.
+
+## Use Case - Managed Callers in Every Repository
+
+Goal: Make the issue automations react instantly in every org repository without hosting anything and without touching what the repositories own.
+
+Plain rule:
+
+- Each repository gets three thin `org-*.yml` callers (issue opened: add to the project; issue closed: set the Status, remove the blocking links). They carry a managed header and delegate to the engines in `.github`, pinned to the moving tag `v1`.
+- One deploy job in `.github` keeps them in sync through one pull request per repository, plus the repo secret they need. It only reads, writes or deletes files named `org-*.yml` that carry the header; CI, deploy and build workflows are never touched, and a look-alike file without the header is reported, not overwritten.
+- Manual runs are dry runs by default; the weekly run only reports drift. Rollout to the other repositories starts only on the owner's go.
+
+Details: `docs/managed-workflows.md` and `actions/managed-deploy/README.md`.
 

@@ -1,0 +1,9 @@
+{
+  "callers": [
+    "org-issue-closed-remove-blocking.yml",
+    "org-issue-closed-sync-status.yml",
+    "org-issue-opened-add-to-project.yml"
+  ],
+  "exclude": [],
+  "repos": {}
+}

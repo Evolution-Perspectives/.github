@@ -1,0 +1,50 @@
+name: Engine / Managed workflows deploy
+
+on:
+  workflow_call:
+    inputs:
+      dry_run:
+        description: Plan and report without writing. Safe by default.
+        required: false
+        type: boolean
+        default: true
+      repos:
+        description: Comma-separated repository names to restrict the run to. Empty means all non-excluded repositories.
+        required: false
+        type: string
+        default: ""
+      rotate_secret:
+        description: Overwrite the repo secret even when it exists.
+        required: false
+        type: boolean
+        default: false
+      runner:
+        description: Runner label for the job. Empty or omitted means the GitHub-hosted ubuntu-latest; the managed callers in private repositories pass the label of the self-hosted pool.
+        required: false
+        type: string
+        default: ubuntu-latest
+    secrets:
+      deploy_pat:
+        description: Token with repo and workflow scope, able to write repo secrets (writes on the other repositories).
+        required: true
+      automation_pat:
+        description: Value stored as the repo secret EP_AUTOMATION_PAT in each repository.
+        required: false
+
+jobs:
+  deploy:
+    name: Deploy the managed callers
+    runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout the templates and the manifest
+        uses: actions/checkout@v6
+
+      - uses: Evolution-Perspectives/.github/actions/managed-deploy@main
+        with:
+          token: ${{ secrets.deploy_pat }}
+          secret_value: ${{ secrets.automation_pat }}
+          dry_run: ${{ inputs.dry_run }}
+          repos: ${{ inputs.repos }}
+          rotate_secret: ${{ inputs.rotate_secret }}

@@ -6,6 +6,7 @@ export interface FakeLogs {
   warning: string[]
   failed: string[]
   summary: string[]
+  secrets: string[]
 }
 
 export interface Mutation {
@@ -31,7 +32,7 @@ const isMutation = (query: string): boolean => /^\s*mutation\b/.test(query)
  */
 export function fakes(onQuery: QueryHandler, onMutation: MutationHandler = () => ({})): Fakes {
   const mutations: Mutation[] = []
-  const logs: FakeLogs = { info: [], warning: [], failed: [], summary: [] }
+  const logs: FakeLogs = { info: [], warning: [], failed: [], summary: [], secrets: [] }
   const summary = {
     addHeading() { return summary },
     addEOL() { return summary },
@@ -42,6 +43,7 @@ export function fakes(onQuery: QueryHandler, onMutation: MutationHandler = () =>
     info: (m) => { logs.info.push(m) },
     warning: (m) => { logs.warning.push(m) },
     setFailed: (m) => { logs.failed.push(m) },
+    setSecret: (m) => { logs.secrets.push(m) },
     summary
   }
   const graphql = (async (query: string, vars: Record<string, unknown> = {}) => {

@@ -1,0 +1,18 @@
+# MANAGED by Evolution-Perspectives/.github (.github/managed-workflows). Do not edit here: the next deploy overwrites this file.
+name: Org / Issue closed → remove blocking links
+
+on:
+  issues:
+    types:
+      - closed
+
+jobs:
+  cleanup-blocking-relationships:
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-remove-blocking-on-close.yml@__REF__
+    with:
+      runner: __RUNNER__
+      issue_node_id: ${{ github.event.issue.node_id }}
+      source_repository: ${{ github.repository }}
+      debug: false
+    secrets:
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}
