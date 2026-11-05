@@ -75,4 +75,6 @@ export interface Config {
   maxWrites: number
   recentMs: number
   pauseMs: number
+  /** Pause after each issue close: a close fires `issues: closed` workflows in the issue's repository. */
+  closePauseMs: number
 }

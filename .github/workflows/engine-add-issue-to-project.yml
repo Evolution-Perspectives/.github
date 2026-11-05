@@ -50,6 +50,7 @@ jobs:
   add-to-project:
     name: Add issue to org project
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:

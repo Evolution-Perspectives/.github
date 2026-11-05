@@ -31,6 +31,14 @@ Limits on the slice (sum of the four): `CPUQuota=200%`, `CPUWeight=20` (sites ha
 - The unit denies the VPS's own public IPv4 and IPv6 addresses. **If the VPS address changes, update the two literals in `IPAddressDeny=`** or apps bound to all interfaces become reachable from jobs.
 - Required free space: the runner folders use about 0.7 GB each; the hook keeps the workspaces clean.
 
+## Bursts: queuing and concurrency
+
+- **Capacity:** four runners, one job each at a time; an event job takes about 5 to 10 seconds, so the pool absorbs roughly 0.5 jobs per second. A burst (the biggest seen: 45 issues closed in two minutes, so about 90 jobs) drains in a few minutes; nothing is lost, jobs wait in the queue for up to 24 hours.
+- **One issue, one run at a time, nothing dropped:** every managed caller has the concurrency group `org-issue-<repository>-<issue number>` with `queue: max`, so the events of one issue (opened, then closed) run in order, one issue never uses two runners at once, and the default behavior of replacing a pending run (which would lose an event) does not apply. The group is per repository, so repositories do not block each other.
+- **No stuck job:** every engine job has `timeout-minutes` (5 for the event engines, 30 for the sweep and the deploy), so a hung job frees its runner instead of holding it for hours (a self-hosted job may otherwise run for days).
+- **The sweep does not cause a storm:** it writes with the automation token, so a close it performs fires the managed callers in that repository; a Status or blocking-link change fires nothing. Those runs are redundant but harmless, and the sweep spaces its closes (`close_pause_ms`, 4 s) and is capped by `max_writes`, which keeps the arrival rate under the pool capacity.
+- **Lost events:** if a run is lost (pool down for more than a day, cancelled), the Friday sweep corrects Status and links.
+
 ## When the pool is down
 
 Jobs wait in the queue for up to 24 hours and then fail, so issue events can be lost. The weekly sweep (Friday, GitHub-hosted) catches up on Status and blocking links. To send repositories back to GitHub-hosted runners, redeploy the managed callers with an empty `runner` (manifest override), done in one run of the deploy tool.

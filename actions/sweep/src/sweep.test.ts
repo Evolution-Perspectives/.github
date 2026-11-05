@@ -9,7 +9,7 @@ import { sweep } from './sweep.ts'
 
 const NOW = Date.parse('2026-11-05T02:00:00Z')
 const noSleep = async () => {}
-const config = (over: Partial<Config> = {}): Config => ({ projectId: 'PVT_x', dryRun: false, debug: false, maxWrites: 50, recentMs: 10 * 60 * 1000, pauseMs: 0, ...over })
+const config = (over: Partial<Config> = {}): Config => ({ projectId: 'PVT_x', dryRun: false, debug: false, maxWrites: 50, recentMs: 10 * 60 * 1000, pauseMs: 0, closePauseMs: 0, ...over })
 
 /** A board with one of each kind of drift. */
 const drift = (extra: Partial<BoardSpec> = {}): BoardSpec => ({
@@ -131,10 +131,19 @@ test('drafts and pull requests are ignored', async () => {
 test('the configuration is validated and safe by default', () => {
   const raw = { projectId: 'PVT_x', dryRun: '', debug: '', maxWrites: '', recentMinutes: '', pauseMs: '' }
   const c = parseConfig(raw)
-  assert.deepEqual([c.dryRun, c.maxWrites, c.recentMs, c.pauseMs], [true, 50, 600000, 250])
+  assert.deepEqual([c.dryRun, c.maxWrites, c.recentMs, c.pauseMs, c.closePauseMs], [true, 50, 600000, 250, 4000])
   assert.equal(parseConfig({ ...raw, dryRun: 'false' }).dryRun, false)
   assert.equal(parseConfig({ ...raw, dryRun: 'true' }).dryRun, true)
-  for (const bad of [{ projectId: '' }, { projectId: 'a b' }, { maxWrites: '-1' }, { maxWrites: 'x' }, { maxWrites: '1.5' }, { recentMinutes: '-2' }, { pauseMs: 'x' }]) {
+  for (const bad of [{ projectId: '' }, { projectId: 'a b' }, { maxWrites: '-1' }, { maxWrites: 'x' }, { maxWrites: '1.5' }, { recentMinutes: '-2' }, { pauseMs: 'x' }, { closePauseMs: '-1' }]) {
     assert.throws(() => parseConfig({ ...raw, ...bad }), Error, JSON.stringify(bad))
   }
+})
+
+test('closes are paced more slowly than other writes because each one fires workflows in its repository', async () => {
+  const sleeps: number[] = []
+  const board = makeBoard(drift())
+  const f = fakes(() => ({}))
+  await sweep({ graphql: board.graphql, core: f.core }, config({ pauseMs: 10, closePauseMs: 500 }), { now: NOW, sleep: async (ms) => { sleeps.push(ms) } })
+  // writes in order: close, status, status, unblock, unblock -> the pause after the close is the long one
+  assert.deepEqual(sleeps, [500, 10, 10, 10])
 })

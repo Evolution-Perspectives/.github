@@ -20,6 +20,10 @@ inputs:
     description: Pause between writes, to stay under secondary rate limits.
     required: false
     default: "250"
+  close_pause_ms:
+    description: Pause after each issue close. A close fires the issues-closed workflows of its repository, so closes are spread out instead of fired in a burst.
+    required: false
+    default: "4000"
   debug:
     description: Enable verbose logs.
     required: false

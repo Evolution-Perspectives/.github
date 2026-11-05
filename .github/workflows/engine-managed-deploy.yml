@@ -38,6 +38,7 @@ jobs:
   deploy:
     name: Deploy the managed callers
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

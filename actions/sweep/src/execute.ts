@@ -80,12 +80,13 @@ export async function runStages(
   const applied: Record<StageName, number> = { close: 0, status: 0, blocking: 0 }
   const failed: Failure[] = []
   const stages: StagePlan[] = []
-  let first = true
+  let lastPause = 0
   for (const { name, plan } of STAGES) {
     const result = plan(snapshot, ctx)
     for (const write of result.writes) {
-      if (!first) await clock.sleep(config.pauseMs)
-      first = false
+      if (lastPause > 0) await clock.sleep(lastPause)
+      // A close fires `issues: closed` workflows (the managed callers) in the issue's repository: space those out.
+      lastPause = write.type === 'close' ? config.closePauseMs : config.pauseMs
       try {
         await executeWrite(graphql, snapshot, write)
         applyWrite(snapshot, write)
