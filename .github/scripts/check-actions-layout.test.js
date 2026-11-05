@@ -82,3 +82,12 @@ test("the label is allowed in managed caller templates but not through a variabl
   const callerVar = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/workflows/org-y.yml": "with:\n  runner: ${{ vars.CI_RUNNER }}\n" });
   assert.match(check(callerVar).join("\n"), /org-y\.yml: runner selected through a variable/);
 });
+
+test("a caller must call an engine at main, a tag, a SHA or the managed placeholder, never a branch", () => {
+  const call = (ref) => ({ ".github/workflows/org-z.yml": `jobs:\n  j:\n    uses: Evolution-Perspectives/.github/.github/workflows/engine-a.yml@${ref}\n` });
+  const bad = check(tree({ ...action("a"), ...engine("engine-a.yml", "a"), ...call("tmp/debug") })).join("\n");
+  assert.match(bad, /org-z\.yml: engine call engine-a\.yml at ref "tmp\/debug"/);
+  for (const ref of ["main", "v1", "a".repeat(40)]) assert.deepEqual(check(tree({ ...action("a"), ...engine("engine-a.yml", "a"), ...call(ref) })), [], ref);
+  const managed = tree({ ...action("a"), ...engine("engine-a.yml", "a"), ".github/managed-workflows/org-z.yml": "uses: Evolution-Perspectives/.github/.github/workflows/engine-a.yml@__REF__\n" });
+  assert.deepEqual(check(managed), []);
+});
