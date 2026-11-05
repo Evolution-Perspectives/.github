@@ -7,6 +7,9 @@ import type { SecretStatus } from './model.ts'
 type Octokit = ReturnType<typeof getOctokit>
 export type SecretSetter = (repo: string, name: string, value: string) => Promise<void>
 
+/** Arguments of `gh secret set` for a repository of the org (gh requires the OWNER/REPO form). */
+export const secretSetArgs = (org: string, repo: string, name: string): string[] => ['secret', 'set', name, '--repo', `${org}/${repo}`]
+
 const statusOf = (error: unknown): number | undefined => (typeof error === 'object' && error !== null ? (error as { status?: number }).status : undefined)
 const decode = (data: unknown): string => Buffer.from((data as { content: string }).content, 'base64').toString('utf8')
 const path = (name: string): string => `${WORKFLOWS_DIR}/${name}`

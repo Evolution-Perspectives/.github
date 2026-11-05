@@ -32,3 +32,9 @@ test('unknown keys, unknown templates and bad refs are rejected', () => {
   ]
   for (const m of bad) assert.throws(() => parseManifest(m, TEMPLATES), /Invalid manifest/, JSON.stringify(m))
 })
+
+import { secretSetArgs } from './github-client.ts'
+
+test('gh secret set gets the OWNER/REPO form it requires', () => {
+  assert.deepEqual(secretSetArgs('Evolution-Perspectives', 'it-lab', 'EP_AUTOMATION_PAT'), ['secret', 'set', 'EP_AUTOMATION_PAT', '--repo', 'Evolution-Perspectives/it-lab'])
+})

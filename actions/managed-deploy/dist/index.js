@@ -36606,6 +36606,8 @@ async function reportResults(core, results, dryRun) {
 
 const WORKFLOWS_DIR = '.github/workflows';
 
+/** Arguments of `gh secret set` for a repository of the org (gh requires the OWNER/REPO form). */
+const secretSetArgs = (org, repo, name) => ['secret', 'set', name, '--repo', `${org}/${repo}`];
 const statusOf = (error) => (typeof error === 'object' && error !== null ? error.status : undefined);
 const decode = (data) => Buffer.from(data.content, 'base64').toString('utf8');
 const path = (name) => `${WORKFLOWS_DIR}/${name}`;
@@ -36791,8 +36793,8 @@ function parseManifest(json, templates) {
 }
 
 /** Stores a repo secret through the gh CLI (encryption included); the value goes through stdin only. */
-const setSecretWithGh = (token) => (repo, name, value) => new Promise((resolve, reject) => {
-    const child = node_child_process.spawn('gh', ['secret', 'set', name, '--repo', repo], { env: { ...process.env, GH_TOKEN: token }, stdio: ['pipe', 'ignore', 'pipe'] });
+const setSecretWithGh = (token, org) => (repo, name, value) => new Promise((resolve, reject) => {
+    const child = node_child_process.spawn('gh', secretSetArgs(org, repo, name), { env: { ...process.env, GH_TOKEN: token }, stdio: ['pipe', 'ignore', 'pipe'] });
     let stderr = '';
     child.stderr.on('data', (d) => { stderr += d.toString(); });
     child.on('error', reject);
@@ -36815,7 +36817,7 @@ void main(async () => {
     for (const name of node_fs.readdirSync(templatesDir).filter((n) => /^org-[a-z0-9-]+\.yml$/.test(n)))
         templates.set(name, node_fs.readFileSync(node_path.join(templatesDir, name), 'utf8'));
     const manifest = parseManifest(JSON.parse(node_fs.readFileSync(manifestPath, 'utf8')), [...templates.keys()]);
-    const client = createGithubClient(getOctokit(token), org, setSecretWithGh(token));
+    const client = createGithubClient(getOctokit(token), org, setSecretWithGh(token, org));
     const filter = input('repos').split(',').map((s) => s.trim()).filter(Boolean);
     const results = await deploy(core, client, templates, manifest, { dryRun, repoFilter: filter, rotateSecret: input('rotate_secret') === 'true', secretValue });
     await reportResults(core, results, dryRun);

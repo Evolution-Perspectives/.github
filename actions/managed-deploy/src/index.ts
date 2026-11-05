@@ -5,13 +5,13 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { input, main } from '../../../lib/runtime.ts'
 import { deploy, reportResults } from './deploy.ts'
-import { createGithubClient } from './github-client.ts'
+import { createGithubClient, secretSetArgs } from './github-client.ts'
 import { parseManifest } from './manifest.ts'
 
 /** Stores a repo secret through the gh CLI (encryption included); the value goes through stdin only. */
-const setSecretWithGh = (token: string) => (repo: string, name: string, value: string): Promise<void> =>
+const setSecretWithGh = (token: string, org: string) => (repo: string, name: string, value: string): Promise<void> =>
   new Promise((resolve, reject) => {
-    const child = spawn('gh', ['secret', 'set', name, '--repo', repo], { env: { ...process.env, GH_TOKEN: token }, stdio: ['pipe', 'ignore', 'pipe'] })
+    const child = spawn('gh', secretSetArgs(org, repo, name), { env: { ...process.env, GH_TOKEN: token }, stdio: ['pipe', 'ignore', 'pipe'] })
     let stderr = ''
     child.stderr.on('data', (d: Buffer) => { stderr += d.toString() })
     child.on('error', reject)
@@ -36,7 +36,7 @@ void main(async () => {
   for (const name of readdirSync(templatesDir).filter((n) => /^org-[a-z0-9-]+\.yml$/.test(n))) templates.set(name, readFileSync(join(templatesDir, name), 'utf8'))
   const manifest = parseManifest(JSON.parse(readFileSync(manifestPath, 'utf8')), [...templates.keys()])
 
-  const client = createGithubClient(github.getOctokit(token), org, setSecretWithGh(token))
+  const client = createGithubClient(github.getOctokit(token), org, setSecretWithGh(token, org))
   const filter = input('repos').split(',').map((s) => s.trim()).filter(Boolean)
   const results = await deploy(core, client, templates, manifest, { dryRun, repoFilter: filter, rotateSecret: input('rotate_secret') === 'true', secretValue })
   await reportResults(core, results, dryRun)
