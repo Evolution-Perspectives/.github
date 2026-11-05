@@ -1,0 +1,32 @@
+name: Project sweep
+description: Reconcile issue close state, project Status and blocking links across the org project.
+inputs:
+  project_id:
+    description: Node ID of the GitHub Projects v2 project to reconcile.
+    required: true
+  dry_run:
+    description: Plan and report without writing. Anything but "false" is a dry run.
+    required: false
+    default: "true"
+  max_writes:
+    description: Maximum number of writes per run; a larger plan writes nothing and fails.
+    required: false
+    default: "50"
+  recent_minutes:
+    description: Skip items whose issue or project item was edited in the last N minutes.
+    required: false
+    default: "10"
+  pause_ms:
+    description: Pause between writes, to stay under secondary rate limits.
+    required: false
+    default: "250"
+  debug:
+    description: Enable verbose logs.
+    required: false
+    default: "false"
+  token:
+    description: PAT with repo and project write scope.
+    required: true
+runs:
+  using: node24
+  main: dist/index.js
