@@ -1,0 +1,51 @@
+name: Ops / Deploy managed workflows
+
+# Deploys .github/managed-workflows (the org-*.yml callers and the repo secret they need) to the
+# org repositories through one pull request each. Manual runs are dry runs by default. The weekly
+# run and every push that touches .github/managed-workflows are always dry runs: they only report
+# the drift between the source and the repositories.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Plan and report without writing.
+        required: false
+        type: boolean
+        default: true
+      repos:
+        description: Comma-separated repository names to restrict the run to (empty means all).
+        required: false
+        type: string
+        default: ""
+      rotate_secret:
+        description: Overwrite the repo secret even when it exists.
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    - cron: "37 3 * * 1"
+  push:
+    branches:
+      - main
+    paths:
+      - .github/managed-workflows/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-managed-workflows
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    uses: Evolution-Perspectives/.github/.github/workflows/engine-managed-deploy.yml@main
+    with:
+      # A manual run uses its input (true or false); scheduled and push runs are always dry runs.
+      dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || github.event_name != 'workflow_dispatch' }}
+      repos: ${{ github.event_name == 'workflow_dispatch' && inputs.repos || '' }}
+      rotate_secret: ${{ github.event_name == 'workflow_dispatch' && inputs.rotate_secret || false }}
+    secrets:
+      # EP_DEPLOY_PAT (repo + workflow scope, secrets write) is needed to write; the automation PAT is enough to read.
+      deploy_pat: ${{ secrets.EP_DEPLOY_PAT || secrets.EP_AUTOMATION_PAT }}
+      automation_pat: ${{ secrets.EP_AUTOMATION_PAT }}

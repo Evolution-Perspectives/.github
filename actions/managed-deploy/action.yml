@@ -1,0 +1,37 @@
+name: Managed workflows deploy
+description: Deploy the managed org-*.yml callers (and the repo secret they need) to the org repositories through one pull request each.
+inputs:
+  token:
+    description: Token with repo and workflow scope (and permission to write repo secrets). Used for the API calls on the other repositories.
+    required: true
+  secret_value:
+    description: Value stored as the repo secret EP_AUTOMATION_PAT in each repository, only when missing or on rotate. Empty means the secret is not managed.
+    required: false
+    default: ""
+  dry_run:
+    description: Plan and report without writing. Anything but "false" is a dry run.
+    required: false
+    default: "true"
+  repos:
+    description: Comma-separated repository names to restrict the run to. Empty means all non-excluded repositories.
+    required: false
+    default: ""
+  rotate_secret:
+    description: Overwrite the repo secret even when it exists.
+    required: false
+    default: "false"
+  org:
+    description: Organization to deploy to. Defaults to the owner of the running repository.
+    required: false
+    default: ""
+  templates_dir:
+    description: Directory of the caller templates, relative to the checked-out workspace.
+    required: false
+    default: .github/managed-workflows
+  manifest_path:
+    description: Path of the manifest, relative to the checked-out workspace.
+    required: false
+    default: .github/managed-workflows/manifest.json
+runs:
+  using: node24
+  main: dist/index.js

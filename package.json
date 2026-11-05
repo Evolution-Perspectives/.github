@@ -6,7 +6,8 @@
     "typecheck": "tsc --noEmit",
     "build": "rollup --config rollup.config.mjs",
     "test": "NODE_NO_WARNINGS=1 node --test \"actions/*/src/*.test.ts\" \"lib/*.test.ts\"",
-    "check": "npm run typecheck && npm test && npm run build"
+    "check": "npm run typecheck && npm test && npm run build",
+    "sync-callers": "NODE_NO_WARNINGS=1 node actions/managed-deploy/src/sync-callers.ts"
   },
   "engines": {
     "node": ">=24"

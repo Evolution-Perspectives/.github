@@ -14,6 +14,8 @@ export interface CoreLike {
   info(message: string): void
   warning(message: string): void
   setFailed(message: string): void
+  /** Masks a value in all later log output. */
+  setSecret(secret: string): void
   summary: SummaryLike
 }
 

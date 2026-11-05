@@ -1,3 +1,4 @@
+# MANAGED by Evolution-Perspectives/.github (.github/managed-workflows). Do not edit here: the next deploy overwrites this file.
 name: Org / Issue closed → remove blocking links
 
 on:

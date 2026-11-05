@@ -1,0 +1,67 @@
+name: Ops / Promote v1
+
+# Moves the moving tag v1 (the ref the managed callers follow) to a commit of main, after checking
+# that no check failed on it, and records the previous commit so it can be rolled back.
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Full commit SHA of main to promote. Empty means the current head of main.
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-v1
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Move the v1 tag
+    runs-on: ubuntu-latest
+    env:
+      SHA_INPUT: ${{ inputs.sha }}
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout with history and tags
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve and verify the commit
+        id: resolve
+        run: |
+          set -euo pipefail
+          if [ -n "$SHA_INPUT" ]; then
+            [[ "$SHA_INPUT" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-character commit SHA."; exit 1; }
+            SHA="$SHA_INPUT"
+          else
+            SHA="$(git rev-parse origin/main)"
+          fi
+          git cat-file -e "$SHA^{commit}" || { echo "::error::Unknown commit $SHA."; exit 1; }
+          git merge-base --is-ancestor "$SHA" origin/main || { echo "::error::$SHA is not on main."; exit 1; }
+          FAILED="$(gh api "repos/$REPO/commits/$SHA/check-runs" --paginate --jq '[.check_runs[]|select(.status=="completed" and (.conclusion=="failure" or .conclusion=="timed_out" or .conclusion=="cancelled"))]|length' | awk '{s+=$1} END {print s+0}')"
+          [ "${FAILED:-0}" = "0" ] || { echo "::error::$FAILED check run(s) failed on $SHA."; exit 1; }
+          OLD="$(git rev-parse -q --verify refs/tags/v1 || echo none)"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "old=$OLD" >> "$GITHUB_OUTPUT"
+
+      - name: Move the tag
+        env:
+          SHA: ${{ steps.resolve.outputs.sha }}
+          OLD: ${{ steps.resolve.outputs.old }}
+        run: |
+          set -euo pipefail
+          git tag -f v1 "$SHA"
+          git push -f origin refs/tags/v1
+          {
+            echo "### v1 promoted"
+            echo "- new: \`$SHA\`"
+            echo "- previous: \`$OLD\`"
+            echo "- rollback: run this workflow again with sha = the previous commit"
+          } >> "$GITHUB_STEP_SUMMARY"

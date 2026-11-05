@@ -18,5 +18,6 @@ test('a mutation handler can fail and the failed call is not recorded', async ()
 test('core logs are captured', async () => {
   const f = fakes(() => ({}))
   f.core.info('a'); f.core.warning('b'); f.core.setFailed('c'); f.core.summary.addRaw('d')
-  assert.deepEqual(f.logs, { info: ['a'], warning: ['b'], failed: ['c'], summary: ['d'] })
+  f.core.setSecret('e')
+  assert.deepEqual(f.logs, { info: ['a'], warning: ['b'], failed: ['c'], summary: ['d'], secrets: ['e'] })
 })
