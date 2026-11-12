@@ -14,12 +14,22 @@ export interface Issue {
   stateReason: string | null // COMPLETED | NOT_PLANNED | DUPLICATE | REOPENED | null
   updatedAt: string
   blockedBy: BlockerRef[]
+  issueType?: string | null // issue type name, null or absent when the issue has none
+  subIssueIds?: string[] // ids of the direct sub-issues (any repository)
+}
+
+/** Sprint value of an item: the iteration it sits in. */
+export interface SprintValue {
+  startDate: string // YYYY-MM-DD
+  duration: number // days
 }
 
 export interface Item {
   id: string
   updatedAt: string
   status: string | null // Status option name, null when empty
+  sprint?: SprintValue | null
+  endDate?: string | null // End date field value, YYYY-MM-DD
   issue: Issue
 }
 
@@ -31,14 +41,17 @@ export interface StatusField {
 export interface Snapshot {
   projectId: string
   statusField: StatusField
+  endDateField: { id: string }
   items: Item[]
   truncated: string[] // issues with more than 50 blockers (only the first 50 were read)
+  truncatedSubIssues?: string[] // issues with more than 100 sub-issues (only the first 100 were read)
 }
 
 export type Write =
   | { type: 'close'; issueId: string; ref: string; reason: 'COMPLETED' | 'NOT_PLANNED'; status: string }
   | { type: 'status'; itemId: string; ref: string; from: string | null; optionName: string; optionId: string }
   | { type: 'unblock'; issueId: string; blockingIssueId: string; ref: string; blockerRef: string }
+  | { type: 'endDate'; itemId: string; ref: string; from: string | null; to: string }
 
 export interface Skipped {
   ref: string
@@ -57,7 +70,7 @@ export interface Plan {
   mismatches: Mismatch[]
 }
 
-export type StageName = 'close' | 'status' | 'blocking'
+export type StageName = 'close' | 'status' | 'blocking' | 'endDate'
 
 export interface StagePlan extends Plan {
   name: StageName

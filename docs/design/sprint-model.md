@@ -33,7 +33,7 @@ Structure and IDs of the project are in `docs/project-schema/`.
 
 ## Planning and deadlines
 
-- Plan the whole project upfront by placing leaves in future sprints. A parent's deadline is the end of the latest sprint among its descendants.
+- Plan the whole project upfront by placing leaves in future sprints. A parent's deadline is the end of the latest sprint among its descendants. For issues of type `Projet` the weekly project sweep computes it: it sets the project's `End date` to that date (overwriting a hand-set one) while at least one leaf has a sprint, and leaves it alone otherwise.
 - Hours/days estimates and the capacity scheduler are not part of this model.
 
 ## Statuses and issue state

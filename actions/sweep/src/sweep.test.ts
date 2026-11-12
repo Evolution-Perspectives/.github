@@ -147,3 +147,77 @@ test('closes are paced more slowly than other writes because each one fires work
   // writes in order: close, status, status, unblock, unblock -> the pause after the close is the long one
   assert.deepEqual(sleeps, [500, 10, 10, 10])
 })
+
+// ---------- end date stage, whole pipeline
+
+const tree = (extra: Partial<BoardSpec> = {}): BoardSpec => ({
+  issues: [
+    { id: 'P', number: 10, state: 'OPEN', type: 'Projet', subs: ['A', 'B'] },
+    { id: 'A', number: 11, state: 'OPEN', subs: ['A1', 'A2'] },
+    { id: 'A1', number: 12, state: 'OPEN' },
+    { id: 'A2', number: 13, state: 'OPEN' },
+    { id: 'B', number: 14, state: 'OPEN' },
+    { id: 'Q', number: 20, state: 'OPEN', type: 'Projet', subs: ['Q1'] }, // nothing planned: untouched
+    { id: 'Q1', number: 21, state: 'OPEN' }
+  ],
+  items: [
+    { id: 'PVTI_P', issue: 'P', status: '🌱 In Progress', endDate: '2026-12-17', startDate: '2026-11-05' },
+    { id: 'PVTI_A', issue: 'A', status: '🌱 In Progress' },
+    { id: 'PVTI_A1', issue: 'A1', status: '📦 Backlog', sprint: { startDate: '2027-01-22', duration: 7 } },
+    { id: 'PVTI_A2', issue: 'A2', status: '📦 Backlog', sprint: { startDate: '2026-11-06', duration: 7 } },
+    { id: 'PVTI_B', issue: 'B', status: '📦 Backlog' },
+    { id: 'PVTI_Q', issue: 'Q', status: '🌱 In Progress', endDate: '2026-05-29' },
+    { id: 'PVTI_Q1', issue: 'Q1', status: '📦 Backlog' }
+  ],
+  ...extra
+})
+
+test('dry run lists the End date change and writes nothing', async () => {
+  const { board, logs } = await run(tree(), config({ dryRun: true }))
+  assert.equal(board.mutations.length, 0)
+  assert.ok(logs.info.includes('[dry-run] Would set End date of org/app#10 from 2026-12-17 to 2027-01-28'))
+  assert.ok(logs.summary.includes('- skipped org/app#20: no planned leaf'))
+  assert.ok(logs.summary.some((l) => l.startsWith('Stage endDate: planned 1 / planned 1')))
+})
+
+test('a real run overwrites the End date, leaves other dates alone, and the second run plans nothing', async () => {
+  const board = makeBoard(tree())
+  await run(tree(), config(), board)
+  assert.deepEqual(board.mutations.map((m) => m.kind), ['endDate'])
+  assert.equal(board.items.get('PVTI_P')!.endDate, '2027-01-28')
+  assert.equal(board.items.get('PVTI_P')!.startDate, '2026-11-05') // Start date is never written
+  assert.equal(board.items.get('PVTI_Q')!.endDate, '2026-05-29') // no planned leaf: untouched, not cleared
+  assert.deepEqual(board.mutations[0]!.vars.fieldId, 'PVTF_enddate')
+  const second = await run(tree(), config(), board)
+  assert.equal(board.mutations.length, 1)
+  assert.ok(second.logs.summary.some((l) => l.startsWith('Planned writes: 0 ')))
+})
+
+test('a Projet closed by the close stage in the same run keeps its End date', async () => {
+  const spec = tree()
+  spec.items[0]!.status = '🏆 Done'
+  const { board } = await run(spec, config())
+  assert.deepEqual(board.mutations.map((m) => m.kind), ['close'])
+  assert.equal(board.items.get('PVTI_P')!.endDate, '2026-12-17')
+})
+
+test('a missing or non-date End date field fails before any write', async () => {
+  for (const endDateField of [null, { dataType: 'TEXT' }]) {
+    const { board, logs } = await run(tree({ endDateField }), config())
+    assert.equal(board.mutations.length, 0)
+    assert.match(logs.failed[0]!, /End date field/)
+  }
+})
+
+test('a failed End date write does not stop the run and fails it', async () => {
+  const spec = tree({ failOn: (q, vars) => /updateProjectV2ItemFieldValue/.test(q) && vars.date !== undefined })
+  const { board, logs } = await run(spec, config())
+  assert.equal(board.items.get('PVTI_P')!.endDate, '2026-12-17')
+  assert.deepEqual(logs.failed, ['1 write(s) failed.'])
+})
+
+test('End date writes count toward the cap', async () => {
+  const { board, logs } = await run(tree(), config({ maxWrites: 0 }))
+  assert.equal(board.mutations.length, 0)
+  assert.match(logs.failed[0]!, /Planned 1 write\(s\), above the cap of 0/)
+})

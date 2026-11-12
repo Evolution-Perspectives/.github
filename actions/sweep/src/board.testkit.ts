@@ -10,12 +10,17 @@ export interface BoardIssue {
   stateReason?: string | null
   updatedAt?: string
   blockedBy?: string[] // ids of blocking issues (in the board or in `external`)
+  type?: string | null // issue type name
+  subs?: string[] // ids of sub-issues (in the board or not)
 }
 
 export interface BoardItem {
   id: string
   issue: string // issue id
   status: string | null // Status option name
+  sprint?: { startDate: string; duration: number } | null
+  endDate?: string | null
+  startDate?: string | null // present only to prove the sweep never writes it
   updatedAt?: string
 }
 
@@ -24,6 +29,7 @@ export interface BoardSpec {
   issues: BoardIssue[]
   external?: { id: string; number: number; repo?: string; state: 'OPEN' | 'CLOSED' }[]
   options?: Record<string, string>
+  endDateField?: { dataType: string } | null // null: the project has no End date field
   pageSize?: number
   failOn?: (mutation: string, vars: Record<string, unknown>) => boolean
 }
@@ -53,7 +59,7 @@ export function makeBoard(spec: BoardSpec): Board {
   const options = spec.options ?? DEFAULT_OPTIONS
   const nameById = new Map(Object.entries(options).map(([name, id]) => [id, name] as const))
   const issues = new Map<string, StoredIssue>(
-    spec.issues.map((i): [string, StoredIssue] => [i.id, { repo: 'org/app', stateReason: null, updatedAt: OLD, blockedBy: [], ...i }])
+    spec.issues.map((i): [string, StoredIssue] => [i.id, { repo: 'org/app', stateReason: null, updatedAt: OLD, blockedBy: [], type: null, subs: [], ...i }])
   )
   const items = new Map<string, BoardItem>(spec.items.map((i): [string, BoardItem] => [i.id, { updatedAt: OLD, ...i }]))
   const external = new Map((spec.external ?? []).map((e) => [e.id, { repo: 'org/app', ...e }] as const))
@@ -77,8 +83,13 @@ export function makeBoard(spec: BoardSpec): Board {
         board.mutations.push({ kind: 'close', vars })
       } else if (/updateProjectV2ItemFieldValue/.test(query)) {
         const item = items.get(String(vars.itemId))!
-        item.status = nameById.get(String(vars.optionId)) ?? null
-        board.mutations.push({ kind: 'status', vars })
+        if (vars.date !== undefined) {
+          item.endDate = String(vars.date)
+          board.mutations.push({ kind: 'endDate', vars })
+        } else {
+          item.status = nameById.get(String(vars.optionId)) ?? null
+          board.mutations.push({ kind: 'status', vars })
+        }
       } else if (/removeBlockedBy/.test(query)) {
         const issue = issues.get(String(vars.issueId))!
         issue.blockedBy = issue.blockedBy.filter((b) => b !== vars.blockingIssueId)
@@ -90,6 +101,10 @@ export function makeBoard(spec: BoardSpec): Board {
     }
     if (/field\(name: "Status"\)/.test(query) && /options/.test(query)) {
       return { node: { field: { id: 'PVTSSF_status', options: Object.entries(options).map(([name, id]) => ({ id, name })) } } }
+    }
+    if (/field\(name: "End date"\)/.test(query)) {
+      const f = spec.endDateField === undefined ? { dataType: 'DATE' } : spec.endDateField
+      return { node: { field: f ? { id: 'PVTF_enddate', dataType: f.dataType } : null } }
     }
     if (/items\(first/.test(query)) {
       board.reads++
@@ -107,6 +122,8 @@ export function makeBoard(spec: BoardSpec): Board {
                 id: item.id,
                 updatedAt: item.updatedAt ?? OLD,
                 fieldValueByName: item.status ? { name: item.status } : null,
+                sprint: item.sprint ?? null,
+                endDate: item.endDate ? { date: item.endDate } : null,
                 content: {
                   __typename: 'Issue',
                   id: issue.id,
@@ -114,6 +131,8 @@ export function makeBoard(spec: BoardSpec): Board {
                   state: issue.state,
                   stateReason: issue.stateReason,
                   updatedAt: issue.updatedAt,
+                  issueType: issue.type ? { name: issue.type } : null,
+                  subIssues: { pageInfo: { hasNextPage: false }, nodes: issue.subs.map((id) => ({ id })) },
                   repository: { nameWithOwner: issue.repo },
                   blockedBy: { pageInfo: { hasNextPage: false }, nodes: issue.blockedBy.map(blockerNode) }
                 }

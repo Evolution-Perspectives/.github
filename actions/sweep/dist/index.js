@@ -36485,6 +36485,8 @@ const STATUS = {
     pendingRelease: '📤 Pending Release',
     inReview: '🧪 In Review'
 };
+// Issue type of the issues whose End date the sweep derives. Resolved by name, like Status options.
+const PROJECT_TYPE = 'Projet';
 const CLOSING_STATUSES = [STATUS.done, STATUS.pendingRelease, STATUS.canceled];
 const emptyPlan = () => ({ writes: [], skipped: [], mismatches: [] });
 function statusOptionId(snapshot, name) {
@@ -36582,6 +36584,70 @@ function planBlocking(snapshot, ctx) {
     }
     return plan;
 }
+/** Last day of a sprint: its start date plus its duration minus one day (UTC, YYYY-MM-DD). */
+function sprintEnd(startDate, duration) {
+    const date = new Date(`${startDate}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + duration - 1);
+    return date.toISOString().slice(0, 10);
+}
+/**
+ * End of the latest Sprint among the leaves under a project, or null when no leaf has a Sprint.
+ * Sub-issues are walked at any depth; a leaf is an issue with no sub-issues (the project itself never
+ * is one), parents are ignored even if they carry a Sprint, and a sub-issue outside the project has
+ * no Sprint. A visited set stops a cycle.
+ */
+function latestLeafSprintEnd(root, byIssue) {
+    const seen = new Set([root.issue.id]);
+    const stack = [...(root.issue.subIssueIds ?? [])];
+    let latest = null;
+    while (stack.length > 0) {
+        const id = stack.pop();
+        if (seen.has(id))
+            continue;
+        seen.add(id);
+        const child = byIssue.get(id);
+        if (!child)
+            continue;
+        const kids = child.issue.subIssueIds ?? [];
+        if (kids.length > 0) {
+            stack.push(...kids);
+            continue;
+        }
+        if (!child.sprint)
+            continue;
+        const end = sprintEnd(child.sprint.startDate, child.sprint.duration);
+        if (!latest || end > latest)
+            latest = end;
+    }
+    return latest;
+}
+/**
+ * The End date of an open Projet is the end of the latest Sprint among its leaf descendants. It
+ * overwrites the stored date. Closed projects, other types and projects without a planned leaf are
+ * left alone; a date is never cleared.
+ */
+function planEndDate(snapshot, ctx) {
+    const plan = emptyPlan();
+    const byIssue = new Map(snapshot.items.map((item) => [item.issue.id, item]));
+    for (const item of snapshot.items) {
+        const { issue } = item;
+        if (issue.state !== 'OPEN' || issue.issueType !== PROJECT_TYPE)
+            continue;
+        const to = latestLeafSprintEnd(item, byIssue);
+        if (!to) {
+            plan.skipped.push({ ref: issue.ref, reason: 'no planned leaf' });
+            continue;
+        }
+        if ((item.endDate ?? null) === to)
+            continue;
+        if (isRecent(item, ctx)) {
+            plan.skipped.push({ ref: issue.ref, reason: 'recently edited' });
+            continue;
+        }
+        plan.writes.push({ type: 'endDate', itemId: item.id, ref: issue.ref, from: item.endDate ?? null, to });
+    }
+    return plan;
+}
 /** Applies a write that succeeded to the in-memory snapshot. */
 function applyWrite(snapshot, write) {
     switch (write.type) {
@@ -36604,6 +36670,11 @@ function applyWrite(snapshot, write) {
                     item.issue.blockedBy = item.issue.blockedBy.filter((b) => b.id !== write.blockingIssueId);
             }
             return;
+        case 'endDate':
+            for (const item of snapshot.items)
+                if (item.id === write.itemId)
+                    item.endDate = write.to;
+            return;
         default: {
             const unreachable = write;
             throw new Error(`Unknown write ${JSON.stringify(unreachable)}`);
@@ -36613,7 +36684,8 @@ function applyWrite(snapshot, write) {
 const STAGES = [
     { name: 'close', plan: planClose },
     { name: 'status', plan: planStatus },
-    { name: 'blocking', plan: planBlocking }
+    { name: 'blocking', plan: planBlocking },
+    { name: 'endDate', plan: planEndDate }
 ];
 /** Plans every stage against a copy, assuming each write succeeds. */
 function planAll(snapshot, ctx) {
@@ -36633,6 +36705,8 @@ function describeWrite(write) {
             return `${write.ref}: Status ${write.from ?? '(empty)'} -> ${write.optionName}`;
         case 'unblock':
             return `${write.ref}: remove "blocked by" ${write.blockerRef}`;
+        case 'endDate':
+            return `set End date of ${write.ref} from ${write.from ?? '(empty)'} to ${write.to}`;
         default: {
             const unreachable = write;
             throw new Error(`Unknown write ${JSON.stringify(unreachable)}`);
@@ -36658,6 +36732,14 @@ const UNBLOCK_MUTATION = `
     removeBlockedBy(input: { issueId: $issueId, blockingIssueId: $blockingIssueId }) { clientMutationId }
   }
 `;
+const END_DATE_MUTATION = `
+  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: Date!) {
+    updateProjectV2ItemFieldValue(input: {
+      projectId: $projectId, itemId: $itemId, fieldId: $fieldId,
+      value: { date: $date }
+    }) { projectV2Item { id } }
+  }
+`;
 async function executeWrite(graphql, snapshot, write) {
     switch (write.type) {
         case 'close':
@@ -36674,6 +36756,14 @@ async function executeWrite(graphql, snapshot, write) {
         case 'unblock':
             await graphql(UNBLOCK_MUTATION, { issueId: write.issueId, blockingIssueId: write.blockingIssueId });
             return;
+        case 'endDate':
+            await graphql(END_DATE_MUTATION, {
+                projectId: snapshot.projectId,
+                itemId: write.itemId,
+                fieldId: snapshot.endDateField.id,
+                date: write.to
+            });
+            return;
         default: {
             const unreachable = write;
             throw new Error(`Unknown write ${JSON.stringify(unreachable)}`);
@@ -36686,7 +36776,7 @@ async function executeWrite(graphql, snapshot, write) {
  */
 async function runStages(graphql, snapshot, config, clock, log, warn) {
     const ctx = { now: clock.now, recentMs: config.recentMs };
-    const applied = { close: 0, status: 0, blocking: 0 };
+    const applied = { close: 0, status: 0, blocking: 0, endDate: 0 };
     const failed = [];
     const stages = [];
     let lastPause = 0;
@@ -36729,6 +36819,17 @@ const STATUS_FIELD_QUERY = `
     }
   }
 `;
+const END_DATE_FIELD_QUERY = `
+  query($projectId: ID!) {
+    node(id: $projectId) {
+      ... on ProjectV2 {
+        field(name: "End date") {
+          ... on ProjectV2Field { id dataType }
+        }
+      }
+    }
+  }
+`;
 const ITEMS_QUERY = `
   query($projectId: ID!, $after: String) {
     node(id: $projectId) {
@@ -36741,6 +36842,12 @@ const ITEMS_QUERY = `
             fieldValueByName(name: "Status") {
               ... on ProjectV2ItemFieldSingleSelectValue { name }
             }
+            sprint: fieldValueByName(name: "Sprint") {
+              ... on ProjectV2ItemFieldIterationValue { startDate duration }
+            }
+            endDate: fieldValueByName(name: "End date") {
+              ... on ProjectV2ItemFieldDateValue { date }
+            }
             content {
               __typename
               ... on Issue {
@@ -36749,7 +36856,12 @@ const ITEMS_QUERY = `
                 state
                 stateReason
                 updatedAt
+                issueType { name }
                 repository { nameWithOwner }
+                subIssues(first: 100) {
+                  pageInfo { hasNextPage }
+                  nodes { id }
+                }
                 blockedBy(first: 50) {
                   pageInfo { hasNextPage }
                   nodes {
@@ -36777,11 +36889,23 @@ async function readStatusField(graphql, projectId) {
         options[option.name] = option.id;
     return { id: field.id, options };
 }
+/** The End date field must exist and be a date field, or the end date stage could not write. */
+async function readEndDateField(graphql, projectId) {
+    const res = await graphql(END_DATE_FIELD_QUERY, { projectId });
+    const field = res?.node?.field;
+    if (!field?.id)
+        throw new Error(`End date field not found in project ${projectId}.`);
+    if (field.dataType !== 'DATE')
+        throw new Error(`End date field of project ${projectId} is not a date field (${field.dataType ?? 'unknown type'}).`);
+    return { id: field.id };
+}
 /** Reads every issue-backed item of the project (drafts and pull requests are ignored). */
 async function readSnapshot(graphql, projectId) {
     const statusField = await readStatusField(graphql, projectId);
+    const endDateField = await readEndDateField(graphql, projectId);
     const items = [];
     const truncated = [];
+    const truncatedSubIssues = [];
     let after = null;
     for (;;) {
         const res = await graphql(ITEMS_QUERY, { projectId, after });
@@ -36799,17 +36923,22 @@ async function readSnapshot(graphql, projectId) {
                 state: c.state,
                 stateReason: c.stateReason ?? null,
                 updatedAt: c.updatedAt,
-                blockedBy: (c.blockedBy?.nodes ?? []).map((b) => ({ id: b.id, ref: `${b.repository.nameWithOwner}#${b.number}`, state: b.state }))
+                blockedBy: (c.blockedBy?.nodes ?? []).map((b) => ({ id: b.id, ref: `${b.repository.nameWithOwner}#${b.number}`, state: b.state })),
+                issueType: c.issueType?.name ?? null,
+                subIssueIds: (c.subIssues?.nodes ?? []).map((s) => s.id)
             };
+            if (c.subIssues?.pageInfo?.hasNextPage)
+                truncatedSubIssues.push(issue.ref);
             if (c.blockedBy?.pageInfo?.hasNextPage)
                 truncated.push(issue.ref);
-            items.push({ id: node.id, updatedAt: node.updatedAt, status: node.fieldValueByName?.name ?? null, issue });
+            const sprint = node.sprint?.startDate && node.sprint.duration ? { startDate: node.sprint.startDate, duration: node.sprint.duration } : null;
+            items.push({ id: node.id, updatedAt: node.updatedAt, status: node.fieldValueByName?.name ?? null, sprint, endDate: node.endDate?.date ?? null, issue });
         }
         if (!page.pageInfo?.hasNextPage)
             break;
         after = page.pageInfo.endCursor ?? null;
     }
-    return { projectId, statusField, items, truncated };
+    return { projectId, statusField, endDateField, items, truncated, truncatedSubIssues };
 }
 
 function writeSummary(core, data) {
@@ -36836,6 +36965,9 @@ function writeSummary(core, data) {
     }
     if (snapshot.truncated.length > 0) {
         s.addRaw(`Issues with more than 50 blockers (only the first 50 were checked): ${snapshot.truncated.join(', ')}`).addEOL();
+    }
+    if ((snapshot.truncatedSubIssues ?? []).length > 0) {
+        s.addRaw(`Issues with more than 100 sub-issues (only the first 100 were read): ${snapshot.truncatedSubIssues.join(', ')}`).addEOL();
     }
     if (failed.length > 0) {
         s.addRaw(`Failures: ${failed.length}`).addEOL();

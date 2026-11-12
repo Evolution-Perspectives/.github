@@ -1,8 +1,8 @@
-// Tests of the three planners: one scenario of the spec per test.
+// Tests of the four planners: one scenario of the spec per test.
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import type { Item, Snapshot } from './model.ts'
-import { STATUS, applyWrite, planAll, planBlocking, planClose, planStatus } from './plan.ts'
+import { STATUS, applyWrite, planAll, planBlocking, planClose, planEndDate, planStatus, sprintEnd } from './plan.ts'
 
 const NOW = Date.parse('2026-11-05T02:00:00Z')
 const OLD = '2020-01-01T00:00:00Z'
@@ -33,7 +33,7 @@ function snapshot(specs: ItemSpec[]): Snapshot {
       blockedBy: (s.blockedBy ?? []).map((b) => ({ id: b.id, ref: `org/app#${b.id}`, state: b.state }))
     }
   }))
-  return { projectId: 'PVT_x', statusField: { id: 'F', options: { ...OPTIONS } }, items, truncated: [] }
+  return { projectId: 'PVT_x', statusField: { id: 'F', options: { ...OPTIONS } }, endDateField: { id: 'D' }, items, truncated: [] }
 }
 
 // ---------- close stage
@@ -133,7 +133,7 @@ test('a blocker closed by the close stage of the same run counts as closed', () 
   ])
   assert.equal(planBlocking(snap, ctx).writes.length, 0) // before the close, the blocker is open
   const stages = planAll(snap, ctx)
-  assert.deepEqual(stages.map((s) => [s.name, s.writes.length]), [['close', 1], ['status', 0], ['blocking', 1]])
+  assert.deepEqual(stages.map((s) => [s.name, s.writes.length]), [['close', 1], ['status', 0], ['blocking', 1], ['endDate', 0]])
   assert.equal(snap.items[0]!.issue.state, 'OPEN') // planAll works on a copy
 })
 
@@ -161,4 +161,151 @@ test('applyWrite patches the snapshot for each write type', () => {
   assert.equal(snap.items[0]!.issue.state, 'CLOSED')
   assert.equal(snap.items[1]!.status, STATUS.done)
   assert.equal(snap.items[1]!.issue.blockedBy.length, 0)
+})
+
+// ---------- end date stage
+
+interface TreeSpec {
+  n: number
+  type?: string | null
+  state?: 'OPEN' | 'CLOSED'
+  subs?: number[]
+  sprint?: { startDate: string; duration: number } | null
+  endDate?: string | null
+  updatedAt?: string
+}
+
+const S = (startDate: string) => ({ startDate, duration: 7 })
+
+function tree(specs: TreeSpec[]): Snapshot {
+  const items: Item[] = specs.map((s) => ({
+    id: `PVTI_${s.n}`,
+    updatedAt: s.updatedAt ?? OLD,
+    status: null,
+    sprint: s.sprint ?? null,
+    endDate: s.endDate ?? null,
+    issue: {
+      id: `I_${s.n}`,
+      number: s.n,
+      ref: `org/app#${s.n}`,
+      state: s.state ?? 'OPEN',
+      stateReason: null,
+      updatedAt: s.updatedAt ?? OLD,
+      blockedBy: [],
+      issueType: s.type ?? null,
+      subIssueIds: (s.subs ?? []).map((n) => `I_${n}`)
+    }
+  }))
+  return { projectId: 'PVT_x', statusField: { id: 'F', options: { ...OPTIONS } }, endDateField: { id: 'D' }, items, truncated: [] }
+}
+
+const endWrites = (plan: ReturnType<typeof planEndDate>) => plan.writes.map((w) => w.type === 'endDate' && [w.ref, w.from, w.to])
+
+test('a sprint ends on its start date plus its duration minus one day', () => {
+  assert.equal(sprintEnd('2027-01-22', 7), '2027-01-28') // Sprint 12
+  assert.equal(sprintEnd('2026-11-06', 7), '2026-11-12') // Sprint 1
+  assert.equal(sprintEnd('2026-12-28', 7), '2027-01-03') // across a year boundary
+  assert.equal(sprintEnd('2027-02-26', 7), '2027-03-04') // across a month boundary
+})
+
+test('the latest sprint among the leaves sets the End date of an open Projet', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2, 3, 4] },
+    { n: 2, sprint: S('2026-11-20') },
+    { n: 3, sprint: S('2027-01-22') },
+    { n: 4 }
+  ]), ctx)
+  assert.deepEqual(endWrites(plan), [['org/app#1', null, '2027-01-28']])
+})
+
+test('leaves are found at any depth and parents are ignored even when they carry a sprint', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2] },
+    { n: 2, subs: [3], sprint: S('2027-06-04') }, // a parent: its sprint does not count
+    { n: 3, subs: [4, 5] },
+    { n: 4, sprint: S('2026-12-04') },
+    { n: 5, sprint: S('2026-12-11') }
+  ]), ctx)
+  assert.deepEqual(endWrites(plan), [['org/app#1', null, '2026-12-17']])
+})
+
+test('a hand-set End date is overwritten, later or earlier', () => {
+  const later = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2], endDate: '2026-12-17' },
+    { n: 2, sprint: S('2027-01-22') }
+  ]), ctx)
+  assert.deepEqual(endWrites(later), [['org/app#1', '2026-12-17', '2027-01-28']])
+  const earlier = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2], endDate: '2027-09-30' },
+    { n: 2, sprint: S('2026-11-06') }
+  ]), ctx)
+  assert.deepEqual(endWrites(earlier), [['org/app#1', '2027-09-30', '2026-11-12']])
+})
+
+test('an End date that already matches plans nothing', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2], endDate: '2026-11-12' },
+    { n: 2, sprint: S('2026-11-06') }
+  ]), ctx)
+  assert.equal(plan.writes.length, 0)
+  assert.equal(plan.skipped.length, 0)
+})
+
+test('a project without a planned leaf is left untouched, never cleared, and listed', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2, 3], endDate: '2026-05-29' },
+    { n: 2 },
+    { n: 3, state: 'CLOSED' },
+    { n: 4, type: 'Projet', endDate: '2026-06-01', sprint: S('2026-11-06') } // no sub-issues: no leaf, its own sprint is not one
+  ]), ctx)
+  assert.equal(plan.writes.length, 0)
+  assert.deepEqual(plan.skipped.map((s) => [s.ref, s.reason]), [['org/app#1', 'no planned leaf'], ['org/app#4', 'no planned leaf']])
+})
+
+test('closed projects, other types and untyped issues are not touched', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', state: 'CLOSED', subs: [4] },
+    { n: 2, type: 'Tâche', subs: [4] },
+    { n: 3, subs: [4] },
+    { n: 4, sprint: S('2026-11-06') }
+  ]), ctx)
+  assert.equal(plan.writes.length, 0)
+  assert.equal(plan.skipped.length, 0)
+})
+
+test('a closed leaf with a sprint counts, a sub-issue outside the project is an unplanned leaf, a cycle ends', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2, 99, 3] },
+    { n: 2, state: 'CLOSED', sprint: S('2026-11-06') },
+    { n: 3, subs: [1, 3] } // points back to the project and to itself
+  ]), ctx)
+  assert.deepEqual(endWrites(plan), [['org/app#1', null, '2026-11-12']])
+})
+
+test('a recently edited project is skipped and listed', () => {
+  const plan = planEndDate(tree([
+    { n: 1, type: 'Projet', subs: [2], updatedAt: new Date(NOW - 60 * 1000).toISOString() },
+    { n: 2, sprint: S('2026-11-06') }
+  ]), ctx)
+  assert.equal(plan.writes.length, 0)
+  assert.deepEqual(plan.skipped, [{ ref: 'org/app#1', reason: 'recently edited' }])
+})
+
+test('planAll runs the end date stage last and a project closed by the close stage is not written', () => {
+  const snap = tree([
+    { n: 1, type: 'Projet', subs: [3] },
+    { n: 2, type: 'Projet', subs: [3] },
+    { n: 3, sprint: S('2026-11-06') }
+  ])
+  snap.items[0]!.status = STATUS.done // open but Done: the close stage closes it
+  const stages = planAll(snap, ctx)
+  assert.deepEqual(stages.map((s) => s.name), ['close', 'status', 'blocking', 'endDate'])
+  assert.deepEqual(endWrites(stages[3]!), [['org/app#2', null, '2026-11-12']])
+})
+
+test('applyWrite patches the End date so a second plan is empty', () => {
+  const snap = tree([{ n: 1, type: 'Projet', subs: [2] }, { n: 2, sprint: S('2026-11-06') }])
+  const plan = planEndDate(snap, ctx)
+  for (const w of plan.writes) applyWrite(snap, w)
+  assert.equal(planEndDate(snap, ctx).writes.length, 0)
 })

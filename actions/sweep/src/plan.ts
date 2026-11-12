@@ -1,4 +1,4 @@
-// The three stages as pure planners over a snapshot, and the in-memory application of a write.
+// The four stages as pure planners over a snapshot, and the in-memory application of a write.
 import type { Item, Plan, PlanContext, Snapshot, StagePlan, StageName, Write } from './model.ts'
 
 // Status option names. IDs are always resolved live from the project, never stored.
@@ -8,6 +8,9 @@ export const STATUS = {
   pendingRelease: '📤 Pending Release',
   inReview: '🧪 In Review'
 } as const
+
+// Issue type of the issues whose End date the sweep derives. Resolved by name, like Status options.
+export const PROJECT_TYPE = 'Projet'
 
 const CLOSING_STATUSES: readonly (string | null)[] = [STATUS.done, STATUS.pendingRelease, STATUS.canceled]
 
@@ -106,6 +109,67 @@ export function planBlocking(snapshot: Snapshot, ctx: PlanContext): Plan {
   return plan
 }
 
+/** Last day of a sprint: its start date plus its duration minus one day (UTC, YYYY-MM-DD). */
+export function sprintEnd(startDate: string, duration: number): string {
+  const date = new Date(`${startDate}T00:00:00Z`)
+  date.setUTCDate(date.getUTCDate() + duration - 1)
+  return date.toISOString().slice(0, 10)
+}
+
+/**
+ * End of the latest Sprint among the leaves under a project, or null when no leaf has a Sprint.
+ * Sub-issues are walked at any depth; a leaf is an issue with no sub-issues (the project itself never
+ * is one), parents are ignored even if they carry a Sprint, and a sub-issue outside the project has
+ * no Sprint. A visited set stops a cycle.
+ */
+function latestLeafSprintEnd(root: Item, byIssue: Map<string, Item>): string | null {
+  const seen = new Set([root.issue.id])
+  const stack = [...(root.issue.subIssueIds ?? [])]
+  let latest: string | null = null
+  while (stack.length > 0) {
+    const id = stack.pop()!
+    if (seen.has(id)) continue
+    seen.add(id)
+    const child = byIssue.get(id)
+    if (!child) continue
+    const kids = child.issue.subIssueIds ?? []
+    if (kids.length > 0) {
+      stack.push(...kids)
+      continue
+    }
+    if (!child.sprint) continue
+    const end = sprintEnd(child.sprint.startDate, child.sprint.duration)
+    if (!latest || end > latest) latest = end
+  }
+  return latest
+}
+
+/**
+ * The End date of an open Projet is the end of the latest Sprint among its leaf descendants. It
+ * overwrites the stored date. Closed projects, other types and projects without a planned leaf are
+ * left alone; a date is never cleared.
+ */
+export function planEndDate(snapshot: Snapshot, ctx: PlanContext): Plan {
+  const plan = emptyPlan()
+  const byIssue = new Map(snapshot.items.map((item) => [item.issue.id, item] as const))
+  for (const item of snapshot.items) {
+    const { issue } = item
+    if (issue.state !== 'OPEN' || issue.issueType !== PROJECT_TYPE) continue
+    const to = latestLeafSprintEnd(item, byIssue)
+    if (!to) {
+      plan.skipped.push({ ref: issue.ref, reason: 'no planned leaf' })
+      continue
+    }
+    if ((item.endDate ?? null) === to) continue
+    if (isRecent(item, ctx)) {
+      plan.skipped.push({ ref: issue.ref, reason: 'recently edited' })
+      continue
+    }
+    plan.writes.push({ type: 'endDate', itemId: item.id, ref: issue.ref, from: item.endDate ?? null, to })
+  }
+  return plan
+}
+
 /** Applies a write that succeeded to the in-memory snapshot. */
 export function applyWrite(snapshot: Snapshot, write: Write): void {
   switch (write.type) {
@@ -125,6 +189,9 @@ export function applyWrite(snapshot: Snapshot, write: Write): void {
         if (item.issue.id === write.issueId) item.issue.blockedBy = item.issue.blockedBy.filter((b) => b.id !== write.blockingIssueId)
       }
       return
+    case 'endDate':
+      for (const item of snapshot.items) if (item.id === write.itemId) item.endDate = write.to
+      return
     default: {
       const unreachable: never = write
       throw new Error(`Unknown write ${JSON.stringify(unreachable)}`)
@@ -135,7 +202,8 @@ export function applyWrite(snapshot: Snapshot, write: Write): void {
 export const STAGES: readonly { name: StageName; plan: (snapshot: Snapshot, ctx: PlanContext) => Plan }[] = [
   { name: 'close', plan: planClose },
   { name: 'status', plan: planStatus },
-  { name: 'blocking', plan: planBlocking }
+  { name: 'blocking', plan: planBlocking },
+  { name: 'endDate', plan: planEndDate }
 ]
 
 /** Plans every stage against a copy, assuming each write succeeds. */
@@ -156,6 +224,8 @@ export function describeWrite(write: Write): string {
       return `${write.ref}: Status ${write.from ?? '(empty)'} -> ${write.optionName}`
     case 'unblock':
       return `${write.ref}: remove "blocked by" ${write.blockerRef}`
+    case 'endDate':
+      return `set End date of ${write.ref} from ${write.from ?? '(empty)'} to ${write.to}`
     default: {
       const unreachable: never = write
       throw new Error(`Unknown write ${JSON.stringify(unreachable)}`)

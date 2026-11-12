@@ -1,9 +1,10 @@
-// Weekly reconciliation of the org project: issue close state, Status and blocking links.
+// Weekly reconciliation of the org project: issue close state, Status, blocking links and project end dates.
 //
-// One read of the whole project, then three stages over an in-memory snapshot:
+// One read of the whole project, then four stages over an in-memory snapshot:
 //   close     open issues whose Status is Done / Pending Release / Canceled are closed (never reopened)
 //   status    closed issues whose Status is not a closing one get their Status from the close reason
 //   blocking  "blocked by" links whose blocker is closed are removed
+//   endDate   the End date of an open Projet is the end of the latest Sprint among its leaf descendants
 // Every write is planned first against a copy, the total is compared to the cap, and only then applied.
 import type { Deps } from '../../../lib/types.ts'
 import { runStages, type Clock } from './execute.ts'

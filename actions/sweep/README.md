@@ -1,6 +1,6 @@
 # sweep
 
-Weekly reconciliation of the org project. It reads the whole project once into memory, then runs three stages over that snapshot and fixes the drift that the event-driven automations miss in repositories where they do not run.
+Weekly reconciliation of the org project. It reads the whole project once into memory, then runs four stages over that snapshot and fixes the drift that the event-driven automations miss in repositories where they do not run.
 
 - **Called by:** `.github/workflows/engine-project-sweep.yml` (reusable engine). Schedule: `.github/workflows/ops-project-sweep.yml` (Friday 02:07 UTC and manual dispatch).
 - **Source:** TypeScript in `src/` (`index.ts` reads the inputs, `sweep.ts` orchestrates, `plan.ts` holds the pure planners, `read.ts` the single project read, `execute.ts` the writes, `summary.ts` the job summary), bundled to the committed `dist/index.js` and run on `node24` (`npm run build`; CI checks the bundle is current).
@@ -12,6 +12,7 @@ Weekly reconciliation of the org project. It reads the whole project once into m
 1. **Close:** an open issue whose Status is Done or Pending Release is closed as completed; with Canceled, as not planned. A closed issue is never reopened.
 2. **Status:** a closed issue whose Status is empty or not a closing one gets its Status from the close reason (completed becomes Done, or Pending Release from In Review; not planned and duplicate become Canceled). A closing Status that disagrees with the close reason is only reported, as a mismatch for a human.
 3. **Blocking:** every "blocked by" link whose blocker is closed is removed, for open and closed issues alike, including blockers closed by stage 1 in the same run.
+4. **End date:** the `End date` of an **open** issue of type `Projet` is set to the end of the latest Sprint among its leaf descendants. Sub-issues are walked at any depth and across repositories; a leaf is an issue with no sub-issues, parents are ignored even if they carry a Sprint, and the project itself is never a leaf. A Sprint ends on its start date plus its duration minus one day. The computed date **overwrites** the stored one, including a hand-set date, and can move it earlier. A project with no planned leaf (or no sub-issues) keeps its date and is listed as skipped (`no planned leaf`); a date is never cleared, closed projects and other issue types are never touched, and `Start date` is never written. The stage runs last, so a project closed by stage 1 in the same run is left alone. The field `End date` is resolved by name and must be a date field, or the run fails before any write.
 
 ## Safety
 
