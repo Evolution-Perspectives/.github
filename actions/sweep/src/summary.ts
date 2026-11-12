@@ -36,6 +36,9 @@ export function writeSummary(core: CoreLike, data: SummaryData): Promise<unknown
   if (snapshot.truncated.length > 0) {
     s.addRaw(`Issues with more than 50 blockers (only the first 50 were checked): ${snapshot.truncated.join(', ')}`).addEOL()
   }
+  if ((snapshot.truncatedSubIssues ?? []).length > 0) {
+    s.addRaw(`Issues with more than 100 sub-issues (only the first 100 were read): ${snapshot.truncatedSubIssues!.join(', ')}`).addEOL()
+  }
   if (failed.length > 0) {
     s.addRaw(`Failures: ${failed.length}`).addEOL()
     for (const f of failed) s.addRaw(`- ${f.stage}: ${f.what}: ${f.message}`).addEOL()

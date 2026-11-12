@@ -65,7 +65,7 @@ Goal: Heal the drift that the event-driven automations miss in repositories wher
 
 Plain rule:
 
-- Early every Friday (02:07 UTC, before the sprint starts) the sweep reads the whole project once and runs three stages over that snapshot: **close** (an open issue whose Status is Done, Pending Release or Canceled is closed; a closed issue is never reopened), **Status** (a closed issue with an empty or non-closing Status gets the Status matching its close reason) and **blocking** (every "blocked by" link whose blocker is closed is removed).
+- Early every Friday (02:07 UTC, before the sprint starts) the sweep reads the whole project once and runs four stages over that snapshot: **close** (an open issue whose Status is Done, Pending Release or Canceled is closed; a closed issue is never reopened), **Status** (a closed issue with an empty or non-closing Status gets the Status matching its close reason) **blocking** (every "blocked by" link whose blocker is closed is removed) and **end date** (the End date of an open `Projet` becomes the end of the latest sprint among its leaf descendants, overwriting a hand-set date; left alone when no leaf has a sprint).
 - A closing Status that disagrees with the close reason (Done on an issue closed as not planned, Canceled on a completed one) is never changed: it is listed in the run summary for a human.
 - Manual runs are dry runs by default and plan without writing. Scheduled runs write only when the repository variable `SWEEP_WRITE` is `true`; until then they are dry runs too.
 - A plan above 1000 writes writes nothing and fails the run (a dry run only warns). Items edited in the last 10 minutes are skipped. A second run right after a real one plans zero writes.

@@ -24,6 +24,15 @@ const UNBLOCK_MUTATION = `
   }
 `
 
+const END_DATE_MUTATION = `
+  mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $date: Date!) {
+    updateProjectV2ItemFieldValue(input: {
+      projectId: $projectId, itemId: $itemId, fieldId: $fieldId,
+      value: { date: $date }
+    }) { projectV2Item { id } }
+  }
+`
+
 export interface Failure {
   stage: StageName
   what: string
@@ -52,6 +61,14 @@ export async function executeWrite(graphql: GraphQL, snapshot: Snapshot, write: 
     case 'unblock':
       await graphql(UNBLOCK_MUTATION, { issueId: write.issueId, blockingIssueId: write.blockingIssueId })
       return
+    case 'endDate':
+      await graphql(END_DATE_MUTATION, {
+        projectId: snapshot.projectId,
+        itemId: write.itemId,
+        fieldId: snapshot.endDateField.id,
+        date: write.to
+      })
+      return
     default: {
       const unreachable: never = write
       throw new Error(`Unknown write ${JSON.stringify(unreachable)}`)
@@ -77,7 +94,7 @@ export async function runStages(
   warn: (message: string) => void
 ): Promise<RunOutcome> {
   const ctx: PlanContext = { now: clock.now, recentMs: config.recentMs }
-  const applied: Record<StageName, number> = { close: 0, status: 0, blocking: 0 }
+  const applied: Record<StageName, number> = { close: 0, status: 0, blocking: 0, endDate: 0 }
   const failed: Failure[] = []
   const stages: StagePlan[] = []
   let lastPause = 0
