@@ -29,26 +29,6 @@
     ]
   },
   {
-    "number": 2,
-    "name": "Bloquants",
-    "id": "PVTV_lADOCIcusc4BOGrDzgJNtmU",
-    "layout": "TABLE_LAYOUT",
-    "filter": "has:blocking",
-    "visibleFields": [
-      "Title",
-      "Start date",
-      "End date"
-    ],
-    "groupBy": [],
-    "verticalGroupBy": [],
-    "sortBy": [
-      {
-        "field": "Start date",
-        "direction": "ASC"
-      }
-    ]
-  },
-  {
     "number": 3,
     "name": "Priorisation",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtmY",
@@ -73,7 +53,7 @@
     "name": "Nico",
     "id": "PVTV_lADOCIcusc4BOGrDzgJNtmk",
     "layout": "TABLE_LAYOUT",
-    "filter": "assignee:NicolasCesariEP -is:closed status:\"💎 Ready\",\"🌱 In Progress\",\"⏳ Paused\"",
+    "filter": "assignee:NicolasCesariEP -is:closed status:\"💎 Ready\",\"🌱 In Progress\",\"⏳ Paused\",\"📦 Backlog\"",
     "visibleFields": [
       "Title",
       "Prio",
@@ -109,8 +89,8 @@
     "number": 10,
     "name": "Logan",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhqo",
-    "layout": "BOARD_LAYOUT",
-    "filter": "assignee:Logan-EP is:open parent-issue:Evolution-Perspectives/hubspot-theme#415",
+    "layout": "TABLE_LAYOUT",
+    "filter": "assignee:Logan-EP is:open ",
     "visibleFields": [
       "Title",
       "Assignees",
@@ -120,12 +100,14 @@
       "Sprint"
     ],
     "groupBy": [],
-    "verticalGroupBy": [
-      "Status"
-    ],
+    "verticalGroupBy": [],
     "sortBy": [
       {
         "field": "Prio",
+        "direction": "ASC"
+      },
+      {
+        "field": "Sprint",
         "direction": "ASC"
       }
     ]
@@ -152,39 +134,17 @@
     "name": "Filipe",
     "id": "PVTV_lADOCIcusc4BOGrDzgJYhsQ",
     "layout": "TABLE_LAYOUT",
-    "filter": null,
-    "visibleFields": [
-      "Title",
-      "Assignees",
-      "Status",
-      "Linked pull requests",
-      "Sub-issues progress"
-    ],
-    "groupBy": [],
-    "verticalGroupBy": [],
-    "sortBy": []
-  },
-  {
-    "number": 15,
-    "name": "Com",
-    "id": "PVTV_lADOCIcusc4BOGrDzgJmsMM",
-    "layout": "BOARD_LAYOUT",
-    "filter": "assignee:Logan-EP,EnzoLYEP",
+    "filter": "assignee:FilipeCardante is:open repo:Evolution-Perspectives/hubspot-theme has:status",
     "visibleFields": [
       "Title",
       "Assignees",
       "Status",
       "Linked pull requests",
       "Sub-issues progress",
-      "Prio",
-      "Charge",
-      "End date",
-      "Fiabilite"
+      "Sprint"
     ],
     "groupBy": [],
-    "verticalGroupBy": [
-      "Status"
-    ],
+    "verticalGroupBy": [],
     "sortBy": []
   },
   {
@@ -192,7 +152,7 @@
     "name": "Micro Kanban",
     "id": "PVTV_lADOCIcusc4BOGrDzgJnYQk",
     "layout": "BOARD_LAYOUT",
-    "filter": "has:parent-issue",
+    "filter": "no:sub-issues-progress",
     "visibleFields": [
       "Title",
       "Assignees",
@@ -238,31 +198,6 @@
     ]
   },
   {
-    "number": 20,
-    "name": "Enzo",
-    "id": "PVTV_lADOCIcusc4BOGrDzgJxmh8",
-    "layout": "BOARD_LAYOUT",
-    "filter": "has:parent-issue assignee:EnzoLYEP",
-    "visibleFields": [
-      "Title",
-      "Assignees",
-      "Status",
-      "Linked pull requests",
-      "Sub-issues progress",
-      "Parent issue"
-    ],
-    "groupBy": [],
-    "verticalGroupBy": [
-      "Status"
-    ],
-    "sortBy": [
-      {
-        "field": "Prio",
-        "direction": "ASC"
-      }
-    ]
-  },
-  {
     "number": 22,
     "name": "Roadmap Globale",
     "id": "PVTV_lADOCIcusc4BOGrDzgKN5yE",
@@ -299,13 +234,12 @@
     "name": "Coralie",
     "id": "PVTV_lADOCIcusc4BOGrDzgMZtX8",
     "layout": "TABLE_LAYOUT",
-    "filter": "assignee:CoraliePB",
+    "filter": "assignee:CoraliePB is:open repo:Evolution-Perspectives/hubspot-theme has:status",
     "visibleFields": [
       "Title",
       "Assignees",
       "Status",
-      "Linked pull requests",
-      "Sub-issues progress"
+      "Sprint"
     ],
     "groupBy": [],
     "verticalGroupBy": [],
@@ -327,5 +261,47 @@
       "Sprint"
     ],
     "sortBy": []
+  },
+  {
+    "number": 26,
+    "name": "Roadmap Sites Web",
+    "id": "PVTV_lADOCIcusc4BOGrDzgMbBPU",
+    "layout": "ROADMAP_LAYOUT",
+    "filter": "repo:Evolution-Perspectives/hubspot-theme has:parent-issue no:sub-issues-progress has:sprint",
+    "visibleFields": [],
+    "groupBy": [
+      "Sprint"
+    ],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Sprint",
+        "direction": "ASC"
+      }
+    ]
+  },
+  {
+    "number": 27,
+    "name": "Fabienne",
+    "id": "PVTV_lADOCIcusc4BOGrDzgMlYf8",
+    "layout": "TABLE_LAYOUT",
+    "filter": "assignee:fabiennelv OR (status:\"🧪 In Review\" validation:fabienneLV)",
+    "visibleFields": [
+      "Title",
+      "Assignees",
+      "Status",
+      "Sprint",
+      "Validation"
+    ],
+    "groupBy": [
+      "Sprint"
+    ],
+    "verticalGroupBy": [],
+    "sortBy": [
+      {
+        "field": "Sprint",
+        "direction": "ASC"
+      }
+    ]
   }
 ]

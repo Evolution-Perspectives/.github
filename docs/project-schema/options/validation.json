@@ -1,0 +1,60 @@
+{
+  "field": "Validation",
+  "fieldId": "PVTMSF_lADOCIcusc4BOGrDzhqHFEY",
+  "options": [
+    {
+      "name": "Alice-EP-Helance",
+      "id": "0658fc80",
+      "color": "GRAY",
+      "description": null
+    },
+    {
+      "name": "CoraliePB",
+      "id": "1cb83e0e",
+      "color": "GRAY",
+      "description": null
+    },
+    {
+      "name": "EnzoLYEP",
+      "id": "60804027",
+      "color": "GRAY",
+      "description": null
+    },
+    {
+      "name": "fabienneLV",
+      "id": "9ea8a357",
+      "color": "ORANGE",
+      "description": null
+    },
+    {
+      "name": "FilipeCardante",
+      "id": "be7f6687",
+      "color": "BLUE",
+      "description": null
+    },
+    {
+      "name": "Logan-EP",
+      "id": "ec57264d",
+      "color": "GREEN",
+      "description": null
+    },
+    {
+      "name": "max-imiliennn",
+      "id": "a279b831",
+      "color": "GRAY",
+      "description": null
+    },
+    {
+      "name": "NicolasCesariEP",
+      "id": "bca57368",
+      "color": "PURPLE",
+      "description": null
+    },
+    {
+      "name": "NLV-EP",
+      "id": "3c1423f8",
+      "color": "GRAY",
+      "description": null
+    }
+  ]
+}
