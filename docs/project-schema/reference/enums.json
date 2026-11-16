@@ -89,12 +89,12 @@
   ],
   "IssueFieldVisibility": [
     {
-      "value": "ORG_ONLY",
-      "description": "Org Only"
+      "value": "RESTRICTED",
+      "description": "Visible to the owner and to collaborators on the repository the field is read through."
     },
     {
       "value": "ALL",
-      "description": "All"
+      "description": "Visible to everyone who can see the issue."
     }
   ],
   "IssueTypeColor": [

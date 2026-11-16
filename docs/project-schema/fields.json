@@ -127,5 +127,11 @@
     "name": "Texte libre",
     "id": "PVTF_lADOCIcusc4BOGrDzhotojc",
     "dataType": "TEXT"
+  },
+  {
+    "name": "Validation",
+    "id": "PVTMSF_lADOCIcusc4BOGrDzhqHFEY",
+    "dataType": "MULTI_SELECT",
+    "optionsFile": "options/validation.json"
   }
 ]

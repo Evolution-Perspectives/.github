@@ -186,7 +186,7 @@
       "name": "ownerId",
       "type": "ID!",
       "required": true,
-      "description": "The ID of the organization where the issue field will be created."
+      "description": "The ID of the organization or user where the issue field will be created."
     },
     {
       "name": "name",
@@ -238,13 +238,13 @@
       "name": "ownerId",
       "type": "ID!",
       "required": true,
-      "description": "The ID for the organization on which the issue type is created"
+      "description": "The ID of the owner on which the issue type is created"
     },
     {
       "name": "isEnabled",
       "type": "Boolean!",
       "required": true,
-      "description": "Whether or not the issue type is enabled on the org level"
+      "description": "Whether or not the issue type is enabled"
     },
     {
       "name": "name",
@@ -1036,7 +1036,7 @@
       "name": "isEnabled",
       "type": "Boolean",
       "required": false,
-      "description": "Whether or not the issue type is enabled for the organization"
+      "description": "Whether or not the issue type is enabled"
     },
     {
       "name": "name",
